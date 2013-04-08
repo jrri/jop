@@ -40,9 +40,9 @@ ifeq ($(USB),true)
 else
 	COM_FLAG=-e
 ifeq ($(WINDIR),)
-	COM_PORT=/dev/ttyS0
+	COM_PORT=/dev/ttyUSB0
 else 
-	COM_PORT=COM1
+	COM_PORT=/dev/ttyUSB0 #COM_PORT=COM1
 endif
 endif
 
@@ -56,7 +56,7 @@ QPROJ=cycmin cycbaseio cycbg dspio lego cycfpu cyc256x16 sopcmin usbmin cyccmp d
 ifeq ($(USB),true)
 	QPROJ=usbmin
 else
-	QPROJ=altde2-70
+	QPROJ=altde2-70iic
 endif
 
 #
@@ -89,6 +89,8 @@ CLDC11=false
 #	Whether to use JDK 1.6
 #
 JDK16=false
+
+SCJLIBS=true
 
 # Currently same hardware is used so all three cannot be "yes" at the same time
 # Remember to edit decode.vhd file and uncomment/comment the appropriate microcode
@@ -126,19 +128,91 @@ IPDEST=192.168.0.123
 ################################################################################
 
 # Jop RTS configuration
-USE_SCOPES=false
-USE_SCOPECHECKS=false
+USE_SCOPES=true
+USE_SCOPECHECKS=true
 ADD_REF_INFO=false
 MEASURE=true
 JOP_CONF_STR=USE_SCOPES=$(USE_SCOPES) USE_SCOPECHECKS=$(USE_SCOPECHECKS) ADD_REF_INFO=$(ADD_REF_INFO) MEASURE=$(MEASURE)
 
 P1=test
-P2=test
-P3=HelloWorld
+P2=scjlibs
+P3=StringTest
+
+#P1=paper
+#P2=scjlibs
+#P3=NonSCJ_002
+
+#P1=paper
+#P2=scjlibs
+#P3=TestNonSCJ
+
+#P1=paper
+#P2=scjlibs/examples/hijac/cdx
+#P3=Main
+
+#P1=rtapi
+#P2=hijac/cdx
+#P3=Main
+
+#P1=rtapi
+#P2=scjtck
+#P3=RunOnJop
+
+#P1=test
+#P2=misc
+#P3=ClassObjects
+
+#P1=test
+#P2=test
+#P3=HelloWorld
+
+#P1=rtapi
+#P2=test/level0
+#P3=MyLevel0App
+
+#P1=rtapi
+#P2=test/cyclic
+#P3=CyclicApp
+
+#P1=rtapi
+#P2=test/level1
+#P3=MyLevel1App
+
+#P1=test
+#P2=i2c
+#P3=HelloI2C
+
+#P1=test
+#P2=misc
+#P3=ClockTest
+
+#P1=rtapi
+#P2=test
+#P3=TestMemory
+
+#P1=rtapi
+#P2=cdx
+#P3=Launcher
+
+#P1=app
+#P2=csp/scj/watchdog
+#P3=WatchDogAppSCJ
+
+#P1=rtapi
+#P2=org/reprap
+#P3=Main
+
+#P1=rtapi
+#P2=examples/safetycritical
+#P3=HelloSCJ
+
+#P1=rtapi
+#P2=test
+#P3=Test
 
 #
 # Run JVM Tests
-# 
+#P1=test
 #P2=jvm
 #P3=DoAll
 
@@ -160,7 +234,7 @@ CALLSTRING_LENGTH=0
 #
 # dataflow analysis
 #
-USE_DFA?=no
+USE_DFA?=yes
 
 
 #
@@ -213,7 +287,11 @@ else
 ifeq ($(JDK16),true)
 	TARGET_SOURCE=$(TARGET_SRC_PATH)/common$(S)$(TARGET_SRC_PATH)/jdk_base$(S)$(TARGET_SRC_PATH)/jdk16$(S)$(TARGET_SRC_PATH)/rtapi$(S)$(TARGET_APP_SOURCE_PATH)
 else
+ifeq ($(SCJLIBS),true)
+	TARGET_SOURCE=$(TARGET_SRC_PATH)/common$(S)$(TARGET_SRC_PATH)/scjlibs$(S)$(TARGET_SRC_PATH)/rtapi$(S)$(TARGET_APP_SOURCE_PATH)
+else
 	TARGET_SOURCE=$(TARGET_SRC_PATH)/common$(S)$(TARGET_SRC_PATH)/jdk_base$(S)$(TARGET_SRC_PATH)/jdk11$(S)$(TARGET_SRC_PATH)/rtapi$(S)$(TARGET_APP_SOURCE_PATH)
+endif
 endif
 endif
 TARGET_JFLAGS=-d $(TARGET)/dist/classes -sourcepath $(TARGET_SOURCE) -bootclasspath "" -extdirs "" -classpath "" -source 1.5 -target 1.5 -encoding Latin1
@@ -644,11 +722,11 @@ config_xilinx:
 
 download:
 #	this is the Java version for downloading
-#	java -cp java/tools/dist/lib/jop-tools.jar$(S)$(JAVA_RXTX_LIB) com.jopdesign.tools.JavaDown \
-#		$(COM_FLAG) java/target/dist/bin/$(JOPBIN) $(COM_PORT)
+	java -cp java/tools/dist/lib/jop-tools.jar$(S)$(JAVA_RXTX_LIB) com.jopdesign.tools.JavaDown \
+		$(COM_FLAG) java/target/dist/bin/$(JOPBIN) $(COM_PORT)
 
 #	this is the download version with down.exe
-	$(DOWN) $(COM_FLAG) java/target/dist/bin/$(JOPBIN) $(COM_PORT)
+#	$(DOWN) $(COM_FLAG) java/target/dist/bin/$(JOPBIN) $(COM_PORT)
 
 #
 #	flash programming
