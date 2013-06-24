@@ -19,7 +19,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
-  @authors  Martin Schoeberl, Lei Zhao, Ales Plsek, Tórur Strøm
  */
 
 package javax.realtime;
@@ -43,6 +42,10 @@ import static javax.safetycritical.annotate.Allocate.Area.CURRENT;
  * A time object in normalized form represents negative time if both components
  * are nonzero and negative, or one is nonzero and negative and the other is
  * zero. For add and subtract negative values behave as they do in arithmetic.
+ * 
+ * @authors Martin Schoeberl, Lei Zhao, Ales Plsek, Tórur Strøm
+ * @version SCJ 0.93
+ * 
  */
 @SCJAllowed
 public class AbsoluteTime extends HighResolutionTime {
@@ -51,12 +54,14 @@ public class AbsoluteTime extends HighResolutionTime {
 	 * Construct an AbsoluteTime object with time millisecond and nanosecond
 	 * components past the real-time clock's Epoch.
 	 * 
-	 * @param ms
-	 *            The desired value for the millisecond component of this. The
-	 *            actual value is the result of parameter normalization.
-	 * @param ns
-	 *            The desired value for the nanosecond component of this. The
-	 *            actual value is the result of parameter normalization.
+	 * @param millis
+	 *            The desired value for the millisecond component of this
+	 *            absolute time object. The actual value is the result of
+	 *            parameter normalization.
+	 * @param nanos
+	 *            The desired value for the nanosecond component of this
+	 *            absolute time object. The actual value is the result of
+	 *            parameter normalization.
 	 */
 	@BlockFree
 	@SCJAllowed
@@ -71,19 +76,17 @@ public class AbsoluteTime extends HighResolutionTime {
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public AbsoluteTime() {
-		this(0,0);
+		this(0, 0);
 	}
 
-	// /**
-	// * TBD: Do we want to require MemoryAreaEncloses(inner = {"this"}, outer =
-	// * {"time.getClock()"})? PERC Pico says that Clock must be allocated in
-	// * immortal memory to avoid this "difficulty"?
-	// */
+	//! @todo Do we want to require MemoryAreaEncloses(inner = {"this"}, outer =
+	//! {"time.getClock()"})? PERC Pico says that Clock must be allocated
+	//! in immortal memory to avoid this "difficulty"?
 	/**
 	 * Make a new AbsoluteTime object from the given AbsoluteTime object.
 	 * 
-	 * @param The
-	 *            AbsoluteTime object which is the source for the copy.
+	 * @param time
+	 *            The AbsoluteTime object which is the source for the copy.
 	 */
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
@@ -95,10 +98,10 @@ public class AbsoluteTime extends HighResolutionTime {
 	 * Construct an AbsoluteTime object with time millisecond and nanosecond
 	 * components past the epoch for clock.
 	 * 
-	 * @param ms
+	 * @param millis
 	 *            The desired value for the millisecond component of this. The
 	 *            actual value is the result of parameter normalization.
-	 * @param ns
+	 * @param nanos
 	 *            The desired value for the nanosecond component of this. The
 	 *            actual value is the result of parameter normalization.
 	 * @param clock
@@ -141,9 +144,33 @@ public class AbsoluteTime extends HighResolutionTime {
 	 */
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
+//	public AbsoluteTime add(long millis, int nanos, AbsoluteTime dest) {
+//		return (AbsoluteTime) super.add(millis, nanos,
+//				dest == null ? new AbsoluteTime(0, 0, clock) : dest);
+//	}
+
 	public AbsoluteTime add(long millis, int nanos, AbsoluteTime dest) {
-		return (AbsoluteTime) super.add(millis, nanos,
-				dest == null ? new AbsoluteTime(0, 0, clock) : dest);
+		
+		if (dest == null){
+			dest = new AbsoluteTime(0, 0, clock);
+		}
+
+		dest.set(addSafe(this.millis, millis), ((long) this.nanos) + nanos);
+
+		return dest;
+	}
+
+	/**
+	 * Adds the two given values together, returning their sum if there is no
+	 * overflow.
+	 */
+	static long addSafe(long arg1, long arg2) {
+		long sum = arg1 + arg2;
+		if ((arg1 > 0 && arg2 > 0 && sum <= 0)
+				|| (arg1 < 0 && arg2 < 0 && sum >= 0))
+			throw new ArithmeticException("overflow");
+
+		return sum;
 	}
 	
 	/**
@@ -167,7 +194,7 @@ public class AbsoluteTime extends HighResolutionTime {
 
 		return add(time.millis, time.nanos, dest);
 	}
-	
+
 	/**
 	 * Create a new instance of AbsoluteTime representing the result of adding
 	 * time to the value of this and normalizing the result.
@@ -177,14 +204,14 @@ public class AbsoluteTime extends HighResolutionTime {
 	 * @return A new AbsoluteTime object whose time is the normalization of this
 	 *         plus the parameter time.
 	 */
-	@Allocate( { CURRENT })
+	@Allocate({ CURRENT })
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public AbsoluteTime add(RelativeTime time) {
-		
-		return add(time,null);
+
+		return add(time, null);
 	}
-	
+
 	/**
 	 * Create a new object representing the result of adding millis and nanos to
 	 * the values from this and normalizing the result.
@@ -196,13 +223,13 @@ public class AbsoluteTime extends HighResolutionTime {
 	 * @return A new AbsoluteTime object whose time is the normalization of this
 	 *         plus millis and nanos.
 	 */
-	@Allocate( { CURRENT })
+	@Allocate({ CURRENT })
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public AbsoluteTime add(long millis, int nanos) {
 		return add(millis, nanos, null);
 	}
-	
+
 	/**
 	 * Return an object containing the value resulting from subtracting time
 	 * from the value of this and normalizing the result.
@@ -227,7 +254,7 @@ public class AbsoluteTime extends HighResolutionTime {
 
 		return (RelativeTime) add(-time.millis, -time.nanos, dest);
 	}
-	
+
 	/**
 	 * Return an object containing the value resulting from subtracting time
 	 * from the value of this and normalizing the result.
@@ -249,7 +276,7 @@ public class AbsoluteTime extends HighResolutionTime {
 
 		return add(-time.millis, -time.nanos, dest);
 	}
-	
+
 	/**
 	 * Create a new instance of AbsoluteTime representing the result of
 	 * subtracting time from the value of this and normalizing the result.
@@ -259,11 +286,11 @@ public class AbsoluteTime extends HighResolutionTime {
 	 * @return A new AbsoluteTime object whose time is the normalization of this
 	 *         minus the parameter time.
 	 */
-	@Allocate( { CURRENT })
+	@Allocate({ CURRENT })
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public AbsoluteTime subtract(RelativeTime time) {
-		return subtract(time,null);
+		return subtract(time, null);
 	}
 
 	/**
@@ -275,10 +302,14 @@ public class AbsoluteTime extends HighResolutionTime {
 	 * @return A new RelativeTime object whose time is the normalization of this
 	 *         minus the AbsoluteTime parameter time.
 	 */
-	@Allocate( { CURRENT })
+	@Allocate({ CURRENT })
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public RelativeTime subtract(AbsoluteTime time) {
 		return subtract(time, null);
+	}
+	
+	public String toString(){
+		return "("+this.millis+" ms, "+this.nanos+" ns)";
 	}
 }

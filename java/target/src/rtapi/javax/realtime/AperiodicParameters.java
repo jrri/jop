@@ -27,27 +27,43 @@ import static javax.safetycritical.annotate.Level.LEVEL_1;
 import javax.safetycritical.annotate.SCJAllowed;
 
 /**
- * Construct a new object within the current memory area.
+ * SCJ supports no detection of minimum inter-arrival time violations, therefore
+ * only aperiodic parameters are needed. Hence the RTSJ SporadicParameters class
+ * is absent. Deadline miss detection is supported.
  * 
- * @parameter deadline is an offset from the release time by which the release
- *            should finish. A null deadline indicates that there is no
- *            deadline.
- * @parameter handler is the async event handler to be release if the associated
- *            schedulable object misses its deadline. A null parameter indicates
- *            that no handler should be release.
+ * @author Martin Schoeberl, Juan Rios
+ * @version SCJ 0.93
+ * @note The following text, still in the specification, is not valid anymore
+ *       since there are no events in SCJ: The RTSJ supports a queue for storing
+ *       the arrival of release events is order to enable bursts of events to be
+ *       handled. This queue is of length 1 in SCJ. The RTSJ also enables
+ *       different responses to the queue overflowing. In SCJ the overflow
+ *       behavior is to overwrite the pending release event if there is one.
+ * 
  */
 @SCJAllowed(LEVEL_1)
 public class AperiodicParameters extends ReleaseParameters {
-	
-	private RelativeTime deadline;
-	private AsyncEventHandler missHandler;
-	
+
+	/**
+	 * Construct a new AperiodicParameters object within the current memory area
+	 * with no deadline detection facility.
+	 */
 	@SCJAllowed(LEVEL_1)
 	public AperiodicParameters() {
 		this.deadline = null;
 		this.missHandler = null;
 	}
 
+	/**
+	 * Construct a new object within the current memory area.
+	 * 
+	 * @parameter deadline is an offset from the release time by which the
+	 *            release should finish. A null deadline indicates that there is
+	 *            no deadline.
+	 * @parameter handler is the AsynchronousEventHandler to be release if the
+	 *            associated schedulable object misses its deadline. A null
+	 *            parameter indicates that no handler should be release.
+	 */
 	@SCJAllowed(LEVEL_1)
 	public AperiodicParameters(RelativeTime deadline,
 			AsyncEventHandler missHandler) {

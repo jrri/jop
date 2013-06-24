@@ -23,9 +23,7 @@ public class ImmortalEntry {
 		dumpLog = new DumpLog();
 		
 		term = Terminal.getTerminal();
-		term.writeln("Startup...");
 		
-		term.writeln("Startup...");
 		term.writeln("Setup ok...");
 
 	}

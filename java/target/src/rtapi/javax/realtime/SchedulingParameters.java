@@ -23,13 +23,18 @@
 package javax.realtime;
 
 import javax.safetycritical.annotate.SCJAllowed;
-import javax.safetycritical.annotate.SCJProtected;
 
 /**
- * Another empty class used together with another class to store a single
- * integer value.
+ * The RTSJ potentially allows different schedulers to be supported and defines
+ * this class as the root class for all scheduling parameters. In SCJ this class
+ * is empty; only priority parameters are supported.
+ * 
+ * There is no ImportanceParameters subclass in SCJ.
  * 
  * @author Martin Schoeberl
+ * @version SCJ 0.93
+ * @note Another empty class used together with another class to store a single
+ *       integer value.
  * 
  */
 @SCJAllowed

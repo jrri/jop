@@ -17,7 +17,8 @@ import javax.safetycritical.annotate.SCJAllowed;
  */
 public abstract class InterruptServiceRoutine {
 	
-	public String name;
+	// public String name;
+	protected StringBuffer name;
 
 	/**
 	 * 
@@ -73,7 +74,7 @@ public abstract class InterruptServiceRoutine {
 	 */
 	@SCJAllowed(LEVEL_1)
 	public final String getName() {
-		return name;
+		return name.toString();
 	}
 
 	/**

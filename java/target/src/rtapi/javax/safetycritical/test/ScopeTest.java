@@ -4,12 +4,17 @@ import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.realtime.RelativeTime;
 import javax.realtime.ThrowBoundaryError;
+import javax.safetycritical.JopSystem;
 import javax.safetycritical.ManagedMemory;
 import javax.safetycritical.Mission;
 import javax.safetycritical.MissionSequencer;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.Safelet;
 import javax.safetycritical.StorageParameters;
+import javax.safetycritical.annotate.Level;
+import javax.safetycritical.annotate.Phase;
+import javax.safetycritical.annotate.SCJAllowed;
+import javax.safetycritical.annotate.SCJRestricted;
 
 public class ScopeTest implements Safelet
 {
@@ -23,7 +28,7 @@ public class ScopeTest implements Safelet
 		{
 			seq = new MissionSequencer(
 					new PriorityParameters(0),
-					new StorageParameters(100, null, 0,0)
+					new StorageParameters(4000, null, 0,0)
 					)
 			{
 				private Mission mission = null;
@@ -89,7 +94,7 @@ public class ScopeTest implements Safelet
 													}
 												};
 											}
-											ManagedMemory.getCurrentManagedMemory().enterPrivateMemory(20, innerLogic);
+											ManagedMemory.enterPrivateMemory(20, innerLogic);
 											
 										}
 									};
@@ -108,6 +113,21 @@ public class ScopeTest implements Safelet
 	@Override
 	public long immortalMemorySize() {
 		return 20000;
+	}
+
+	@Override
+	@SCJAllowed(Level.SUPPORT)
+	@SCJRestricted(phase = Phase.INITIALIZATION)
+	public void initializeApplication() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static void main(String args[]){
+		
+		JopSystem js = new JopSystem();
+		js.startMission(new ScopeTest());
+		
 	}
 
 }

@@ -27,7 +27,8 @@ public class Minimal {
 		};
 		System.out.println("Hello SCJ World");
 		seq.handleAsyncEvent(); // Starts the tests*/
-		JopSystem.startMission(new ScopeTest());
+		JopSystem js = new JopSystem();
+		js.startMission(new ScopeTest());
 	}
 
 }

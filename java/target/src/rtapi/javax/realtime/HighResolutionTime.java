@@ -19,7 +19,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-  @authors  Martin Schoeberl, Lei Zhao, Ales Plsek, Tórur Strøm
  */
 
 package javax.realtime;
@@ -30,18 +29,20 @@ import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
 /**
- * Class HighResolutionTime is the base class for AbsoluteTime, RelativeTime,
- * RationalTime. Used to express time with nanosecond accuracy. This class is
- * never used directly: it is abstract and has no public constructor. Instead,
- * one of its subclasses AbsoluteTime, RelativeTime, or RationalTime should be
- * used.
+ * Class HighResolutionTime is the base class for AbsoluteTime and RelativeTime.
+ * Time can be express with nanosecond accuracy. This class is never used
+ * directly: it is abstract and has no public constructor. Instead, one of its
+ * subclasses, AbsoluteTime or RelativeTime should be used.
+ * 
+ * @authors Martin Schoeberl, Lei Zhao, Ales Plsek, Tórur Strøm
+ * @version SCJ 0.93
  * 
  */
 @SCJAllowed
-public abstract class HighResolutionTime { // implements Comparable {
+public abstract class HighResolutionTime implements Comparable<Object> {
 
 	static final int NANOS_PER_MILLI = 1000 * 1000;
-	
+
 	/**
 	 * milliseconds part of the time.
 	 */
@@ -52,52 +53,63 @@ public abstract class HighResolutionTime { // implements Comparable {
 	int nanos;
 
 	/**
-	 * the clock associated with this time.
-	 * This is only interesting when user-defined clocks are
-	 * used, which are a Level 2 feature.
+	 * The clock associated with this time. This is only interesting when
+	 * user-defined clocks are used, which are a Level 2 feature.
 	 */
 	Clock clock;
-	
+
 	HighResolutionTime(long millis, int nanos) {
 		clock = Clock.getRealtimeClock();
 		set(millis, nanos);
 	}
-	
+
 	HighResolutionTime(HighResolutionTime time) {
 		millis = time.millis;
 		nanos = time.nanos;
 		clock = time.clock;
 	}
-	
+
 	HighResolutionTime(long millis, int nanos, Clock clock) {
 		this.clock = clock;
 		set(millis, nanos);
 	}
-	
+
 	/**
 	 * Compares this HighResolutionTime with the specified HighResolutionTime
 	 * time.
 	 * 
 	 * @param time
 	 *            Compares with the time of this.
-	 * @return
+	 * @return An integer value of 1 if the time argument is smaller than this
+	 *         HighResolutionTime, an integer value of -1 if the time argument
+	 *         is bigger than this HighResolutionTime or an integer value of
+	 *         zero if both times are equal.
+	 * 
+	 * @throws IllegalArgumentException
+	 * @throws ClassCastException
 	 */
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public int compareTo(HighResolutionTime time) {
-        if (time == null)
-            throw new IllegalArgumentException("null parameter");
-        // We are missing reflection in JOP - T�rur 3/6/2011
-        /*if (getClass() != time.getClass())
-            throw new ClassCastException();*/
-        if (clock != time.clock)
-            throw new IllegalArgumentException("different clocks");
-        if (millis > time.millis)
-            return 1;
-        else if (millis < time.millis)
-            return -1;
-        else
-            return nanos - time.nanos;
+		if (time == null)
+			throw new IllegalArgumentException("Null parameter");
+		// if (getClass() != time.getClass())
+		if (!(time instanceof HighResolutionTime))
+			throw new ClassCastException("Cannot cast into HighResolutionTime");
+		if (clock != time.clock)
+			throw new IllegalArgumentException("Different clocks");
+
+		if (millis > time.millis)
+			return 1;
+		else if (millis < time.millis)
+			return -1;
+		else if (nanos > time.nanos)
+			return 1;
+		else if (nanos < time.nanos)
+			return -1;
+		else
+			return 0;
+		// return nanos - time.nanos;
 	}
 
 	/**
@@ -112,7 +124,7 @@ public abstract class HighResolutionTime { // implements Comparable {
 	public int compareTo(java.lang.Object object) {
 		return compareTo((HighResolutionTime) object);
 	}
-	
+
 	/**
 	 * Returns true if the argument object has the same type and values as this.
 	 * 
@@ -138,20 +150,21 @@ public abstract class HighResolutionTime { // implements Comparable {
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public boolean equals(java.lang.Object object) {
-		return equals((HighResolutionTime)object);
+		return equals((HighResolutionTime) object);
 	}
-	
+
 	/**
-	 * At the moment just return the single real-time clock.
+	 * Returns a reference to the clock associated with this.
 	 * 
 	 * @return A reference to the clock associated with this.
+	 * @note At the moment just return the single real-time clock.
 	 */
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public Clock getClock() {
 		return clock;
 	}
-	
+
 	/**
 	 * 
 	 * @return The milliseconds component of the time represented by this.
@@ -177,6 +190,7 @@ public abstract class HighResolutionTime { // implements Comparable {
 	 * contract of Object.hashCode().
 	 * 
 	 * @return The hashcode value for this instance.
+	 * @note How to best generate a hash code
 	 */
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
@@ -184,7 +198,7 @@ public abstract class HighResolutionTime { // implements Comparable {
 		// TODO lookup the chapter how to best generate a hash code.
 		return (int) millis + nanos;
 	}
-	
+
 	/**
 	 * Sets the millisecond component of this to the given argument, and the
 	 * nanosecond component of this to 0.
@@ -198,7 +212,7 @@ public abstract class HighResolutionTime { // implements Comparable {
 	public void set(long millis) {
 		set(millis, 0);
 	}
-	
+
 	/**
 	 * Sets the millisecond and nanosecond components of this.
 	 * 
@@ -215,53 +229,53 @@ public abstract class HighResolutionTime { // implements Comparable {
 	@SCJRestricted(maySelfSuspend = false)
 	public void set(long millis, long nanos) {
 		final long millis_in_nanos = nanos / NANOS_PER_MILLI;
-        final int nanosleft = (int) (nanos % NANOS_PER_MILLI);
-        if (millis > 0) {
-            if (nanos < 0) { // no overflow possible
-                this.millis = millis + millis_in_nanos;
-                // ensure same sign
-                if (this.millis > 0 && nanosleft != 0) {
-                    this.millis--;
-                    this.nanos = nanosleft + NANOS_PER_MILLI;
-                } else {
-                    this.nanos = nanosleft;
-                }
-            } else { // watch for overflow
-                long tmp = millis + millis_in_nanos;
-                if (tmp <= 0) {
-                    // What should we do in case of overflow? - Tórur 3/6/2011
-                	throw new ArithmeticException("overflow");
-                	//return false
-                }
-                this.millis = tmp;
-                this.nanos = nanosleft;
-            }
-        } else if (millis < 0) {
-            if (nanos < 0) { // watch for negative overflow
-                long tmp = millis + millis_in_nanos;
-                if (tmp >= 0) {
-                	// What should we do in case of overflow? - Tórur 3/6/2011
-                	throw new ArithmeticException("overflow");
-                	//return false
-                }
-                this.millis = tmp;
-                this.nanos = nanosleft;
-            } else { // no overflow possible
-                this.millis = millis + millis_in_nanos;
-                // ensure same sign
-                if (this.millis < 0 && nanosleft != 0) {
-                    this.millis++;
-                    this.nanos = nanosleft - NANOS_PER_MILLI;
-                } else {
-                    this.nanos = nanosleft;
-                }
-            }
-        } else { // millis == 0
-            this.millis = millis_in_nanos;
-            this.nanos = nanosleft;
-        }
+		final int nanosleft = (int) (nanos % NANOS_PER_MILLI);
+		if (millis > 0) {
+			if (nanos < 0) { // no overflow possible
+				this.millis = millis + millis_in_nanos;
+				// ensure same sign
+				if (this.millis > 0 && nanosleft != 0) {
+					this.millis--;
+					this.nanos = nanosleft + NANOS_PER_MILLI;
+				} else {
+					this.nanos = nanosleft;
+				}
+			} else { // watch for overflow
+				long tmp = millis + millis_in_nanos;
+				if (tmp <= 0) {
+					// What should we do in case of overflow? - Tórur 3/6/2011
+					throw new ArithmeticException("overflow");
+					// return false
+				}
+				this.millis = tmp;
+				this.nanos = nanosleft;
+			}
+		} else if (millis < 0) {
+			if (nanos < 0) { // watch for negative overflow
+				long tmp = millis + millis_in_nanos;
+				if (tmp >= 0) {
+					// What should we do in case of overflow? - Tórur 3/6/2011
+					throw new ArithmeticException("overflow");
+					// return false
+				}
+				this.millis = tmp;
+				this.nanos = nanosleft;
+			} else { // no overflow possible
+				this.millis = millis + millis_in_nanos;
+				// ensure same sign
+				if (this.millis < 0 && nanosleft != 0) {
+					this.millis++;
+					this.nanos = nanosleft - NANOS_PER_MILLI;
+				} else {
+					this.nanos = nanosleft;
+				}
+			}
+		} else { // millis == 0
+			this.millis = millis_in_nanos;
+			this.nanos = nanosleft;
+		}
 	}
-	
+
 	/**
 	 * Change the value represented by this to that of the given time.
 	 * 
@@ -275,61 +289,68 @@ public abstract class HighResolutionTime { // implements Comparable {
 		nanos = time.nanos;
 	}
 
-//	/**
-//	 * Behaves exactly like target.wait() but with the enhancement that it waits
-//	 * with a precision of HighResolutionTime.
-//	 * 
-//	 * @param target
-//	 *            The object on which to wait. The current thread must have a
-//	 *            lock on the object.
-//	 * @param time
-//	 *            The time for which to wait. If it is RelativeTime(0,0) then
-//	 *            wait indefinitely. If it is null then wait indefinitely.
-//	 * @throws java.lang.InterruptedException
-//	 */
-//	@SCJAllowed(LEVEL_2)
-//    public static void waitForObject(java.lang.Object target,
-//            HighResolutionTime time) throws java.lang.InterruptedException {
-//        if (target == null)
-//            throw new NullPointerException("null target");
-//
-//        if (time != null) {
-//            if (time.clock != Clock.single)
-//                throw new UnsupportedOperationException("Incompatible clock");
-//
-//            if (time instanceof AbsoluteTime) {
-//                time = ((AbsoluteTime) time).subtract(Clock.single.getTime());
-//                //target.wait(time.getMilliseconds(), time.getNanoseconds());
-//            } else {
-//                /*if (time.isNegative())
-//                    throw new IllegalArgumentException("negative relative time");
-//                else
-//                    target.wait(time.getMilliseconds(), time.getNanoseconds());*/
-//            }
-//        } else
-//            target.wait();
-//    }
-	
-	HighResolutionTime add(long millis, int nanos, HighResolutionTime dest) {
-//        if (!
-        dest.set(addSafe(this.millis, millis), ((long) this.nanos) + nanos);
-//        )
-//            throw new ArithmeticException("non-normalizable result");
-//        dest.setClock(_clock);
-        return dest;
-    }
-	
 	/**
-     * Adds the two given values together, returning their sum if there is no
-     * overflow.
-     */
-    static long addSafe(long arg1, long arg2) {
-        long sum = arg1 + arg2;
-            if ((arg1 > 0 && arg2 > 0 && sum <= 0)
-                    || (arg1 < 0 && arg2 < 0 && sum >= 0))
-                throw new ArithmeticException("overflow");
+	 * Behaves exactly like target.wait() but with the enhancement that it waits
+	 * with a precision of HighResolutionTime.
+	 * 
+	 * @param target
+	 *            The object on which to wait. The current thread must have a
+	 *            lock on the object.
+	 * @param time
+	 *            The time for which to wait. If it is RelativeTime(0,0) then
+	 *            wait indefinitely. If it is null then wait indefinitely.
+	 * @throws java.lang.InterruptedException
+	 * 
+	 * @warning Not implemented
+	 */
+	@SCJAllowed(LEVEL_2)
+	public static void waitForObject(Object target, HighResolutionTime time)
+			throws java.lang.InterruptedException {
+//		if (target == null)
+//			throw new NullPointerException("null target");
+//
+//		if (time != null) {
+//			if (time.clock != Clock.single)
+//				throw new UnsupportedOperationException("Incompatible clock");
+//
+//			if (time instanceof AbsoluteTime) {
+//				time = ((AbsoluteTime) time).subtract(Clock.single.getTime());
+//				// target.wait(time.getMilliseconds(), time.getNanoseconds());
+//			} else {
+//				/*
+//				 * if (time.isNegative()) throw new
+//				 * IllegalArgumentException("negative relative time"); else
+//				 * target.wait(time.getMilliseconds(), time.getNanoseconds());
+//				 */
+//			}
+//		} else
+//			target.wait();
+	}
 
-        return sum;
-    }
+	HighResolutionTime add(long millis, int nanos, HighResolutionTime dest) {
+		// if (!
+		dest.set(addSafe(this.millis, millis), ((long) this.nanos) + nanos);
+		// )
+		// throw new ArithmeticException("non-normalizable result");
+		// dest.setClock(_clock);
+		return dest;
+	}
+
+	/**
+	 * Adds the two given values together, returning their sum if there is no
+	 * overflow.
+	 */
+	static long addSafe(long arg1, long arg2) {
+		long sum = arg1 + arg2;
+		if ((arg1 > 0 && arg2 > 0 && sum <= 0)
+				|| (arg1 < 0 && arg2 < 0 && sum >= 0))
+			throw new ArithmeticException("overflow");
+
+		return sum;
+	}
+
+	public String toString() {
+		return "(" + this.millis + " ms, " + this.nanos + " ns)";
+	}
 
 }

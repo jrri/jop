@@ -32,41 +32,101 @@ import javax.safetycritical.annotate.SCJRestricted;
 
 import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
+import com.jopdesign.sys.RtThreadImpl;
 
 import joprt.SwEvent;
 
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 
 /**
- * @author Martin Schoeberl
+ * This class permits the automatic execution of code that is bound to an
+ * aperiodic event. It is abstract. Concrete subclasses must implement the
+ * handleAsyncEvent method and may override the default cleanup method.
+ * 
+ * Note, there is no programmer access to the RTSJ fireCount mechanisms, so the
+ * associated methods are missing.
+ * 
+ * Note that the values in parameters passed to the constructors are those that
+ * will be used by the infrastructure. Changing these values after construction
+ * will have no impact on the created event handler.
+ * 
+ * @author Martin Schoeberl, Juan Rios
+ * @version SCJ 0.93
  * 
  */
 @SCJAllowed(LEVEL_1)
 public abstract class AperiodicEventHandler extends ManagedEventHandler {
 
-	String name;
+	// String name;
 	SwEvent event;
-	Memory privMem;
+	// Memory privMem;
+	PrivateMemory privMem;
+	RtThreadImpl rtt;
 
+	/**
+	 * Constructs an aperiodic event handler that can be explicitly released.
+	 * 
+	 * @param priority
+	 *            specifies the priority parameters for this aperiodic event
+	 *            handler. Must not be null.
+	 * 
+	 * @param release
+	 *            specifies the release parameters for this aperiodic event
+	 *            handler; it must not be null.
+	 * 
+	 * @param storage
+	 *            specifies the StorageParameters for this aperiodic event
+	 *            handler
+	 * 
+	 * @param scopeSize
+	 *            the size of the private memory that will be associated with
+	 *            the handler
+	 */
 	@MemoryAreaEncloses(inner = { "this", "this", "this", "this" }, outer = {
 			"priority", "release_info", "mem_info", "event" })
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(phase = INITIALIZATION)
 	public AperiodicEventHandler(PriorityParameters priority,
-			AperiodicParameters release, StorageParameters storage, long scopeSize) {
+			AperiodicParameters release, StorageParameters storage,
+			long scopeSize) {
 		this(priority, release, storage, scopeSize, "");
 	}
 
+	/**
+	 * Constructs an aperiodic event handler that can be explicitly released.
+	 * 
+	 * @param priority
+	 *            specifies the priority parameters for this aperiodic event
+	 *            handler. Must not be null.
+	 * 
+	 * @param release
+	 *            specifies the release parameters for this aperiodic event
+	 *            handler; it must not be null.
+	 * 
+	 * @param storage
+	 *            specifies the StorageParameters for this aperiodic event
+	 *            handler
+	 * 
+	 * @param scopeSize
+	 *            the size of the private memory that will be associated with
+	 *            the handler
+	 * @param name
+	 *            A string representing the name of the handler
+	 */
 	@MemoryAreaEncloses(inner = { "this", "this", "this", "this", "this" }, outer = {
 			"priority", "release_info", "scp", "event", "name" })
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(phase = INITIALIZATION)
 	public AperiodicEventHandler(PriorityParameters priority,
-			AperiodicParameters release, StorageParameters storage, long scopeSize, String name) {
+			AperiodicParameters release, StorageParameters storage,
+			long scopeSize, String name) {
 		super(priority, release, storage, name);
 
 		if (storage != null) {
-			privMem = new Memory((int) scopeSize, (int) storage.getTotalBackingStoreSize());
+			// privMem = new Memory((int) scopeSize, (int)
+			// storage.getTotalBackingStoreSize());
+			privMem = new PrivateMemory((int) scopeSize,
+					(int) storage.getTotalBackingStoreSize());
 		}
 
 		final Runnable runner = new Runnable() {
@@ -76,52 +136,35 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 			}
 		};
 
-		this.name = name;
-
 		// Aperiodic = Sporadic with minimum inter-arrival time set to zero
 		event = new SwEvent(priority.getPriority(), 0) {
 
 			@Override
 			public void handle() {
-				privMem.enter(runner);
+				if (!Mission.currentMission.terminationPending)
+					privMem.enter(runner);
 			}
 
 		};
 
+		rtt = event.thr;
 	}
 
-	// @MemoryAreaEncloses(inner = { "this", "this", "this", "this" }, outer = {
-	// "priority", "release_info", "scp", "events" })
-	// @SCJAllowed(LEVEL_1)
-	// @SCJRestricted(phase = INITIALIZATION)
-	// public AperiodicEventHandler(PriorityParameters priority,
-	// AperiodicParameters release, StorageParameters scp,
-	// AperiodicEvent[] events) {
-	// super(null, null, null, null);
-	// }
-	//
-	// @MemoryAreaEncloses(inner = { "this", "this", "this", "this", "this" },
-	// outer = {
-	// "priority", "release_info", "scp", "events", "name" })
-	// @SCJAllowed(LEVEL_1)
-	// @SCJRestricted(phase = INITIALIZATION)
-	// public AperiodicEventHandler(PriorityParameters priority,
-	// AperiodicParameters release, StorageParameters scp,
-	// AperiodicEvent[] events, String name) {
-	// super(null, null, null, null);
-	// }
-
+	/**
+	 * Registers the schedulable object with its mission.
+	 */
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION)
 	public final void register() {
 		Mission m = Mission.getCurrentMission();
-		if (!m.hasEventHandlers){
-//			System.out.println("creating MEH vector...");
+		if (!m.hasEventHandlers) {
+			// System.out.println("creating MEH vector...");
 			m.eventHandlersRef = Native.toInt(new Vector());
 			m.hasEventHandlers = true;
 		}
-		
+
 		((Vector) Native.toObject(m.eventHandlersRef)).addElement(this);
+		RtThreadImpl.register(rtt);
 	}
 
 	/**
@@ -136,6 +179,9 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Release this aperiodic event handler
+	 */
 	public final void release() {
 		event.fire();
 	}

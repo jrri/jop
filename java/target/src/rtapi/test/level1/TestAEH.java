@@ -37,7 +37,7 @@ public class TestAEH extends AperiodicEventHandler{
 	@Override
 	public void handleAsyncEvent() {
 		// TODO Auto-generated method stub
-		Terminal.getTerminal().writeln("AEH");
+		Terminal.getTerminal().writeln(getName()+"Hello");
 	}
 
 }

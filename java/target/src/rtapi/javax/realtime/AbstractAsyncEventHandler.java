@@ -27,13 +27,14 @@ import javax.safetycritical.annotate.SCJAllowed;
 import static javax.safetycritical.annotate.Level.LEVEL_0;
 
 /**
- * Slowly I get tired of empty classes....
  * 
- * @author martin
- *
+ * This is the base class for all asynchronous event handlers. In SCJ, this is
+ * an empty class.
+ * 
+ * @author Martin Schoeberl
+ * 
  */
 @SCJAllowed(LEVEL_0)
-public abstract class AbstractAsyncEventHandler implements Schedulable
-{
+public abstract class AbstractAsyncEventHandler implements Schedulable {
 
 }

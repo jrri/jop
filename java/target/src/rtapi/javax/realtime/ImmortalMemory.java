@@ -20,69 +20,75 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package javax.realtime;
 
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import com.jopdesign.sys.Memory;
+import com.jopdesign.sys.Native;
+import com.jopdesign.sys.SysHelper;
+
 /**
- * Mmh, there is no ManagedImmortal class. How shall we now implement
- * all the getter methods via pacakge boundaries...
- * We will transer the information via a final class in safetycritical,
- * which has no public contructor, and call a final method in IM expecting
- * this type. That is ugly, but should do the job.
+ * This class represents immortal memory. Objects allocated in immortal memory
+ * are never reclaimed during the lifetime of the application.
+ * 
  * @author martin
- *
+ * @version SCJ 0.93
+ * @note There is no ManagedImmortal class. How shall we now implement all the
+ *       getter methods via package boundaries... We will transfer the
+ *       information via a final class in javax.safetycritical, which has no
+ *       public constructor, and call a final method in ImmortalMemory expecting
+ *       this type. That is ugly, but should do the job.
+ * 
  */
 @SCJAllowed
-public final class ImmortalMemory extends MemoryArea
-{
+public final class ImmortalMemory extends MemoryArea {
 
 	private static ImmortalMemory instance;
-	private static long IMMORTAL_MEMORY_SIZE = 200;
 
-	private ImmortalMemory(long size) 
-	{
-		super();
+	static SysHelper _sysHelper;
+
+	public static void setHelper(SysHelper sysHelper) {
+		_sysHelper = sysHelper;
 	}
-
+	
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
-	public static ImmortalMemory instance()
-	{
-		if(instance == null)
-		{
-			instance = new ImmortalMemory(IMMORTAL_MEMORY_SIZE);
+	public static ImmortalMemory instance() {
+		if (instance == null) {
+			instance = new ImmortalMemory();
 		}
 		return instance;
 	}
 
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
-	public void enter(Runnable logic)
-	{
-
+	public long memoryConsumed() {
+		return _sysHelper.memoryConsumed(getImmortalMemory());
 	}
 
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
-	public long memoryConsumed()
-	{
-		return 0L; // dummy return
+	public long memoryRemaining() {
+		return _sysHelper.memoryRemaining(getImmortalMemory());
 	}
 
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
-	public long memoryRemaining()
-	{
-		return 0L; // dummy return
+	public long size() {
+		return _sysHelper.size(getImmortalMemory());
 	}
 
-	@SCJAllowed
-	@SCJRestricted(maySelfSuspend = false)
-	public long size()
-	{
-		return 0L; // dummy return
+	private Memory getImmortalMemory() {
+		return _sysHelper.getImmortalMemory();
+	}
+	
+	public long xx(){
+		return _sysHelper.getRemainingBackingStore(getImmortalMemory());
+	}
+	
+	void enterPrivateMemory(int size, Runnable logic){
+		_sysHelper.enterPrivateMemory(_sysHelper.getImmortalMemory(), size, logic);
 	}
 }

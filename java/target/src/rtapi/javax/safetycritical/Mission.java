@@ -34,29 +34,36 @@ import javax.safetycritical.annotate.Allocate.Area;
 import com.jopdesign.sys.Native;
 
 /**
+ * A Safety Critical Java application is comprised of one or more missions. Each
+ * mission is implemented as a subclass of this abstract Mission class. A
+ * mission is comprised of one or more ManagedSchedulable objects, conceptually
+ * running as independent threads of control, and the data that is shared
+ * between them.
  * 
- * @author martin
+ * @author Martin Schoeberl, Juan Rios
+ * @version SCJ 0.93
  * 
  */
 @SCJAllowed
 public abstract class Mission {
 
-	// Workaround to avoid illegal reference:
-	// Store the address itself (a number) of
-	// the structure containing the handler's
-	// registerd in this mission.
+	/*
+	 * Workaround to avoid illegal references: Store the address itself (a
+	 * number) of the structure containing the handler's registerd in this
+	 * mission.
+	 */
 	int eventHandlersRef;
 	boolean hasEventHandlers = false;
 
-	// See above...
+	/* See above... */
 	int longEventHandlersRef;
 	boolean hasLongEventHandlers = false;
 
-	// See above...
+	/* See above... */
 	int managedInterruptRef;
 	boolean hasManagedInterrupt = false;
 
-	// To keep track of the state of a mission
+	/* To keep track of the state of a mission */
 	static final int INACTIVE = 0;
 	static final int INITIIALIZATION = 1;
 	static final int EXECUTION = 2;
@@ -64,108 +71,265 @@ public abstract class Mission {
 
 	public int phase = INACTIVE;
 
-	// True only for subclasses of CyclicExecutive
+	/* True only for subclasses of CyclicExecutive */
 	boolean isCyclicExecutive = false;
 
+	/* This works only on L0, L1 applications where there is only one sequencer */
 	static MissionSequencer currentSequencer = null;
 
+	static Mission currentMission;
+
+	boolean terminationPending = false;
+
+	/**
+	 * Allocate and initialize data structures associated with a Mission
+	 * implementation.
+	 * 
+	 * The constructor may allocate additional infrastructure objects within the
+	 * same MemoryArea that holds the implicit this argument.
+	 * 
+	 * The amount of data allocated in he same MemoryArea as this by the Mission
+	 * constructor is implementation-defined. Application code will need to know
+	 * the amount of this data to properly size the containing scope.
+	 * 
+	 * Memory behavior: This constructor may allocate objects within the same
+	 * MemoryArea that holds the implicit this argument.
+	 */
 	@Allocate({ Area.THIS })
 	@SCJAllowed
 	public Mission() {
 	}
 
+	/**
+	 * Method to clean data structures and machine state upon termination of
+	 * this Mission’s execute phase. Infrastructure code running in the
+	 * controlling Mission Sequencer’s bound thread invokes cleanUp after all
+	 * ManagedSchedulables associated with this Mission have terminated, but
+	 * before control leaves the corresponding MissionMemory area. The default
+	 * implementation of cleanUp does nothing.
+	 */
+	@SCJAllowed(SUPPORT)
+	protected void cleanUp() {
+		Terminal.getTerminal().writeln(
+				"[SYSTEM]: Default Mission cleanup method");
+	}
+
+	/**
+	 * Obtain the current mission.
+	 * 
+	 * @return the instance of the Mission to which the currently executing
+	 *         ManagedSchedulable corresponds. The current Mission is known from
+	 *         the moment when initialize has been invoked and continues to be
+	 *         known until the mission’s last cleanUp method has been completed.
+	 *         Otherwise, returns null.
+	 */
+	@SCJAllowed
+	public static Mission getCurrentMission() {
+		return currentMission;
+	}
+
+	/**
+	 * 
+	 * @return the MissionSequencer that is overseeing execution of this
+	 *         mission.
+	 */
+	public MissionSequencer<Mission> getSequencer() {
+		return currentSequencer;
+	}
+
+	/**
+	 * Perform initialization of this Mission. Infrastructure calls initialize
+	 * after the Mission has been instantiated and the MissionMemory has been
+	 * resized to match the size returned from Mission.missionMemorySize. Upon
+	 * entry into the initialize method, the current allocation context is the
+	 * MissionMemory area dedicated to this particular Mission.
+	 * 
+	 * The default implementation of initialize does nothing.
+	 * 
+	 * A typical implementation of initialize instantiates and registers all
+	 * ManagedSchedulable objects that constitute this Mission. The
+	 * infrastructure enforces that ManagedSchedulables can only be instantiated
+	 * and registered if the currently executing ManagedSchedulable is running a
+	 * Mission.initialize method under the direction of the SCJ infrastructure.
+	 * The infrastructure arranges to begin executing the registered
+	 * ManagedSchedulable objects associated with a particular Mission upon
+	 * return from its initialize method.
+	 * 
+	 * Besides initiating the associated ManagedSchedulable objects, this method
+	 * may also instantiate and/or initialize certain mission-level data
+	 * structures. Note that objects shared between ManagedSchedulables
+	 * typically reside within the corresponding MissionMemory scope, but may
+	 * alternatively reside in outer-nested MissionMemory or ImmortalMemory
+	 * areas. Individual ManagedSchedulables can gain access to these objects
+	 * either by supplying their references to the ManagedSchedulable
+	 * constructors or by obtaining a reference to the currently running mission
+	 * (the value returned from Mission.getCurrentMission), coercing the
+	 * reference to the known Mission subclass, and accessing the fields or
+	 * methods of this subclass that represent the shared data objects.
+	 */
 	// why is this SUPPORT?
 	@SCJAllowed(SUPPORT)
 	protected abstract void initialize();
 
+	/**
+	 * This method must be implemented by a safety-critical application. It is
+	 * invoked by the SCJ infrastructure to determine the desired size of this
+	 * Mission’s MissionMemory area. When this method receives control, the
+	 * MissionMemory area will include all of the backing store memory to be
+	 * used for all memory areas. Therefore this method will not be able to
+	 * create or call any methods that create any PrivateMemory areas. After
+	 * this method returns, the SCJ infrastructure shall shrink the
+	 * MissionMemory to a size based on the memory size returned by this method.
+	 * This will make backing store memory available for the backing stores of
+	 * the ManagedSchedulable objects that comprise this mission. Any attempt to
+	 * introduce a new PrivateMemory area within this method will result in an
+	 * OutOfMemoryError exception.
+	 * 
+	 * @return the desired size of this Mission’s MissionMemory area
+	 * @todo Memory.java do not have any method for resizing memory instances
+	 */
 	@SCJAllowed
 	abstract public long missionMemorySize();
 
-	@SCJAllowed(SUPPORT)
-	protected void cleanUp() {
+	/**
+	 * This method provides a standard interface for requesting termination of a
+	 * mission.
+	 * 
+	 * Once this method is called during Mission execution, subsequent
+	 * invocations of terminationPending shall return true, shall invoke this
+	 * object’s terminationHook method, and shall invoke
+	 * requestSequenceTermination on each inner-nested MissionSequencer object
+	 * that is registered for execution within this mission. Additionally, this
+	 * method has the effect of arranging to (1) disable all periodic event
+	 * handlers associated with this Mission so that they will experience no
+	 * further firings, (2) disable all AperiodicEventHandlers so that no
+	 * further firings will be honored, (3) clear the pending event (if any) for
+	 * each event handler so that the event handler can be effectively shut down
+	 * following completion of any event handling that is currently active, (4)
+	 * wait for all of the ManagedSchedulable objects associated with this
+	 * mission to terminate their execution, (5) invoke the
+	 * ManagedSchedulable.cleanUp methods for each of the ManagedSchedulable
+	 * objects associated with this mission, and invoking the cleanUp method
+	 * associated with this mission.
+	 * 
+	 * While many of these activities may be carried out asynchronously after
+	 * returning from the requestTermination method, the implementation of
+	 * requestTermination shall not return until after all of the
+	 * ManagedEventHandler objects registered with this Mission have been
+	 * disassociated from this Mission so they will receive no further releases.
+	 * Before returning, or at least before initialize for this same mission is
+	 * called in the case that it is subsequently started, the implementation
+	 * shall clear all mission state.
+	 */
+	@SCJAllowed
+	public final void requestTermination() {
 
-		Terminal.getTerminal().writeln("Mission cleanup");
+		/*
+		 * This variable is polled in the PEH and checked before every firing of
+		 * AEH/ALEH
+		 */
+		terminationPending = true;
+		
+//		/*
+//		 * The following code runs in the main thread, that is, the one with the
+//		 * lowest priority in a L0, L1 application. This will allow any currently
+//		 * executing handlers to finish before the terminate() method gets
+//		 * called.
+//		 * 
+//		 * For a L0 application, everything runs in the main thread so the
+//		 * terminate() method should be called after the currently executing
+//		 * handler finishes. That is done in the MissionSequencer.
+//		 */
+//		if (!isCyclicExecutive)
+//			terminate();
+		
+	}
+	
+	void terminate() {
 
 		if (hasEventHandlers) {
 			Vector eventHandlers = getHandlers();
+
+			/*
+			 * Run all cleanUp() methods of every MEH associated with the
+			 * mission
+			 */
 			for (int i = 0; i < eventHandlers.size(); i++) {
 				((ManagedEventHandler) eventHandlers.elementAt(i)).cleanUp();
 			}
 
-			// The vector lives in mission memory. The removeAllElements()
-			// method sets all references to handlers to null. The handler
-			// objects are collected when the mission finishes (i.e. when
-			// mission memory is exited).
+			/*
+			 * The vector lives in mission memory. The removeAllElements()
+			 * method sets all references to handlers to null. The handler
+			 * objects are collected when the mission finishes (i.e. when
+			 * mission memory is exited).
+			 */
 			eventHandlers.removeAllElements();
 
-			// This is actually needed only if mission objects live in immortal
-			// memory.
+			/*
+			 * The following is needed only if mission objects live in immortal
+			 * memory.
+			 */
 			hasEventHandlers = false;
 			eventHandlersRef = 0;
-
 		}
 
 		if (hasLongEventHandlers) {
 			Vector longEventHandlers = getLongHandlers();
+
+			/*
+			 * Run all cleanUp() methods of every MLEH associated with the
+			 * mission
+			 */
 			for (int i = 0; i < longEventHandlers.size(); i++) {
 				((ManagedLongEventHandler) longEventHandlers.elementAt(i))
 						.cleanUp();
 			}
 
+			/*
+			 * The vector lives in mission memory. The removeAllElements()
+			 * method sets all references to handlers to null. The handler
+			 * objects are collected when the mission finishes (i.e. when
+			 * mission memory is exited).
+			 */
 			longEventHandlers.removeAllElements();
+
+			/*
+			 * The following is needed only if mission objects live in immortal
+			 * memory.
+			 */
 			longEventHandlersRef = 0;
 			hasLongEventHandlers = false;
-
 		}
 
 		Vector managedInterrupt = getInterrupts();
 		if (managedInterrupt != null) {
+
+			/*
+			 * Unregister interrupts
+			 */
 			for (int i = 0; i < managedInterrupt.size(); i++) {
 				((ManagedInterruptServiceRoutine) managedInterrupt.elementAt(i))
 						.unregister();
 			}
-			
+
 			managedInterrupt.removeAllElements();
 			managedInterruptRef = 0;
 			hasManagedInterrupt = false;
 		}
 	}
 
-	@SCJAllowed
-	public final void requestTermination() {
-		MissionSequencer.terminationRequest = true;
-		// It is simple polled in the PAEH - that'S easy ;-)
-		// But we should also invoke cleanup().
-		// That does not work when requestTermination is invoked
-		// before startMission()
-		// clean.fire();
-		// System.out.println("Termination request");
-	}
-
-	@SCJAllowed
-	public final void requestSequenceTermination() {
-		requestTermination();
-	}
-
-	@SCJAllowed
-	public final boolean terminationPending() {
-		return MissionSequencer.terminationRequest;
-	}
-
-	@SCJAllowed
-	public final boolean sequenceTerminationPending() {
-		return false;
-	}
-
-	@SCJAllowed
-	public static Mission getCurrentMission() {
-		return currentSequencer.current_mission;
-		// return MissionSequencer.current_mission;
-		// return null;
+	/**
+	 * This method shall be invoked by requestTermination. Application-specific
+	 * subclasses of Mission may override the terminationHook method to supply
+	 * application-specific mission shutdown code.
+	 */
+	@SCJAllowed(javax.safetycritical.annotate.Level.SUPPORT)
+	protected void terminationHook() {
 	}
 
 	/**
-	 * NOT PART OF SPEC, implementation specific
+	 * Implementation specific
 	 */
 	Vector getHandlers() {
 		return (Vector) Native.toObject(eventHandlersRef);
@@ -175,16 +339,15 @@ public abstract class Mission {
 		return (Vector) Native.toObject(longEventHandlersRef);
 	}
 
-	public Vector getInterrupts() {
+	Vector getInterrupts() {
 		if (hasManagedInterrupt) {
 			return (Vector) Native.toObject(managedInterruptRef);
 		} else {
 			return null;
 		}
-		
 	}
 
-	// @SCJAllowed(SUPPORT)
-	// protected abstract Runnable start();
-
+	static void setCurrentMission(Mission m) {
+		currentMission = m;
+	}
 }

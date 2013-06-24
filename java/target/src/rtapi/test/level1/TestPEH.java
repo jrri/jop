@@ -8,6 +8,7 @@ import javax.safetycritical.AperiodicEventHandler;
 import javax.safetycritical.AperiodicLongEventHandler;
 import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
+import javax.safetycritical.PrivateMemory;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.Terminal;
 
@@ -22,9 +23,9 @@ public class TestPEH extends PeriodicEventHandler {
 	Random rnd = new Random();
 
 	public TestPEH(PriorityParameters priority, PeriodicParameters release,
-			StorageParameters storage, long scopeSize, AperiodicEventHandler aeh,
+			StorageParameters storage, long scopeSize, String name, AperiodicEventHandler aeh,
 			AperiodicLongEventHandler aleh) {
-		super(priority, release, storage, scopeSize);
+		super(priority, release, storage, scopeSize, name);
 		this.aeh = aeh;
 		this.aleh = aleh;
 	}
@@ -32,10 +33,19 @@ public class TestPEH extends PeriodicEventHandler {
 	@Override
 	public void handleAsyncEvent() {
 
-		Terminal.getTerminal().writeln("PEH");
+		Terminal.getTerminal().writeln(getName()+"Hello!");
 //		Object object = new Object();
 //		Memory m = Memory.getMemoryArea(object);
 //		Terminal.getTerminal().writeln("Level: "+m.level);
+		
+		PrivateMemory.enterPrivateMemory(256, new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				Terminal.getTerminal().writeln(getName()+"Hello from nested!");
+			}
+		});
 
 		if (rnd.nextInt(3) == 1) {
 			aeh.release();

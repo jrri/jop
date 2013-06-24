@@ -22,43 +22,20 @@
 
 package javax.realtime;
 
-import static javax.safetycritical.annotate.Level.LEVEL_0;
-
 import javax.safetycritical.annotate.SCJAllowed;
-import javax.safetycritical.annotate.SCJProtected;
-import javax.safetycritical.annotate.SCJRestricted;
 
 /**
- * TODO: We shall just simply override the methods in the SCJ classes
- * and drop them from here. It would not be noticeable, right?
- * 
- * We don't want to implement the meat of memory management in
- * an RTSJ class.
- * 
- * A quick fix would be to make it abstract. And we will do ;-)
+ * This class can not be instantiated in SCJ. It is subclassed by MissionMemory
+ * and PrivateMemory. It has no visible methods.
  * 
  * @author martin
- *
+ * @version SCJ 0.93
+ * @note We shall just simply override the methods in the SCJ classes and drop
+ *       them from here. It would not be noticeable, right? We don't want to
+ *       implement the meat of memory management in an RTSJ class. A quick fix
+ *       would be to make it abstract. And we will do ;-)
  */
 @SCJAllowed
 public abstract class LTMemory extends ScopedMemory {
-
-//	protected LTMemory(int size, int bsSize) {
-//		super(size, bsSize);
-//		// TODO Auto-generated constructor stub
-//	}
-//
-//	protected LTMemory(int size) {
-//		this(size,0);
-//	}
-	
-	/**
-	 * We don't allow to use the constructor....
-	 * @param size
-	 */
-//	@SCJProtected
-//	public LTMemory(long size) {
-////		super(size);
-//	}
 
 }

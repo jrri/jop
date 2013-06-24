@@ -24,16 +24,17 @@ package javax.realtime;
 
 import javax.safetycritical.annotate.SCJAllowed;
 
-
 /**
- * Do we need this interface?
- * I think no. Portals and resize is gone. Therefore, another
- * empty interface....
+ * This is the base interface for all scoped memory areas. Scoped memory is a
+ * region based memory management strategy that can only be cleared when no
+ * thread is executing in the area.
  * 
  * @author martin
- *
+ * @version SCJ 0.93
+ * @note Martin: Do we need this interface? I think no. Portals and resize is
+ *       gone. Therefore, another empty interface....
+ * 
  */
 @SCJAllowed
-public interface ScopedAllocationContext extends AllocationContext
-{
+public interface ScopedAllocationContext extends AllocationContext {
 }

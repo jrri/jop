@@ -89,21 +89,15 @@ package javax.realtime;
 import javax.safetycritical.annotate.SCJAllowed;
 
 /**
- * Another empty class....
+ * Scoped memory implements the scoped allocation context.
  * 
  * @author martin
- *
+ * @versio SCJ 0.93
+ * @note resize method is gone so another empty class....
+ * 
  */
 @SCJAllowed
 public abstract class ScopedMemory extends MemoryArea implements
 		ScopedAllocationContext {
-
-//	ScopedMemory(int size, int bsSize) {
-//		super(size, bsSize);
-//	}
-//
-//	ScopedMemory(int size) {
-//		this(size,0);
-//	}
 
 }

@@ -28,7 +28,7 @@ import com.jopdesign.sys.RtThreadImpl;
 
 public class RtThread implements Runnable {
 
-	RtThreadImpl thr;
+	public RtThreadImpl thr;
 	private Runnable runner = null;
 
 	public static void initClass() {

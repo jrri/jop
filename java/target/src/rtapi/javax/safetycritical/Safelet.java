@@ -34,15 +34,20 @@ import static javax.safetycritical.annotate.Phase.INITIALIZATION;
  * by an implementation of Safelet which identifies the outer-most
  * MissionSequencer. This outer-most MissionSequencer takes responsibility for
  * running the sequence of missions that comprise this safety-critical
- * application. The mechanism used to identify the Safelet to a particular SCJ
- * environment is implementation defined. For the MissionSequencer returned from
- * getSequencer, the SCJ infrastructure arranges for an independent thread to
- * begin executing the code for that sequencer and then waits for that thread to
- * terminate its execution.
+ * application.
+ * 
+ * The mechanism used to identify the Safelet to a particular SCJ environment is
+ * implementation defined.
+ * 
+ * For the MissionSequencer returned from getSequencer, the SCJ infrastructure
+ * arranges for an independent thread to begin executing the code for that
+ * sequencer and then waits for that thread to terminate its execution.
  * 
  * @author Martin Schoeberl
  * 
  * @param <MissionLevel>
+ * 
+ * @version SCJ 0.93
  */
 @SCJAllowed
 public interface Safelet<MissionLevel extends Mission> {
@@ -56,7 +61,7 @@ public interface Safelet<MissionLevel extends Mission> {
 	 */
 	@SCJAllowed(SUPPORT)
 	// MS: looks like there is a change in the annotation system in SCJ
-//	@SCJRestricted(INITIALIZATION)
+	// @SCJRestricted(INITIALIZATION)
 	@SCJRestricted(phase = INITIALIZATION)
 	public void initializeApplication();
 
@@ -75,8 +80,11 @@ public interface Safelet<MissionLevel extends Mission> {
 
 	/**
 	 * 
-	 * @return the amount of immortal memory currently available for execution
-	 *         of this application.
+	 * @return the amount of additional immortal memory that must be available
+	 *         for the immortal memory allocations to be performed by this
+	 *         application. If the amount of memory remaining in immortal memory
+	 *         is less than this requested size, the infrastructure halts
+	 *         execution of the application upon return from this method.
 	 */
 	@SCJAllowed(SUPPORT)
 	public long immortalMemorySize();

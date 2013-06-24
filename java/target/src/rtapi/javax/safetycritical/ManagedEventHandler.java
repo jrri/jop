@@ -21,16 +21,12 @@
 package javax.safetycritical;
 
 import javax.realtime.BoundAsyncEventHandler;
+import javax.realtime.HighResolutionTime;
 import javax.realtime.PriorityParameters;
 import javax.realtime.ReleaseParameters;
 
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
-
-import com.jopdesign.sys.Memory;
-import com.jopdesign.sys.RtThreadImpl;
-
-import joprt.RtThread;
 
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 import static javax.safetycritical.annotate.Phase.CLEANUP;
@@ -38,54 +34,79 @@ import static javax.safetycritical.annotate.Level.SUPPORT;
 import static javax.safetycritical.annotate.Level.INFRASTRUCTURE;
 
 /**
- * An almost empty class, just to add two methods.
+ * In SCJ, all handlers must be registered with the enclosing mission, so SCJ
+ * applications use classes that are based on the ManagedEventHandler and the
+ * ManagedLongEventHandler class hierarchies.
  * 
- * @author Martin Schoeberl
+ * Note that the values in parameter classes passed to the constructors are
+ * those that will be used by the infrastructure. Changing these values after
+ * construction will have no impact on the created event handler.
+ * 
+ * @author Martin Schoeberl, Juan Rios
+ * @version SCJ 0.93
+ * @note An almost empty class, just to add two methods.
  * 
  */
 @SCJAllowed
 public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 		implements ManagedSchedulable {
 
-	private String name;
+	/*
+	 * Workaround to avoid illegal assignments when referring to constant
+	 * strings. Constant strings in JOP have no associated memory area
+	 */
+	protected StringBuffer name;
 
 	@SCJAllowed(INFRASTRUCTURE)
 	@SCJRestricted(phase = INITIALIZATION)
 	ManagedEventHandler(PriorityParameters priority, ReleaseParameters release,
 			StorageParameters scp, String name) {
-		this.name = name;
+		this.name = new StringBuffer(name);
 	}
 
+	ManagedEventHandler(PriorityParameters priority, StorageParameters scp,
+			String name) {
+		this.name = new StringBuffer(name);
+	}
+
+	ManagedEventHandler(PriorityParameters priority, HighResolutionTime time,
+			StorageParameters storage) {
+		this(priority, time, storage, "");
+	}
+
+	ManagedEventHandler(PriorityParameters priority, HighResolutionTime time,
+			StorageParameters storage, String name) {
+		this.name = new StringBuffer(name);
+	}
+
+	/**
+	 * Application developers override this method with code to be executed when
+	 * this event handler’s execution is disabled (after termination of the
+	 * enclosing mission has been requested).
+	 * 
+	 * MissionMemory is the current allocation context on entry into this
+	 * method. When the cleanUp method is called, a private memory area shall be
+	 * provided for its use, and shall be the current memory area. If desired,
+	 * the cleanUp method may introduce a new PrivateMemory area. The memory
+	 * allocated to ManagedSchedulables shall be available to be reclaimed when
+	 * each Mission’s cleanUp method returns.
+	 */
 	@Override
 	@SCJAllowed(SUPPORT)
 	@SCJRestricted(phase = CLEANUP)
 	public void cleanUp() {
-		
-		System.out.println("MEH cleanup");
+		Terminal.getTerminal().writeln("[SYSTEM]: Default MEH cleanup");
 	}
 
-	// TODO: do we need to repeat it here?
-	// ok, why not...
-	@Override
-	@SCJAllowed(SUPPORT)
-	public abstract void handleAsyncEvent();
-
+	/**
+	 * 
+	 * @return a string name of this event handler. The actual object returned
+	 *         shall be the same object that was passed to the event handler
+	 *         constructor.
+	 */
 	@SCJAllowed
 	public String getName() {
-		return name;
+		return name.toString();
 	}
 
-	//jrri: Not in v 0.9 of spec
-//	@Override
-//	@SCJAllowed
-//	@SCJRestricted(phase = INITIALIZATION)
-//	public void register() {
-//		
-//	}
-	
-	//jrri: Not in v 0.9 of spec
-//	@SCJAllowed
-//	public static ManagedEventHandler getCurrentHandler(){
-//		return null;
-//	}
 }

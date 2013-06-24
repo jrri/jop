@@ -188,10 +188,17 @@ class Scheduler implements Runnable {
 
 		// change active if a lower priority
 		// thread is before main
-//		tq.active = tq.ref[0].nr;		// this was our main thread
+		// tq.active = tq.ref[0].nr; // this was our main thread
 
 		// cnt one higher for start thread (main or Runnable)
 		++cnt;
+		
+		// TODO Illegal references.
+		// When RtThreadImpl.startMission is called from mission memory,
+		// the assignment of the arrays produces an illegal field assignment.
+		// Calling RtThreadImpl.startMission from MissionMemory is useful to
+		// delete the arrays when returning from MissionMemory and recreate them
+		// when the next mission starts
 		ref = new RtThreadImpl[cnt];
 		next = new int[cnt];
 		event = new int[cnt];

@@ -16,7 +16,6 @@
  *
 \*---------------------------------------------------------------------*/
 
-
 package javax.safetycritical;
 
 import javax.safetycritical.annotate.SCJAllowed;
@@ -25,23 +24,29 @@ import javax.safetycritical.annotate.SCJRestricted;
 import static javax.safetycritical.annotate.Level.SUPPORT;
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 import static javax.safetycritical.annotate.Phase.CLEANUP;
+
 /**
- * An interface implemented by all Safety Critical Java Schedulable classes.
- * It defines the register mechanism.
+ * In SCJ, all schedulable objects are managed by a mission.
+ * 
+ * This interface is implemented by all SCJ Schedulable classes. It defines the
+ * mechanism by which the ManagedSchedulable is registered with the mission for
+ * its management. This interface is used by SCJ classes. It is not intended for
+ * direct use by applications classes.
+ * 
+ * @version SCJ 0.93
+ * @todo This class specifies that: "It defines the mechanism by which the
+ *       ManagedSchedulable is registered with the mission for its management"
+ *       but the register() method was available until ver. 0.80 of the spec.
+ *       The mentioned text should be removed from the description.
  */
 @SCJAllowed
-public interface ManagedSchedulable extends javax.realtime.Schedulable
-{
+public interface ManagedSchedulable extends javax.realtime.Schedulable {
 
-	// jrri: Not in v0.90 of spec
-	//  /**
-//   * Register the task with its Mission.
-//   */
-//  @SCJAllowed
-//  @SCJRestricted(phase = INITIALIZATION)
-//  public void register();
-
-  @SCJAllowed(SUPPORT)
-  @SCJRestricted(phase = CLEANUP)
-  public void cleanUp();
+	/**
+	 * Runs any end-of-mission clean up code associated with this schedulable
+	 * object.
+	 */
+	@SCJAllowed(SUPPORT)
+	@SCJRestricted(phase = CLEANUP)
+	public void cleanUp();
 }

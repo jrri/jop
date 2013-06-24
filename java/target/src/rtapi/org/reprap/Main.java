@@ -34,7 +34,8 @@ public class Main implements Safelet
 	
 	
 	public static void main(String[] args) {
-		JopSystem.startMission(new Main());
+		JopSystem js = new JopSystem();
+		js.startMission(new Main());
 	}
 	
 	@Override

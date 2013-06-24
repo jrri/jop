@@ -20,6 +20,11 @@
 
 package com.jopdesign.sys;
 
+import javax.realtime.ImmortalMemory;
+import javax.safetycritical.ManagedMemory;
+import javax.safetycritical.PrivateMemory;
+import javax.safetycritical.MissionMemory;
+
 /**
  * JOP's implementation of scoped memory.
  * 
@@ -32,30 +37,32 @@ package com.jopdesign.sys;
  * 
  */
 public class Memory {
+	
 
 	// TODO should be set at some time, before the first
 	// scope (e.g. mission memory) is created
-	final static int IM_SIZE = 10000;
+	// final static int IM_SIZE = 90000;
+	final static int IM_SIZE = Config.IMM_MEM_SIZE;
 
 	int cnt;
 	/** Start address of memory area */
-	int startPtr;
+	public int startPtr;
 	/** Allocation pointer */
-	int allocPtr;
+	public int allocPtr;
 	/**
 	 * End of area for local allocations.
 	 * Points to the last usable word.
 	 */
-	int endLocalPtr;
+	public int endLocalPtr;
 	/**
 	 * End of backing store.
 	 * Points to the last usable word.
 	 */
-	int endBsPtr;
+	public int endBsPtr;
 	/**
 	 * Allocation pointer for the nested backing store.
 	 */
-	int allocBsPtr;
+	public int allocBsPtr;
 	// TODO: support for multiple parallel scopes
 	// We need also an allocation pointer for the backing
 	// store.
@@ -75,6 +82,13 @@ public class Memory {
 	 */
 	public static Memory immortal;
 
+	static {
+		SysHelper sysHelper = new SysHelper();
+		ImmortalMemory.setHelper(sysHelper);
+		ManagedMemory.setHelper(sysHelper);
+		MissionMemory.setHelper(sysHelper);
+		PrivateMemory.setHelper(sysHelper);
+	}
 	
 	Memory() {
 	}
@@ -100,7 +114,7 @@ public class Memory {
 		return immortal;
 	}
 
-	public Memory(int size, int bsSize) {
+	Memory(int size, int bsSize) {
 		cnt = 0;
 		if (RtThreadImpl.mission) {
 			// should be atomic? probably not
@@ -136,7 +150,7 @@ public class Memory {
 	 * 
 	 * @param size
 	 */
-	public Memory(int size) {
+	Memory(int size) {
 		this(size, 0);
 	}
 
@@ -156,7 +170,7 @@ public class Memory {
 	 * public int getSize() { //return backingStore.length*4; return size; }
 	 */
 
-	public void enter(Runnable logic) {
+	void enter(Runnable logic) {
 		// Anders thinks cnt is useless here
 		synchronized (this) {
 			++cnt;
@@ -170,6 +184,7 @@ public class Memory {
 //			Native.wrMem(0, i);
 //		}
 
+//		int oldAllocBsPtr = allocBsPtr;
 		// activate the memory area
 		RtThreadImpl rtt = null;
 		Memory outer = null;
@@ -197,14 +212,20 @@ public class Memory {
 		for (int i = startPtr; i < allocPtr; ++i) {
 			Native.wrMem(0, i);
 		}
+		
+//		for (int i = startPtr; i < endBsPtr; ++i) {
+//			Native.wrMem(0, i);
+//		}
+
 		inner = null;
 		allocPtr = startPtr;
+//		allocBsPtr = oldAllocBsPtr;
 	}
 	
 	// just a enter without pointer reset (and cleanup)
 	// need to be checked that the area is actually owned
 	// by a thread when it is private memory
-	public void executeInArea(Runnable logic) {
+	void executeInArea(Runnable logic) {
 		// activate the memory area
 		RtThreadImpl rtt = null;
 		Memory outer = null;
@@ -255,7 +276,7 @@ public class Memory {
 	 * @param size
 	 * @param logic
 	 */
-	public void enterPrivateMemory(int size, Runnable logic) {
+	void enterPrivateMemory(int size, Runnable logic) {
 		// TODO: is this assignment allowed?
 		// The scope object lives in an outer one,
 		// so it is not!
@@ -290,36 +311,69 @@ public class Memory {
 	}
 	
 	// executeInArea -- don't forget to synchronize new
-	
-	public static Memory getMemoryArea(Object object){
-		
-		// Debug stuff
-//		int i = Native.toInt(object);
-//		System.out.println("Object reference: "+i);
-//				
-//		int j = Native.rdMem(i+GC.OFF_MEM);
-//		System.out.println("Memory object reference: "+j);
 
-		Memory m = (Memory)Native.toObject(
-			    Native.rdMem(Native.toInt(object)+ GC.OFF_MEM));
-		
+	static Memory getMemoryArea(Object object) {
+
+		// Debug stuff
+		// int i = Native.toInt(object);
+		// System.out.println("Object reference: "+i);
+		//
+		// int j = Native.rdMem(i+GC.OFF_MEM);
+		// System.out.println("Memory object reference: "+j);
+
+		Memory m = (Memory) Native.toObject(Native.rdMem(Native.toInt(object)
+				+ GC.OFF_MEM));
+
 		return m;
 	}
 	
-	public int size(){
+	/**
+	 * 
+	 * @return The total size of the memory area that can be used for local
+	 *         allocations
+	 */
+	public int size() {
 		return endLocalPtr - startPtr + 1;
 	}
-	
-	public int memoryConsumed(){
+
+	/**
+	 * 
+	 * @return The amount of memory that has been used for local allocations
+	 */
+	public int memoryConsumed() {
 		return allocPtr - startPtr + 1;
 	}
-	
-	public int memoryRemaining(){
+
+	/**
+	 * 
+	 * @return The remaining memory space that can be used for local allocations
+	 */
+	public int memoryRemaining() {
 		return endLocalPtr - allocPtr;
 	}
-	
-	public int bStoreRemaining(){
+
+	/**
+	 * 
+	 * @return The total backing store space remaining in this memory area
+	 */
+	public int bStoreRemaining() {
 		return endBsPtr - allocBsPtr;
+	}
+	
+	/**
+	 * Used only to set the resize the mission memory
+	 * 
+	 * @param size
+	 */
+	void setSize(int size){
+		
+		if(size <= 0){
+			
+		}
+		
+		/* New size */
+		endLocalPtr = startPtr + size -1;
+		allocBsPtr = endLocalPtr + 1;
 	}
 	
 }

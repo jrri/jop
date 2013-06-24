@@ -23,20 +23,50 @@ package javax.realtime;
 import javax.safetycritical.annotate.BlockFree;
 import javax.safetycritical.annotate.SCJAllowed;
 
+/**
+ * This class is restricted relative to the RTSJ so that it allows the priority
+ * to be created and queried, but not changed.
+ * 
+ * In SCJ the range of priorities is separated into software priorities and
+ * hardware priorities. Hardware priorities have higher values than software
+ * priorities. Schedulable objects can be assigned only software priorities.
+ * Ceiling priorities can be either software or hardware priorities.
+ * 
+ * @author Martin Schoeberl, Juan Rios
+ * @version SCJ 0.93
+ * 
+ */
 @SCJAllowed
 public class PriorityParameters extends SchedulingParameters {
+
 	int priority;
 
+	/**
+	 * Create a PriorityParameters object specifying the given priority.
+	 * 
+	 * @param priority
+	 *            is the integer value of the specified priority.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if priority is not in the range of supported priorities.
+	 * 
+	 * @todo Throwing of IllegalArgumentException.
+	 */
 	@BlockFree
 	@SCJAllowed
 	public PriorityParameters(int priority) {
 		this.priority = priority;
 	}
 
+	/**
+	 * 
+	 * @return the integer priority value that was specified at construction
+	 *         time
+	 */
 	@BlockFree
 	@SCJAllowed
 	public int getPriority() {
-		return priority;
+		return this.priority;
 	}
 
 }

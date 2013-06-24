@@ -28,14 +28,17 @@ public class RunOnJop {
 //	};
 	
 //	static TestCase tc = new TestTermination();
-	static TestCase tc = new TestPeriodicParameters();
+//	static TestCase tc = new TestPeriodicParameters();
+//	static TestCase tc = new TestClocks();
+	static TestCase tc = new TestMemory();
 	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		Terminal.getTerminal().writeln("SCJ TCK on JOP");
-		JopSystem.startMission(tc);
+		JopSystem js = new JopSystem();
+		js.startMission(tc);
 	}
 
 }

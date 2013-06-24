@@ -26,15 +26,33 @@ import static javax.safetycritical.annotate.Phase.CLEANUP;
 public abstract class ManagedInterruptServiceRoutine extends
 		InterruptServiceRoutine {
 
-	IOFactory factory;
-	SysDevice system;
-	Runnable runner;
+	static IOFactory factory;
+	static SysDevice system;
+	
+	/**
+	 * Runnable to be registered as first level interrupt handler
+	 */
+	final Runnable firstLevelHandler;
+	/**
+	 * Software event representing the second level interrupt handler for
+	 * interrupts that should be handled under the control of the scheduler
+	 */
+	SwEvent secondLevelHandler;
+	/**
+	 * Implementation dependent interrupt ID
+	 */
 	int interrupt;
 	
 	StorageParameters storage;
 	long scopeSize;
-	private Memory privMem;
+	// private Memory privMem;
+	private PrivateMemory privMem;
 
+	static {
+		factory = IOFactory.getFactory();
+		system = factory.getSysDevice();
+	}
+	
 	/**
 	 * Creates an interrupt service routine with the given name and associated
 	 * with a given interrupt.
@@ -50,33 +68,51 @@ public abstract class ManagedInterruptServiceRoutine extends
 	 */
 	@SCJAllowed(LEVEL_1)
 	public ManagedInterruptServiceRoutine(StorageParameters storage, long scopeSize, String name) {
-
-		factory = IOFactory.getFactory();
-		system = factory.getSysDevice();
 		
 		this.storage = storage;
 		this.scopeSize = scopeSize;
-		super.name = name;
+		super.name = new StringBuffer(name);
 		
-		privMem = new Memory((int) scopeSize, (int) storage.getTotalBackingStoreSize());
+//		privMem = new Memory((int) scopeSize, (int) storage.getTotalBackingStoreSize());
+		privMem = new PrivateMemory((int) scopeSize, (int) storage.getTotalBackingStoreSize());
 
-		runner = new Runnable() {
+		firstLevelHandler = new Runnable() {
 
 			@Override
 			public void run() {
-				
-				privMem.enter(new Runnable() {
-					
-					@Override
-					public void run() {
-						handle();
-					}
-				});
+				secondLevelHandler.fire();
 			}
 		};
 		
-//		SwEvent sw = new SwEvent(priority, minTime)
-
+		final Runnable isr = new Runnable() {
+			@Override
+			public void run() {
+				handle();
+			}
+		};
+		
+		//TODO: priority and minTime
+		secondLevelHandler = new SwEvent(1, 1){
+			@Override
+			public void handle() {
+				privMem.enter(isr);
+			}
+		};
+		
+//		runner = new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				
+//				privMem.enter(new Runnable() {
+//					
+//					@Override
+//					public void run() {
+//						handle();
+//					}
+//				});
+//			}
+//		};
 	}
 	
 	@SCJAllowed(LEVEL_1)
@@ -116,7 +152,13 @@ public abstract class ManagedInterruptServiceRoutine extends
 																// RegistrationException
 																// {
 		this.interrupt = interrupt;
-		factory.registerInterruptHandler(interrupt, runner);
+		
+		// TODO Illegal array reference.
+		// The array that holds the references to the interrupt handlers is a
+		// static field in JVMHelp.java
+		factory.registerInterruptHandler(interrupt, firstLevelHandler);
+
+		// factory.registerInterruptHandler(interrupt, sw);
 
 		final Mission m = Mission.getCurrentMission();
 

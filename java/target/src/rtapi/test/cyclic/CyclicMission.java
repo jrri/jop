@@ -9,11 +9,12 @@ import javax.safetycritical.Frame;
 import javax.safetycritical.ManagedMemory;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
+import javax.safetycritical.Terminal;
 
 
 public class CyclicMission extends CyclicExecutive {
 
-	long missionMemory = 1024;
+	long missionMemory = 2048;
 	int totalPeriodicHandlers = 3;
 	
 	@Override
@@ -30,7 +31,7 @@ public class CyclicMission extends CyclicExecutive {
 
 	public CyclicSchedule getSchedule(PeriodicEventHandler[] handlers) {
 		
-		Frame[] frames = new Frame[100];
+		Frame[] frames = new Frame[3];
 		for (int i = 0; i < frames.length; i++) {
 			frames[i] = new Frame(new RelativeTime(1500, 0),
 					new PeriodicEventHandler[] {
@@ -58,6 +59,8 @@ public class CyclicMission extends CyclicExecutive {
 	@Override
 	public void cleanUp(){
 		
+		Terminal.getTerminal().writeln("CyclicMission cleanup" );
+		
 		ImmortalEntry.dumpLog.selector = 0;
 		for(int i =0; i < ImmortalEntry.eventsLogged; i++){
 			ImmortalEntry.dumpLog.logEntry = i;
@@ -76,7 +79,6 @@ public class CyclicMission extends CyclicExecutive {
 			ManagedMemory.enterPrivateMemory(1500, ImmortalEntry.dumpLog);
 		}
 
-		super.cleanUp();
 	}
 
 }

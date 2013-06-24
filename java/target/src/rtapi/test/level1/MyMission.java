@@ -6,6 +6,7 @@ import javax.realtime.PriorityParameters;
 import javax.realtime.RelativeTime;
 import javax.safetycritical.Mission;
 import javax.safetycritical.StorageParameters;
+import javax.safetycritical.Terminal;
 
 public class MyMission extends Mission{
 	
@@ -14,7 +15,7 @@ public class MyMission extends Mission{
 	int totalAperiodicHandlers = 1;
 	int totalAperiodicLongHandlers = 1;
 	
-	MyMission(int number){
+	public MyMission(int number){
 		
 		this.number = number;
 		
@@ -27,21 +28,22 @@ public class MyMission extends Mission{
 		TestAEH aeh;
 		TestALEH aleh;
 		
-		System.out.println("Mission " +number+ " initialization");
-//		peHandlerCount = totalPeriodicHandlers;
-//		aeHandlerCount = totalAperiodicHandlers;
-//		aleHandlerCount = totalAperiodicLongHandlers;
+		Terminal.getTerminal().writeln("[MISSION " +number+ "] start initialization");
+
+		// peHandlerCount = totalPeriodicHandlers;
+		// aeHandlerCount = totalAperiodicHandlers;
+		// aleHandlerCount = totalAperiodicLongHandlers;
 		
 		PriorityParameters eh1_prio = new PriorityParameters(14);
 		AperiodicParameters eh1_pparams = new AperiodicParameters(null, null);
 		
 		StorageParameters eh1_storage = new StorageParameters(1024, null, 0, 0);
-		aeh = new TestAEH(eh1_prio, eh1_pparams, eh1_storage, 512, "Aperiodic Handler 1");
+		aeh = new TestAEH(eh1_prio, eh1_pparams, eh1_storage, 512, "[AEH]: ");
+		
 		aeh.register();
-
-		aleh = new TestALEH(eh1_prio, eh1_pparams, eh1_storage, 512, "Aperiodic Long Handler");
+		aleh = new TestALEH(eh1_prio, eh1_pparams, eh1_storage, 512, "[ALEH]: ");
 		aleh.register();
-
+		
 		PriorityParameters eh0_prio = new PriorityParameters(13);
 		RelativeTime eh0_tart = new RelativeTime(0,0);
 		RelativeTime eh0_period = new RelativeTime(1000, 0);
@@ -50,18 +52,18 @@ public class MyMission extends Mission{
 		
 		StorageParameters eh0_storage = new StorageParameters(1024, null, 0, 0);
 		
-		peh = new TestPEH(eh0_prio, eh0_pparams, eh0_storage, 512, aeh,aleh);
+		peh = new TestPEH(eh0_prio, eh0_pparams, eh0_storage, 512, "[PEH]: ", aeh,aleh);
 		
 		peh.register();
 		
-
+		Terminal.getTerminal().writeln("[MISSION " +number+ "] finished initialization");
 		
 	}
 
 	@Override
 	public long missionMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 2735;
 	}
 
 }

@@ -1,4 +1,4 @@
-package test.level1;
+package test.mixed;
 
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.LinearMissionSequencer;
@@ -12,7 +12,12 @@ import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-public class Level1Safelet implements Safelet{
+import test.cyclic.CyclicMission;
+import test.cyclic.ImmortalEntry;
+import test.level1.CustomMissionSequencer;
+import test.level1.MyMission;
+
+public class MixedLevelSafelet implements Safelet{
 	
 	static final int sequencerSelector = 0;
 
@@ -24,12 +29,14 @@ public class Level1Safelet implements Safelet{
 		
 		StorageParameters seq_storage = new StorageParameters(16384, sizes, 0, 0);
 
-		MyMission m0 = new MyMission(0);
-		MyMission m1 = new MyMission(1);
+		Mission m0 = new CyclicMission();
+		Mission m1 = new MyMission(1);
+		Mission m2 = new MyMission(2);
 		
-		Mission[] missions = new Mission[2];
+		Mission[] missions = new Mission[3];
 		missions[0] = m0;
 		missions[1] = m1;
+		missions[2] = m2;
 		
 		MissionSequencer[] ms = new MissionSequencer[3];
 
@@ -59,10 +66,7 @@ public class Level1Safelet implements Safelet{
 	@SCJAllowed(Level.SUPPORT)
 	@SCJRestricted(phase = Phase.INITIALIZATION)
 	public void initializeApplication() {
-		// TODO Auto-generated method stub
-		
+		ImmortalEntry.setup();
 	}
-	
-	
 
 }

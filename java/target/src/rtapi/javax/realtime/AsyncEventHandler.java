@@ -28,15 +28,21 @@ import javax.safetycritical.annotate.SCJProtected;
 import static javax.safetycritical.annotate.Level.LEVEL_0;
 
 /**
- * AsyncEventHandler
+ * In SCJ, all asynchronous events must have their handlers bound to a thread
+ * when they are created (during the initialization phase). The binding is
+ * permanent. Thus, the AsyncEventHandler constructors are hidden from public
+ * view in the SCJ specification.
  * 
- * An almost empty class.
+ * @author Martin Schoeberl
+ * @version SCJ 0.93
+ * @note An almost empty class.
  * 
  */
 @SCJAllowed(LEVEL_0)
 public class AsyncEventHandler extends AbstractAsyncEventHandler {
+
 	/**
-	 * That's an old RTSJ issue. It is used by the RTSJ implementation and shall
+	 * This is an old RTSJ issue. It is used by the RTSJ implementation and shall
 	 * not be called from user code. But it is visible!
 	 */
 	@Override
@@ -45,7 +51,8 @@ public class AsyncEventHandler extends AbstractAsyncEventHandler {
 	}
 
 	/**
-	 * Overwrite for user code.
+	 * This method must be overridden by the application to provide the handling
+	 * code.
 	 */
 	@SCJAllowed
 	public void handleAsyncEvent() {

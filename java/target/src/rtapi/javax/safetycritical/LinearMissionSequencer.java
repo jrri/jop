@@ -24,6 +24,8 @@ import javax.realtime.PriorityParameters;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import com.jopdesign.sys.Memory;
+
 import static javax.safetycritical.annotate.Level.SUPPORT;
 
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
@@ -32,12 +34,13 @@ import static javax.safetycritical.annotate.Phase.INITIALIZATION;
  * A LinearMissionSequencer is a MissionSequencer that serves the needs of a
  * common design pattern in which the sequence of Mission executions is known
  * prior to execution and all missions can be preallocated within an
- * outer-nested memory area. The parameter <SpecificMission> allows application
- * code to differentiate between LinearMissionSequencers that are designed for
- * use in Level 0 vs. other environments. For example, a
- * LinearMissionSequencer<CyclicExecutive> is known to only run missions that
- * are suitable for execution within a Level 0 run-time environment.
+ * outer-nested memory area.
  * 
+ * The parameter <SpecificMission> allows application code to differentiate
+ * between LinearMissionSequencers that are designed for use in Level 0 vs.
+ * other environments. For example, a LinearMissionSequencer<CyclicExecutive> is
+ * known to only run missions that are suitable for execution within a Level 0
+ * run-time environment.
  * 
  * @param <SpecificMission>
  */
@@ -48,7 +51,7 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	Mission single;
 	Mission[] missions_;
 	boolean repeat_;
-	String name_;
+	StringBuffer name_ = null;
 
 	boolean served = false;
 
@@ -59,7 +62,12 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	 * Construct a LinearMissionSequencer object to oversee execution of the
 	 * single mission m.
 	 * 
-	 * Throws IllegalArgumentException if any of the arguments equals null.
+	 * Memory behavior: This constructor requires that the "priority" argument
+	 * reside in a scope that encloses the scope of the "this" argument. This
+	 * constructor requires that the "storage" argument reside in a scope that
+	 * encloses the scope of the "this" argument. This constructor requires that
+	 * the "m" argument reside in a scope that encloses the scope of the "this"
+	 * argument.
 	 * 
 	 * @param priority
 	 *            The priority at which the MissionSequencer’s bound thread
@@ -73,8 +81,10 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	 * @param m
 	 *            The single mission that runs under the oversight of this
 	 *            LinearMissionSequencer.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if any of the arguments equals null.
 	 */
-
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION, maySelfSuspend = false)
 	public LinearMissionSequencer(PriorityParameters priority,
@@ -86,6 +96,15 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	/**
 	 * Construct a LinearMissionSequencer object to oversee execution of the
 	 * single mission m.
+	 * 
+	 * Memory behavior: This constructor requires that the "priority" argument
+	 * reside in a scope that encloses the scope of the "this" argument. This
+	 * constructor requires that the "storage" argument reside in a scope that
+	 * encloses the scope of the "this" argument. This constructor requires that
+	 * the "m" argument reside in a scope that encloses the scope of the "this"
+	 * argument. This constructor requires that the "name" argument reside in a
+	 * scope that encloses the scope of the "this" argument.
+	 * 
 	 * 
 	 * @param priority
 	 *            The priority at which the MissionSequencer’s bound thread
@@ -102,6 +121,9 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	 * @param name
 	 *            The name by which this LinearMissionSequencer will be
 	 *            identified in traces for use in debug or in toString.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if any of the arguments equals null.
 	 */
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION, maySelfSuspend = false)
@@ -111,21 +133,28 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 		super(priority, storage, name);
 
 		if ((priority == null) | (storage == null) | (m == null)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Null argument in sequencer constructor");
 		}
-
 		single = m;
 		repeat_ = repeat;
-		name_ = name;
+		name_ = new StringBuffer(name);
+		
 	}
 
 	/**
 	 * Construct a LinearMissionSequencer object to oversee execution of the
 	 * sequence of missions represented by the missions parameter. The
-	 * LinearMission- Sequencer runs the sequence of missions identified in its
+	 * LinearMissionSequencer runs the sequence of missions identified in its
 	 * missions array exactly once, from low to high index position within the
 	 * array. The constructor allocates a copy of its missions array argument
 	 * within the current scope.
+	 * 
+	 * Memory behavior: This constructor requires that the "priority" argument
+	 * reside in a scope that encloses the scope of the "this" argument. This
+	 * constructor requires that the "storage" argument reside in a scope that
+	 * encloses the scope of the "this" argument. This constructor requires that
+	 * the "m" argument reside in a scope that encloses the scope of the "this"
+	 * argument.
 	 * 
 	 * @param priority
 	 *            The priority at which the MissionSequencer’s bound thread
@@ -142,6 +171,9 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	 * @param repeat
 	 *            When repeat is true, the specified list of missions shall be
 	 *            repeated indefinitely.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if any of the arguments equals null.
 	 */
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION, maySelfSuspend = false)
@@ -158,6 +190,14 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	 * missions array exactly once, from low to high index position within the
 	 * array. The constructor allocates a copy of its missions array argument
 	 * within the current scope.
+	 * 
+	 * Memory behavior: This constructor requires that the "priority" argument
+	 * reside in a scope that encloses the scope of the "this" argument. This
+	 * constructor requires that the "storage" argument reside in a scope that
+	 * encloses the scope of the "this" argument. This constructor requires that
+	 * the "m" argument reside in a scope that encloses the scope of the "this"
+	 * argument. This constructor requires that the "name" argument reside in a
+	 * scope that encloses the scope of the "this" argument.
 	 * 
 	 * @param priority
 	 *            The priority at which the MissionSequencer’s bound thread
@@ -176,6 +216,9 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 	 *            repeated indefinitely.
 	 * @name The name by which this LinearMissionSequencer will be identified in
 	 *       traces for use in debug or in toString.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if any of the arguments equals null.
 	 */
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION, maySelfSuspend = false)
@@ -186,15 +229,21 @@ public class LinearMissionSequencer<SpecificMission extends Mission> extends
 		super(priority, storage, name);
 
 		if ((priority == null) | (storage == null) | (missions == null)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Null argument in sequencer constructor");
 		}
 
 		missions_ = new Mission[missions.length];
 		System.arraycopy(missions, 0, missions_, 0, missions.length);
 		repeat_ = repeat;
-		name_ = name;
+		name_ = new StringBuffer(name);
 	}
 
+	/**
+	 * Returns a reference to the next Mission in the sequence of missions that
+	 * was specified by the m or missions argument to this object’s constructor.
+	 * 
+	 * See Also: MissionSequencer.getNextMission()
+	 */
 	@SCJAllowed(SUPPORT)
 	@SCJRestricted(phase = INITIALIZATION, maySelfSuspend = false)
 	@Override

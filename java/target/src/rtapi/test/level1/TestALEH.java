@@ -17,7 +17,7 @@ public class TestALEH extends AperiodicLongEventHandler{
 	@Override
 	public void handleAsyncEvent(long data) {
 
-		Terminal.getTerminal().writeln(""+data);
+		Terminal.getTerminal().writeln(getName()+data);
 //		System.out.println(data);
 		
 	}

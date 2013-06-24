@@ -19,7 +19,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-  @authors  Martin Schoeberl, Lei Zhao, Ales Plsek, Tórur Strøm
+  @authors  Martin Schoeberl, Lei Zhao, Ales Plsek, Tï¿½rur Strï¿½m
  */
 
 package javax.realtime;
@@ -38,6 +38,8 @@ import javax.safetycritical.annotate.SCJRestricted;
  * must be adhered to strictly (the interval), but within that interval the
  * periodic events are supposed to happen frequency times, as uniformly spaced
  * as possible, but clock and scheduling jitter is moderately acceptable.
+ * 
+ * @version SCJ 0.93
  * 
  */
 @SCJAllowed
@@ -245,6 +247,10 @@ public class RelativeTime extends HighResolutionTime {
             throw new IllegalArgumentException("null arg or different clock");
 
         return add(-time.millis, -time.nanos);
+	}
+	
+	public String toString(){
+		return "("+this.millis+" ms, "+this.nanos+" ns)";
 	}
 
 }

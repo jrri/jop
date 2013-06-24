@@ -157,6 +157,13 @@ public class RtThreadImpl {
 		// If we have 'normal' Threads we should start the timer!
 
 	}
+	
+	// A method to de-initialize the mission mode. Used when changing mission in
+	// SCJ L1
+	public static void reInitialize(){
+		initDone = false;
+		mission = false;
+	}
 
 	RtThreadImpl(int prio, int us) {
 	
@@ -168,40 +175,63 @@ public class RtThreadImpl {
 			init();
 		}
 
-		stack = new int[Const.STACK_SIZE-Const.STACK_OFF];
-		sp = Const.STACK_OFF;	// default empty stack for GC before startMission()
+		stack = new int[Const.STACK_SIZE - Const.STACK_OFF];
+		sp = Const.STACK_OFF; // default empty stack for GC before
+								// startMission()
 		
-for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
-	stack[i] = 1234567;
-}
+
+		for (int i = 0; i < Const.STACK_SIZE - Const.STACK_OFF; ++i) {
+			stack[i] = 1234567;
+		}
 
 		this.rtt = rtt;
-		
+
 		period = us;
 		offset = off;
-		if (us==0)	{					// this is NOT a RT thread
+		if (us == 0) { // this is NOT a RT thread
 			priority = prio;
-		} else {						// RT priority is above Thread priorities
-			priority = prio+MAX_PRIORITY+RT_BASE;
+		} else { // RT priority is above Thread priorities
+			priority = prio + MAX_PRIORITY + RT_BASE;
 		}
 		state = CREATED;
 		isEvent = false;
 
-		//	insert in linked list, priority ordered
-		//	highest priority first.
-		//	same priority is ordered as first created has
-		//	'higher' priority.
+		// insert in linked list, priority ordered
+		// highest priority first.
+		// same priority is ordered as first created has
+		// 'higher' priority.
+//		register(this);
+//		RtThreadImpl th = head;
+//		RtThreadImpl prev = null;
+//		while (th != null && priority <= th.priority) {
+//			prev = th;
+//			th = th.lower;
+//		}
+//		
+//		lower = th;
+//		if (prev != null) {
+//			prev.lower = this;
+//		} else {
+//			//TODO Illegal static reference unless MEH's are in Immortal
+//			head = this;
+//		}
+		
+	}
+	
+	public static void register(RtThreadImpl rtt){
 		RtThreadImpl th = head;
 		RtThreadImpl prev = null;
-		while (th!=null && priority<=th.priority) {
+		while (th != null && rtt.priority <= th.priority) {
 			prev = th;
 			th = th.lower;
 		}
-		lower = th;
-		if (prev!=null) {
-			prev.lower = this;
+		
+		rtt.lower = th;
+		if (prev != null) {
+			prev.lower = rtt;
 		} else {
-			head = this;
+			//TODO Illegal static reference unless MEH's are in Immortal
+			head = rtt;
 		}
 	}
 
@@ -223,24 +253,25 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 
 	private void startThread() {
 
-		if (state!=CREATED) return;		// already called start
+		if (state != CREATED)
+			return; // already called start
 
 		// if we have interrupts enabled we have to synchronize
 
-		if (period==0) {
-			state = READY;			// for the idle thread, but we're not using one
+		if (period == 0) {
+			state = READY; // for the idle thread, but we're not using one
 		} else {
 			state = WAITING;
 		}
 
 		// set memory context to the current one
 		currentArea = initArea;
-		
+
 		createStack();
 
 		// new thread starts right here after first scheduled
 
-		if (mission) {		// main (startMission) falls through
+		if (mission) { // main (startMission) falls through
 			rtt.run();
 			// if we arrive here it's time to delete runtime struct of thread
 			// now do nothing!
@@ -248,7 +279,8 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 			for (;;) {
 				// This will not work if we change stack like in Thread.java.
 				// Then we have no reference to this.
-				Scheduler.sched[sys.cpuId].next[nr] = Native.rd(Const.IO_US_CNT) + 2*Scheduler.IDL_TICK;
+				Scheduler.sched[sys.cpuId].next[nr] = Native
+						.rd(Const.IO_US_CNT) + 2 * Scheduler.IDL_TICK;
 				genInt();
 			}
 		}
@@ -302,7 +334,6 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 
 	public static void startMission() {
 
-
 		int i, j, c;
 		RtThreadImpl th;
 		Scheduler s;
@@ -318,14 +349,17 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 		Native.wr(0, Const.IO_INT_ENA);
 		Native.wr(0, Const.IO_INTMASK);		
 
-
-
 		// if we have int's enabled for Thread scheduling
 		// or using the Scheduler interrupt
 		// we have to place a monitorenter here
 		
 		// Collect number of thread for each core
 		th = head;
+
+		// Reset the number of threads in the scheduler to recreate the thread
+		// array when changing mission in SCJ L1. Does this also works for a
+		// multicore application??
+		Scheduler.sched[th.cpuId].cnt = 0;
 		for (c=0; th!=null; ++c) {
 			Scheduler.sched[th.cpuId].cnt++;
 			th = th.lower;
@@ -334,7 +368,7 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 		for (i=0; i<sys.nrCpu; ++i) {
 			Scheduler.sched[i].allocArrays();
 		}
-		
+
 		// list is ordered with increasing priority
 		// array is reverse priority ordered per core
 		// top priority is last!
@@ -370,7 +404,7 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 				s.next[j] = startTime+s.ref[j].offset;
 			}
 		}
-		
+
 		// add scheduler for the first core
 		JVMHelp.addInterruptHandler(0, 0, Scheduler.sched[0]);
 
@@ -420,9 +454,9 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 		nxt = s.next[nr] + period;
 
 		now = Native.rd(Const.IO_US_CNT);
-		if (nxt-now < 0) {					// missed time!
-			s.next[nr] = now;				// correct next
-//			next[nr] = nxt;					// without correction!
+		if (nxt - now < 0) { // missed time!
+			s.next[nr] = now; // correct next
+			// next[nr] = nxt; // without correction!
 			Native.wr(1, Const.IO_INT_ENA);
 			return false;
 		} else {
@@ -437,12 +471,13 @@ for (int i=0; i<Const.STACK_SIZE-Const.STACK_OFF; ++i) {
 		// will arrive before return statement,
 		// just after interrupt enable
 		// TODO: do we really need this loop?
-		for (int j=0;j<10;++j) ;
+		for (int j = 0; j < 10; ++j)
+			;
 		Native.wr(1, Const.IO_INT_ENA);
 
 		// This return should only be executed when we are
 		// scheduled again
-		return true;			
+		return true;
 	}
 
 	public void setEvent() {

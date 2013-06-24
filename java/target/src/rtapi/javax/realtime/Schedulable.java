@@ -25,14 +25,20 @@ package javax.realtime;
 import javax.safetycritical.annotate.SCJAllowed;
 
 /**
- * For SCJ this is an empty interface, which just introduces
- * the issue of Runnable into event handlers where run() shall
- * not be invoked.
  * 
- * @author martin
- *
+ * In keeping with the RTSJ, SCJ event handlers are schedulable objects.
+ * However, the Schedulable interface in the RTSJ is mainly concerned with
+ * on-line feasibility analysis and the getting and setting of the parameter
+ * classes. On the contrary, in SCJ, it provides no extra functionality over the
+ * Runnable interface.
+ * 
+ * For SCJ this is an empty interface, which just introduces the issue of
+ * Runnable into event handlers where run() shall not be invoked.
+ * 
+ * @author Martin Schoeberl
+ * @version SCJ 0.93
+ * 
  */
 @SCJAllowed
 public interface Schedulable extends Runnable {
 }
-

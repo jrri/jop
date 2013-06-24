@@ -22,141 +22,60 @@
 
 package javax.realtime;
 
-import javax.safetycritical.annotate.Allocate;
-import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-import com.jopdesign.sys.Memory;
-
-import static javax.safetycritical.annotate.Level.INFRASTRUCTURE;
-
-;
-
 /**
+ * All allocation contexts are implemented by memory areas. This is the base
+ * level class for all memory areas.
  * 
- * All methods will be overridden by SCJ classes. MemoryArea
- * remains a dummy class, as all other RTSJ memory classes.
+ * @version SCJ 0.93
+ * @note All methods will be overridden by SCJ classes. MemoryArea remains a
+ *       dummy class, as all other RTSJ memory classes.
  * 
  */
 @SCJAllowed
 public abstract class MemoryArea implements AllocationContext {
 
-	MemoryArea() {/* ... */
-	}
-
+	/**
+	 * Returns the memory area in which object is allocated
+	 * 
+	 * @param object
+	 *            the object to query its MemoryArea
+	 * @return the memory area in which the object parameter is allocated
+	 * 
+	 * @note This method should be eliminated if we want to disallow obtaining
+	 *       references to arbitrary memory areas
+	 */
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public static MemoryArea getMemoryArea(Object object) {
+
 		return null;
 	}
 
-//	/**
-//	 * TBD: This method has no object argument, so this commentary is not
-//	 * meaningful.
-//	 * 
-//	 * Execute <code>logic</code> in the memory area containing
-//	 * <code>object</code>.
-//	 * 
-//	 * "@param" object is the reference for determining the area in which to
-//	 * execute <code>logic</code>.
-//	 * 
-//	 * @param logic
-//	 *            is the runnable to execute in the memory area containing
-//	 *            <code>object</code>.
-//	 */
-	@Override
-	@Allocate(sameAreaAs = { "object" })
-	@MemoryAreaEncloses(inner = { "logic" }, outer = { "this" })
-	@SCJAllowed
-	@SCJRestricted(maySelfSuspend = false)
-	public void executeInArea(Runnable logic) throws InaccessibleAreaException {
-	}
-
 	/**
-	 * TBD: this method has no object argument, so this commentary is not
-	 * meaningful
-	 * 
-	 * This method creates an object of type <code>type</code> in the memory
-	 * area containing <code>object</code>.
-	 * 
-	 * "@param" object is the reference for determining the area in which to
-	 * allocate the array.
-	 * 
-	 * @param type
-	 *            is the type of the object returned.
-	 * 
-	 * @return a new object of type <code>type</code>
-	 * 
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InstantiationException
-	 * @throws OutOfMemoryError
-	 * @throws ExceptionInInitializerError
-	 * @throws InaccessibleAreaException
+	 * @return the memory consumed in this memory area.
 	 */
-	@Override
-	@Allocate(sameAreaAs = { "this.area" })
-	@SCJAllowed
-	@SCJRestricted(maySelfSuspend = false)
-	public Object newInstance(Class type)
-	// throws IllegalArgumentException, InstantiationException,
-	// OutOfMemoryError, InaccessibleAreaException
-	{
-		return null; // dummy return
-	}
-
-	/**
-	 * This method creates an object of type <code>type</code> in the memory
-	 * area containing <code>object</code>.
-	 * 
-	 * @param type
-	 *            is the type of the object returned.
-	 * 
-	 * @return a new object of type <code>type</code>
-	 */
-	@Override
-	@Allocate(sameAreaAs = { "this.area" })
-	@SCJAllowed
-	@SCJRestricted(maySelfSuspend = false)
-	public Object newArray(Class type, int size) {
-		return null; // dummy return
-	}
-
-	/**
-	 * This method creates an array of type <code>type</code> in the memory area
-	 * containing <code>object</code>.
-	 * 
-	 * @param object
-	 *            is the reference for determining the area in which to allocate
-	 *            the array.
-	 * 
-	 * @param type
-	 *            is the type of the array element for the returned array.
-	 * 
-	 * @param size
-	 *            is the size of the array to return.
-	 * 
-	 * @return a new array of element type <code>type</code> with size
-	 *         <code>size</code>.
-	 */
-	@Allocate(sameAreaAs = { "object" })
-	@SCJAllowed
-	@SCJRestricted(maySelfSuspend = false)
-	public Object newArrayInArea(Object object, Class type, int size) {
-		return getMemoryArea(object).newArray(type, size);
-	}
-
 	@Override
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public abstract long memoryConsumed();
 
+	/**
+	 * @return the memory remaining in this memory area.
+	 */
 	@Override
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public abstract long memoryRemaining();
 
+	/**
+	 * The size of a memory area is always equal to the {memoryConsumed() +
+	 * memoryRemaining()}
+	 * 
+	 * @return the total size of this memory area.
+	 */
 	@Override
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)

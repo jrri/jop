@@ -23,9 +23,13 @@ package javax.realtime;
 import javax.safetycritical.annotate.SCJAllowed;
 
 /**
- * This class is empty - just a marker for SCJ RTSJ compatibility.
+ * 
+ * The BoundAsyncEventHandler class is not directly available to the safety
+ * critical Java application developers. Hence none of its methods or
+ * constructors are publicly available.
  * 
  * @author Martin Schoeberl
+ * @note This class is empty - just a marker for SCJ RTSJ compatibility.
  * 
  */
 @SCJAllowed

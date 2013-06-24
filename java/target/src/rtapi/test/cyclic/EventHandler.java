@@ -2,6 +2,7 @@ package test.cyclic;
 
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
+import javax.safetycritical.ManagedMemory;
 import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
@@ -10,6 +11,8 @@ import javax.safetycritical.annotate.Level;
 import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
+
+import com.jopdesign.sys.Memory;
 
 public class EventHandler extends PeriodicEventHandler{
 	
@@ -25,11 +28,11 @@ public EventHandler(PriorityParameters priority,
 	public void handleAsyncEvent() {
 		
 		ImmortalEntry.term.writeln(getName());
-//		System.out.println(this.getName());
 		count++;
-		if(count == 1){
-			Mission.getCurrentMission().requestSequenceTermination();
+		if(count == 2){
+			Mission.getCurrentMission().requestTermination();
 		}
+		Terminal.getTerminal().writeln("exec term");
 
 	}
 	

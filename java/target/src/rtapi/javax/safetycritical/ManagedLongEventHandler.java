@@ -7,18 +7,40 @@ import javax.realtime.ReleaseParameters;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-import com.jopdesign.sys.Memory;
-
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 import static javax.safetycritical.annotate.Level.SUPPORT;
 
 /**
- * ManagedLongEventHandler
+ * In SCJ, all handlers must be registered with the enclosing mission, so
+ * applications use classes that are based on the ManagedEventHandler and the
+ * ManagedLongEventHandler class hierarchies. These class hierarchies allow a
+ * mission to manage all the handlers that are created during its initialization
+ * phase. They set up the initial memory area of each managed handler to be a
+ * private memory that is entered before a call to handleAsyncEvent and that is
+ * left on return. The size of the private memory area allocated is the maximum
+ * available to the infrastructure for this handler.
+ * 
+ * Note that the values in parameters classes passed to the constructors are
+ * those that will be used by the infrastructure. Changing these values after
+ * construction will have no impact on the created event handler.
+ * 
+ * This class differs from ManagedEventHandler in that when it is fired, a long
+ * integer is provided for use by the released event handler(s).
+ * 
+ * @author Juan Rios
+ * @version SCJ 0.93
  * 
  */
 @SCJAllowed
 public abstract class ManagedLongEventHandler extends
 		BoundAsyncLongEventHandler implements ManagedSchedulable {
+
+	/*
+	 * Workaround to avoid illegal assignments when referring to constant
+	 * strings. Constant strings in JOP have no associated memory area
+	 */
+	private StringBuffer name;
+
 	/**
 	 * Constructor to create an event handler.
 	 * <p>
@@ -37,21 +59,23 @@ public abstract class ManagedLongEventHandler extends
 	 *            initialization is finished and the timers are started. This
 	 *            argument must not be null.
 	 * 
-	 * @param scp
-	 *            The scp parameter describes the organization of memory
-	 *            dedicated to execution of the underlying thread. (added by MS)
+	 * @param storage
+	 *            specifies the non-null maximum memory demands for this event
+	 *            handler.
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if priority parameters are null.
+	 *             if priority, release or memory parameters are null.
 	 */
-
-	private String name;
-	
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION)
 	ManagedLongEventHandler(PriorityParameters priority,
 			ReleaseParameters release, StorageParameters storage, String name) {
-		this.name = name;
+
+		if (priority == null | release == null | storage == null) {
+			throw new IllegalArgumentException();
+		}
+
+		this.name = new StringBuffer(name);
 	}
 
 	/**
@@ -63,7 +87,7 @@ public abstract class ManagedLongEventHandler extends
 	@Override
 	@SCJAllowed(SUPPORT)
 	public void cleanUp() {
-		System.out.println("MLEH cleanup");
+		Terminal.getTerminal().writeln("[SYSTEM]: Default MLEH cleanup");
 	}
 
 	/**
@@ -78,15 +102,7 @@ public abstract class ManagedLongEventHandler extends
 	 */
 	@SCJAllowed
 	public String getName() {
-		return name;
+		return name.toString();
 	}
-
-//	/**
-//	 * @see javax.safetycritical.ManagedSchedulable#register()
-//	 */
-//	@SCJAllowed
-//	public void register() {
-//
-//	}
 
 }

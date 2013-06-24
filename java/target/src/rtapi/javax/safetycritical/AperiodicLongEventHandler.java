@@ -12,19 +12,38 @@ import javax.safetycritical.annotate.SCJRestricted;
 
 import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
+import com.jopdesign.sys.RtThreadImpl;
 
 import joprt.SwEvent;
 
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 
+/**
+ * This class permits the automatic execution of code that is bound to an
+ * aperiodic event. It is abstract. Concrete subclasses must implement the
+ * handleAsynEvent method and may override the default cleanup method.
+ * 
+ * Note, there is no programmer access to the RTSJ fireCount mechanisms, so the
+ * associated methods are missing.
+ * 
+ * Note that the values in parameters classes passed to the constructors are
+ * those that will be used by the infrastructure. Changing these values after
+ * construction will have no impact on the created event handler.
+ * 
+ * @author Juan Rios
+ * @version SCJ 0.93
+ * 
+ */
 @SCJAllowed(LEVEL_1)
 public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler {
-	
-	String name;
+
+	// String name;
+	StringBuffer name;
 	SwEvent event;
 	long _data;
-	Memory privMem;
-
+	// Memory privMem;
+	PrivateMemory privMem;
+	RtThreadImpl rtt;
 
 	/**
 	 * Constructor to create an aperiodic event handler.
@@ -63,7 +82,8 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(phase = INITIALIZATION)
 	public AperiodicLongEventHandler(PriorityParameters priority,
-			AperiodicParameters release, StorageParameters storage, long scopeSize) {
+			AperiodicParameters release, StorageParameters storage,
+			long scopeSize) {
 		this(priority, release, storage, scopeSize, "");
 	}
 
@@ -110,31 +130,34 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 			AperiodicParameters release, StorageParameters storage,
 			long scopeSize, String name) {
 		super(priority, release, storage, name);
-		
+
 		if (storage != null) {
 			// Create private memory
-			privMem = new Memory((int) scopeSize,
+			// privMem = new Memory((int) scopeSize, (int)
+			// storage.getTotalBackingStoreSize());
+			privMem = new PrivateMemory((int) scopeSize,
 					(int) storage.getTotalBackingStoreSize());
 		}
-		
+
 		final Runnable runner = new Runnable() {
 			@Override
 			public void run() {
 				handleAsyncEvent(_data);
-			}	
+			}
 		};
-		
-		this.name = name;
 
-		event = new SwEvent(priority.getPriority(), 0){
-			
+		this.name = new StringBuffer(name);
+		// this.name = name;
+
+		event = new SwEvent(priority.getPriority(), 0) {
+
 			@Override
 			public void handle() {
-				privMem.enter(runner);
+				if (!Mission.currentMission.terminationPending)
+					privMem.enter(runner);
 			}
-			
 		};
-
+		rtt = event.thr;
 	}
 
 	/**
@@ -147,16 +170,24 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 	@SCJRestricted(phase = INITIALIZATION)
 	public final void register() {
 		Mission m = Mission.getCurrentMission();
-		if (!m.hasLongEventHandlers){
-//			System.out.println("creating MLEH vector...");
+		if (!m.hasLongEventHandlers) {
+			// System.out.println("creating MLEH vector...");
 			m.longEventHandlersRef = Native.toInt(new Vector());
 			m.hasLongEventHandlers = true;
 		}
-		
+
 		((Vector) Native.toObject(m.longEventHandlersRef)).addElement(this);
+		RtThreadImpl.register(rtt);
 	}
-	
-	public final void release(long data){
+
+	/**
+	 * Release this aperiodic event handler
+	 * 
+	 * @param data
+	 *            A long value that will be passed as argument when the handler
+	 *            is released
+	 */
+	public final void release(long data) {
 		_data = data;
 		event.fire();
 	}

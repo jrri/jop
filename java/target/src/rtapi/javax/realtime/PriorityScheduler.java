@@ -37,12 +37,24 @@ import static javax.safetycritical.annotate.Level.LEVEL_2;
  */
 @SCJAllowed(LEVEL_1)
 public class PriorityScheduler extends Scheduler {
-	static PriorityScheduler me = new PriorityScheduler();
-
-	@BlockFree
-	@SCJAllowed(LEVEL_1)
+	
+//	static PriorityScheduler me = new PriorityScheduler();
+//
+//	@BlockFree
+//	@SCJAllowed(LEVEL_1)
+//	public static PriorityScheduler instance() {
+//		return me;
+//	}
+	protected PriorityScheduler(){};
+	
+	private static PriorityScheduler instance = null;
+	
 	public static PriorityScheduler instance() {
-		return me;
+		
+		if(instance == null){
+			instance = new PriorityScheduler();
+		}
+		return instance;
 	}
 
 	@BlockFree

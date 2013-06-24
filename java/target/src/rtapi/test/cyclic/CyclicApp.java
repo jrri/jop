@@ -1,6 +1,9 @@
 package test.cyclic;
 
+import javax.safetycritical.CyclicExecutive;
 import javax.safetycritical.JopSystem;
+import javax.safetycritical.Mission;
+import javax.safetycritical.Safelet;
 import javax.safetycritical.Terminal;
 
 public class CyclicApp {
@@ -13,12 +16,11 @@ public class CyclicApp {
 			term = Terminal.getTerminal();
 			JopSystem js = new JopSystem();
 
-			CyclicSafelet s = new CyclicSafelet();
+			Safelet s = new CyclicSafelet();
 			term.writeln("Safelet created");
 
-			js.startCycle(s);
+			js.startMission(s);
 
-			term.writeln("Application finished");
 		}
 
 

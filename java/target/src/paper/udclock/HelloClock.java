@@ -97,7 +97,7 @@ public class HelloClock extends Mission implements Safelet {
 	@Override
 	public MissionSequencer getSequencer() {
 		// we assume this method is invoked only once
-		StorageParameters sp = new StorageParameters(1000000, null);
+		StorageParameters sp = new StorageParameters(20000, null);
 		return new LinearMissionSequencer(new PriorityParameters(13), sp, false, this);
 	}
 
@@ -120,7 +120,8 @@ public class HelloClock extends Mission implements Safelet {
 	public static void main(String[] args) {
 		Terminal.getTerminal().writeln("Hello SCJ World!");
 		single = new HelloClock();
-		JopSystem.startMission(single);
+		JopSystem js = new JopSystem();
+		js.startMission(single);
 	}
 
 }

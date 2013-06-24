@@ -24,5 +24,9 @@ public class A {
 	public static void baz(){
 		
 	}
+	
+	public void fubar(){
+		
+	}
 
 }

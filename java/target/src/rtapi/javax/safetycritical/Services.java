@@ -15,7 +15,7 @@ import javax.safetycritical.annotate.SCJRestricted;
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 
 /**
- * System wide information
+ * This class provides a collection of static helper methods.
  */
 @SCJAllowed
 public class Services
