@@ -25,6 +25,10 @@ import javax.safetycritical.JopSystem;
 import javax.safetycritical.Safelet;
 import javax.safetycritical.MissionSequencer;
 import javax.safetycritical.StorageParameters;
+import javax.safetycritical.annotate.Level;
+import javax.safetycritical.annotate.Phase;
+import javax.safetycritical.annotate.SCJAllowed;
+import javax.safetycritical.annotate.SCJRestricted;
 
 import minepump.scj.PeriodicMethaneDetectionEventHandler;
 import minepump.scj.MainMissionSequencer;
@@ -57,12 +61,21 @@ public class Minepump implements Safelet {
 		// The setUp function is then invoked on the safelet, continued by a call to getSequencer.
 		// The Sequencer is then responsible for running the missions, when finished, the tearDown
 		// method is invoked and the app is terminated.
-		JopSystem.startMission(new Minepump());
+		JopSystem js = new JopSystem();
+		js.startMission(new Minepump());
 	}
 
 	public long immortalMemorySize() {
 		// TODO Auto-generated method stub
 		return 1000;
+	}
+
+	@Override
+	@SCJAllowed(Level.SUPPORT)
+	@SCJRestricted(phase = Phase.INITIALIZATION)
+	public void initializeApplication() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
