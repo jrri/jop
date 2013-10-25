@@ -64,7 +64,7 @@ public class Jopa {
 	static final int DATABITS = Instruction.INSTLEN+2;
 	static final int CONST_ADDR = 32;
 	static final int VER_ADDR = 64-2;
-	static final int RAM_LEN = 256;
+	static final int RAM_LEN = 512;
 	static final int ROM_LEN = 1<<ADDRBITS;
 	private String srcDir;
 	private String dstDir;

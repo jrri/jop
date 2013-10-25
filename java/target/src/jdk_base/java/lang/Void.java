@@ -37,6 +37,10 @@ exception statement from your version. */
 
 package java.lang;
 
+import com.jopdesign.sys.GC;
+import com.jopdesign.sys.JVMHelp;
+import com.jopdesign.sys.Startup;
+
 
 /**
  * Void is a placeholder class so that the variable <code>Void.TYPE</code>
@@ -57,7 +61,7 @@ public final class Void
    * The return type <code>void</code> is represented by this
    * <code>Class</code> object.
    */
-  // public static final Class TYPE = VMClassLoader.getPrimitiveClass('V');
+   public static final Class<Void> TYPE = (Class<Void>) GC.initializeClassObjects(9);
 
   /**
    * Void is non-instantiable.

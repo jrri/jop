@@ -33,16 +33,21 @@ package com.jopdesign.sys;
  */
 public class GC {
 	
-	static int mem_start;		// read from memory
+	/* Reserved memory */ 
+	static int resMemPtr;
+	
+	/* First usable memory position (Native.rdMem(0) + resMem) */
+	static int mem_start;
+	
 	// get a effective heap size with fixed handle count
 	// for our RT-GC tests
 	static int full_heap_size;
 	
 	/**
 	 * Length of the header when using scopes.
-	 * Can be shorter then the GC supporting handle.
+	 * Can be shorter than the GC supporting handle.
 	 */
-	private static final int HEADER_SIZE = 6;
+	static final int HEADER_SIZE = 6;
 	
 	/**
 	 * Fields in the handle structure.
@@ -50,19 +55,19 @@ public class GC {
 	 * WARNING: Don't change the size as long
 	 * as we do conservative stack scanning.
 	 */
-	static final int HANDLE_SIZE = 8;
+	static final int HANDLE_SIZE = 6;
 
 	/**
 	 * The handle contains following data:
 	 * 0 pointer to the object in the heap or 0 when the handle is free
 	 * 1 pointer to the method table or length of an array
 	 * 2 denote in which space or scope the object is 
-	 * 3 type info: object, primitve array or ref array
+	 * 3 type info: object, primitive array or ref array
 	 * 4 pointer to next handle of same type (used or free)
 	 * 5 gray list
 	 * 6 space marker - either toSpace or fromSpace
 	 * 
-	 * !!! be carefule when changing the handle structure, it's
+	 * !!! be careful when changing the handle structure, it's
 	 * used in System.arraycopy() and probably in jvm.asm!!!
 	 */
 	public static final int OFF_PTR = 0;
@@ -70,11 +75,10 @@ public class GC {
 	public static final int OFF_SPACE = 2;
 	public static final int OFF_TYPE = 3;
 	
-	// Scope level shares the to/from pointer
+	/* Scope level shares the to/from pointer */
 	public static final int OFF_SCOPE_LEVEL = OFF_SPACE;
 	
-	// Offset with memory reference. Can we use this field?
-	// Does not work for arrays
+	/* Offset with memory reference. */
 	public static final int OFF_MEM = 5;
 	
 	
@@ -144,18 +148,24 @@ public class GC {
 
 	static OutOfMemoryError OOMError;
 	
-	// Memory allocation pointer used before we enter the ImmortalMemory 
+	/* Memory allocation pointer used before we enter the ImmortalMemory */ 
 	static int allocationPointer;
-
+	
 	static void init(int mem_size, int addr) {
+		
+	}
+
+	static void init(int mem_size, int resMem, int addr) {
 		addrStaticRefs = addr;
-		mem_start = Native.rdMem(0);
+		resMemPtr = Native.rdMem(0);
+		mem_start = Native.rdMem(0) + resMem;
 		// align mem_start to 8 word boundary for the
 		// conservative handle check
 		
-//mem_start = 261300;
-		mem_start = (mem_start+7)&0xfffffff8;
-//mem_size = mem_start + 2000;
+		// mem_start = 261300;
+		mem_start = (mem_start + 7) & 0xfffffff8;
+		GC.log("mem_start", mem_start);
+		// mem_size = mem_start + 2000;
 		if(Config.USE_SCOPES) {
 			allocationPointer = mem_start;
 			// clean immortal memory
@@ -496,7 +506,7 @@ public class GC {
 		for (int i=fromSpace; i<end; ++i) {
 			Native.wrMem(0, i);
 		}
-		// for tests clean also the remainig memory in the to-space
+		// for tests clean also the remaining memory in the to-space
 //		synchronized (mutex) {
 //			for (int i=copyPtr; i<allocPtr; ++i) {
 //				Native.wrMem(0, i);
@@ -587,7 +597,6 @@ public class GC {
 				Native.wrMem(sc.level, ptr+OFF_SCOPE_LEVEL);
 				
 				// Add scoped memory area info into objects handle
-				// TODO: Choose an appropriate field since we also want scope level info in handle 
 				Native.wrMem( Native.toInt(sc), ptr+OFF_MEM);
 			}
 			Native.wrMem(ptr+HEADER_SIZE, ptr+OFF_PTR);
@@ -711,8 +720,6 @@ public class GC {
 				Native.wrMem(sc.level, ptr+OFF_SCOPE_LEVEL);
 				
 				// Add scoped memory area info into array handle
-				// TODO: Choose an appropriate field since we also want scope level info in handle
-				// TODO: Does not work in arrays
 				 Native.wrMem( Native.toInt(sc), ptr+OFF_MEM);
 			}
 			Native.wrMem(ptr+HEADER_SIZE, ptr+OFF_PTR);
@@ -940,13 +947,13 @@ public class GC {
 /************************************************************************************************/
 	
 
-	static void log(String s, int i) {
+	public static void log(String s, int i) {
 		JVMHelp.wr(s);
 		JVMHelp.wr(" ");
 		JVMHelp.wrSmall(i);
 		JVMHelp.wr("\n");
 	}
-	static void log(String s) {
+	public static void log(String s) {
 		JVMHelp.wr(s);
 		JVMHelp.wr("\n");
 	}
@@ -954,5 +961,64 @@ public class GC {
 	public int newObj2(int ref){
 		return newObject(ref);
 	}
+	
+	/**
+	 * Initialize Class objects when the application starts. This method is
+	 * called in Startup.boot method.
+	 * 
+	 * @param offset
+	 *            the index of the class info structure pointer in the class
+	 *            info table (See JopWriter.java)
+	 * @return a Class object representing a specific type
+	 */
+	public static Class initializeClassObjects(int offset) {
 
+		// pointer to 'special' pointers
+		int specialPointers = Native.rdMem(1);
+
+		// pointer to table with references to class info table
+		int classObjectsTable = Native.rdMem(specialPointers + Const.CLASS_TABLE_OFFSET);
+
+		// pointer to java.lang.Class class info
+		int classClassInfo = Native.rdMem(specialPointers + Const.CLASS_CLASS_OFFSET);
+		
+		// Pointer to <init> method
+		int initPtr = Native.rdMem(classClassInfo + Const.INIT_METH);
+		
+		int classInfoStruct = Native.rdMem(classObjectsTable + offset);
+		
+		// Create the Class object
+		
+		//TODO: Creates "cyclic indirect <clinit> dependency" error when scopes are not used
+		// int classObject = GC.newObject(classClassInfo);
+		
+		int size = Native.rdMem(classClassInfo);
+		int classObject  = resMemPtr;
+		resMemPtr =  resMemPtr + size + HEADER_SIZE;
+		Native.wrMem(classObject + HEADER_SIZE, classObject + OFF_PTR);
+		Native.wrMem(classClassInfo + Const.CLASS_HEADR, classObject + OFF_MTAB_ALEN);
+		Native.wrMem(0, classObject + GC.OFF_TYPE);
+
+		// Call <init> method
+		Native.invoke(classObject, initPtr);
+		
+		// Write reference to newly created object to the class info structure it represents
+		Native.wrMem(classObject, classInfoStruct + Const.CLASS_OBJECT);
+		Class clazz = (Class) Native.toObject(classObject);
+		
+		// Set common attributes
+		clazz.classRefAddress = classInfoStruct;
+		int ifNo = Native.rdMem(classInfoStruct + 3);
+		clazz._interfaceNumber = ifNo;
+		clazz._isInterface = ( ifNo < 0);
+		clazz._isArray = false;
+		
+		// Primitive type attributes
+		if (offset < 10) {
+			clazz._isPrimitive = true;
+			clazz.primitiveType = offset;
+		}
+		return clazz;
+	}
+	
 }

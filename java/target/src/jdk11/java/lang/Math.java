@@ -454,7 +454,11 @@ public final class Math {
 
 	public static long ceil(float f) {
 		if (Const.SUPPORT_FLOAT) {
-			return (int) f;
+			int inum = (int) f;
+			if(f == (float) inum){
+				return (int) f;
+			}
+			return inum + 1;
 		} else {
 			throw new RuntimeException("Not implemented");
 		}

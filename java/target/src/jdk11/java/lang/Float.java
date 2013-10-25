@@ -39,7 +39,10 @@ exception statement from your version. */
 
 package java.lang;
 
+import com.jopdesign.sys.GC;
+import com.jopdesign.sys.JVMHelp;
 import com.jopdesign.sys.Native;
+import com.jopdesign.sys.Startup;
 
 /**
  * Instances of class <code>Float</code> represent primitive
@@ -93,7 +96,7 @@ public final class Float // JDK 1.4 extends Number implements Comparable
    * <code>Class</code> object.
    * @since 1.1
    */
-//  public static final Class TYPE = VMClassLoader.getPrimitiveClass('F');
+  public static final Class<Float> TYPE = (Class<Float>) GC.initializeClassObjects(7);
 
   /**
    * The number of bits needed to represent a <code>float</code>.

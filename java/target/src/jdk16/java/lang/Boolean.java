@@ -39,6 +39,8 @@ package java.lang;
 
 import java.io.Serializable;
 
+import javax.safetycritical.annotate.SCJAllowed;
+
 /**
  * Instances of class <code>Boolean</code> represent primitive
  * <code>boolean</code> values.
@@ -52,6 +54,7 @@ public final class Boolean {
 	/**
 	 * Compatible with JDK 1.0.2+.
 	 */
+	@SCJAllowed
 	private static final long serialVersionUID = -3665804199014368530L;
 
 	/**
@@ -60,6 +63,7 @@ public final class Boolean {
 	 * <code>valueOf()</code> methods if they return a <code>Boolean</code>
 	 * representing <code>true</code>.
 	 */
+	@SCJAllowed
 	public static final Boolean TRUE = new Boolean(true);
 
 	/**
@@ -68,6 +72,7 @@ public final class Boolean {
 	 * <code>valueOf()</code> methods if they return a <code>Boolean</code>
 	 * representing <code>false</code>.
 	 */
+	@SCJAllowed
 	public static final Boolean FALSE = new Boolean(false);
 
 	/**
@@ -82,6 +87,7 @@ public final class Boolean {
 	 * 
 	 * @serial the wrapped value
 	 */
+	@SCJAllowed
 	private final boolean value;
 
 	/**

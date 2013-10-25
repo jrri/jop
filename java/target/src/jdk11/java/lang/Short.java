@@ -37,6 +37,10 @@
 
 package java.lang;
 
+import com.jopdesign.sys.GC;
+import com.jopdesign.sys.JVMHelp;
+import com.jopdesign.sys.Startup;
+
 /**
  * Instances of class <code>Short</code> represent primitive
  * <code>short</code> values.
@@ -70,7 +74,7 @@ public final class Short {
 	 * The primitive type <code>short</code> is represented by this
 	 * <code>Class</code> object.
 	 */
-	// public static final Class TYPE = VMClassLoader.getPrimitiveClass('S');
+	 public static final Class<Short> TYPE = (Class<Short>) GC.initializeClassObjects(4);
 	/**
 	 * The number of bits needed to represent a <code>short</code>.
 	 * 

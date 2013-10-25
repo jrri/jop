@@ -39,6 +39,10 @@ package java.lang;
 
 import java.io.Serializable;
 
+import com.jopdesign.sys.GC;
+import com.jopdesign.sys.JVMHelp;
+import com.jopdesign.sys.Startup;
+
 /**
  * Instances of class <code>Boolean</code> represent primitive
  * <code>boolean</code> values.
@@ -76,7 +80,7 @@ public final class Boolean {
 	 * 
 	 * @since 1.1
 	 */
-	// public static final Class TYPE = VMClassLoader.getPrimitiveClass('Z');
+	 public static final Class<Boolean> TYPE = (Class<Boolean>) GC.initializeClassObjects(1);
 	/**
 	 * The immutable value of this Boolean.
 	 * 

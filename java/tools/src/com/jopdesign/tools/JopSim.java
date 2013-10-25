@@ -32,6 +32,7 @@
 
 package com.jopdesign.tools;
 
+import com.jopdesign.common.ClassInfo;
 import com.jopdesign.sys.Const;
 import com.jopdesign.timing.WCETInstruction;
 
@@ -132,7 +133,7 @@ public class JopSim {
 		}
 	};
 
-	static final int MAX_MEM = 1024*1024/4;
+	static final int MAX_MEM = 2*1024*1024/4;
 	// static final int MAX_MEM = 2*1024*1024/4; // 2MB for de2-70 board
 	static final int MAX_STACK = Const.STACK_SIZE;	// with internal memory
 	static final int MEM_TEST_OFF = 256;
@@ -457,9 +458,9 @@ System.out.println(mp+" "+pc);
 		// pointer to super class at offset 3
 		// == Const.CLASS_SUPER
 		int sup = readMem(vt+3, Access.CLINFO);
-		// the real VT is located at offset 5
+		// the real VT is located at offset 7
 		// == Const.CLASS_HEADR
-		vt = sup+5;
+		vt = sup+7;//<===========================
 
 // System.err.println("invsuper: cp: "+cp+" off: "+off+" args: "+args+" ref: "+ref+" vt: "+vt+" addr: "+(vt+off));
 		invoke(vt+off);
@@ -494,7 +495,8 @@ System.out.println(mp+" "+pc);
 		
 		// pointer to method table in handle at offset 1
 		int vt = readMem(ref+1, Access.MVB);	// pointer to virtual table in obj-1
-		int it = readMem(vt-1, Access.CLINFO);	// pointer to interface table one befor vt
+//		int it = readMem(vt-1, Access.CLINFO);	// pointer to interface table one befor vt
+		int it = readMem(vt-3, Access.CLINFO);	// pointer to interface table three befor vt <=======
 
 		int mp = readMem(it+off, Access.IFTAB);
 // System.out.println("invint: off: "+off+" args: "+args+" ref: "+ref+" vt: "+vt+" mp: "+(mp));

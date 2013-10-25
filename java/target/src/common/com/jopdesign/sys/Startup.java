@@ -81,17 +81,47 @@ public class Startup {
 			// mem(0) is the length of the application
 			// or in other words the heap start
 			val = Native.rdMem(1);		// pointer to 'special' pointers
-			// first initialize the GC with the address of static ref. fields
-			GC.init(mem_size, val+4);
+			
+			// pointer to table with references to class info table
+			int classObjectsTable = Native.rdMem(val + 6);
+
+			// Number of entries in the previous table
+			int classCount = Native.rdMem(classObjectsTable);
+
+			// pointer to java.lang.Class class info
+			int classClassInfo = Native.rdMem(val + 7);
+			
+			// Reserved memory size. Reserved for Class objects
+			int resMem = (Native.rdMem(classClassInfo) + 6)*classCount;
+			
+			/*
+			 * First initialize the GC with the address of static ref. fields.
+			 * The memory area between the last word in the .jop file and resMem
+			 * is used to create Class objects
+			 */
+			GC.init(mem_size, resMem, val+4);
 			// place for some initialization:
 			// could be placed in <clinit> in the future
-//			System.init();
+			// System.init();
 			version();
+			GC.log("------ VM boot start ------");
 			started = true;
 			clazzinit();
-			// not in <clinit> as first methods are special and palcement
+			// not in <clinit> as first methods are special and placement
 			// of <clinit> depends on compiler
 			JVMHelp.init();
+			
+			/*
+			 * Create the remaining Class objects. Class objects for primitive
+			 * types are created in its <clinit> method. Class info structures
+			 * for primitive types are located at the first 9 positions of a
+			 * table at the end of the .jop file
+			 */
+			for (int i = 10; i <= classCount; i++) {
+				GC.initializeClassObjects(i);
+			}
+			
+			GC.log("------ VM boot end ------");
 		}
 		
 		// clear all pending interrupts (e.g. timer after reset)
@@ -146,25 +176,28 @@ public class Startup {
 		// change for DE2-70 VGA board
 		// int size = 0x0078500; // adresses for JOP - after this memory for vga
 		int size = 0;
-		int firstWord = Native.rd(offset+0);
+		int firstWord = Native.rd(offset + 0);
 		int val;
 		// increment in 512 Bytes
-		for (size=0; ; size+=128) {
-			val = Native.rd(offset+size);
-			Native.wr(0xaaaa5555, offset+size);
-			if (Native.rd(offset+size)!=0xaaaa5555) break;
-			Native.wr(0x12345678, offset+size);
-			if (Native.rd(offset+size)!=0x12345678) break;
-			if (size!=0) {
+		for (size = 0;; size += 128) {
+			val = Native.rd(offset + size);
+			Native.wr(0xaaaa5555, offset + size);
+			if (Native.rd(offset + size) != 0xaaaa5555)
+				break;
+			Native.wr(0x12345678, offset + size);
+			if (Native.rd(offset + size) != 0x12345678)
+				break;
+			if (size != 0) {
 				// invalidate cache
 				Native.invalidate();
-				if (Native.rd(offset+0)!=firstWord) break;				
+				if (Native.rd(offset + 0) != firstWord)
+					break;
 			}
 			// restore current word
-			Native.wr(val, offset+size);
+			Native.wr(val, offset + size);
 		}
 		// restore the first word
-		Native.wr(firstWord, offset+0);
+		Native.wr(firstWord, offset + 0);
 
 		return size;
 	}
@@ -243,7 +276,7 @@ public class Startup {
 
 		stack = new int[MAX_STACK];
 
-		int table = Native.rdMem(1)+6;		// start of clinit table
+		int table = Native.rdMem(1)+8;		// start of clinit table <===
 		int cnt = Native.rdMem(table);		// number of methods
 		++table;
 		for (int i=0; i<cnt; ++i) {
@@ -262,7 +295,8 @@ public class Startup {
 //			System.out.println(var);
 //			System.out.println("len=");
 //			System.out.println(len);
-			if (len<256 && len!=0) {	// see JOPizer constant on max. method length
+			// see JOPizer constant on max. method length
+			if (len<256 && len!=0) {
 				Native.invoke(addr);
 			// len=0 means interpret it
 			} else {
