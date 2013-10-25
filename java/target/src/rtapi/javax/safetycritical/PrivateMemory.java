@@ -23,22 +23,23 @@ import com.jopdesign.sys.SysHelper;
 @SCJAllowed
 public class PrivateMemory extends ManagedMemory {
 	
-	static SysHelper _sysHelper;
-
-	public static void setHelper(SysHelper sysHelper) {
-		_sysHelper = sysHelper;
-	}
-
 	PrivateMemory(int size, int bsSize) {
-		memory = _sysHelper.getMemory(size, bsSize);
+		super(size, bsSize);
+//		memory = _sysHelper.getMemory(size, bsSize);
+//		_sysHelper.setManagedMemory(memory, this);
 	}
 
 	PrivateMemory(int size) {
 		this(size, 0);
 	}
 	
+	PrivateMemory(){
+		super();
+	}
+	
 	void enter(Runnable logic){
 		_sysHelper.enter(memory, logic);
+		inner = null;
 	}
 
 }

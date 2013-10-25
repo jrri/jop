@@ -38,11 +38,6 @@ public class PeriodicParameters extends ReleaseParameters {
 	RelativeTime start;
 	RelativeTime period;
 	
-	static{
-		RtsjHelper rtsjHelper = new RtsjHelper();
-		PeriodicEventHandler.setRtsjHelper(rtsjHelper);
-	}
-
 	/**
 	 * Constructs a new PeriodicParameters object within the current memory
 	 * area.

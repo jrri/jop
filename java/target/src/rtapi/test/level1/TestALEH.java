@@ -1,5 +1,6 @@
 package test.level1;
 
+import javax.realtime.AffinitySet;
 import javax.realtime.AperiodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.AperiodicLongEventHandler;

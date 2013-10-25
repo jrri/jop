@@ -32,6 +32,8 @@ import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import test.cyclic.ImmortalEntry;
+
 public class Level0Safelet implements Safelet<CyclicExecutive> {
 
 	@Override
@@ -58,14 +60,14 @@ public class Level0Safelet implements Safelet<CyclicExecutive> {
 	@Override
 	public long immortalMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 10000;
 	}
 
 	@Override
 	@SCJAllowed(Level.SUPPORT)
 	@SCJRestricted(phase = Phase.INITIALIZATION)
 	public void initializeApplication() {
-		// TODO Auto-generated method stub
+		ImmortalEntry.setup();
 		
 	}
 

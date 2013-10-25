@@ -36,5 +36,15 @@ import static javax.safetycritical.annotate.Level.LEVEL_0;
  */
 @SCJAllowed(LEVEL_0)
 public abstract class AbstractAsyncEventHandler implements Schedulable {
+	
+	AffinitySet affintySet;
+	
+	void setProcessorAffinity(AffinitySet set){
+		this.affintySet = set;
+	}
+	
+	AffinitySet getAffinitySet(){
+		return this.affintySet;
+	}
 
 }

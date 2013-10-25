@@ -20,13 +20,17 @@
 
 package javax.safetycritical;
 
+import javax.realtime.AffinitySet;
 import javax.realtime.BoundAsyncEventHandler;
 import javax.realtime.HighResolutionTime;
 import javax.realtime.PriorityParameters;
 import javax.realtime.ReleaseParameters;
+import javax.realtime.RtsjHelper;
 
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
+
+import com.jopdesign.sys.SysHelper;
 
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 import static javax.safetycritical.annotate.Phase.CLEANUP;
@@ -50,6 +54,17 @@ import static javax.safetycritical.annotate.Level.INFRASTRUCTURE;
 @SCJAllowed
 public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 		implements ManagedSchedulable {
+	
+	static SysHelper _sysHelper;
+	static RtsjHelper _rtsjHelper;
+
+	public static void setSysHelper(SysHelper sysHelper){
+		_sysHelper = sysHelper;
+		
+	}
+	public static void setRtsjHelper(RtsjHelper rtsjHelper) {
+		_rtsjHelper = rtsjHelper;
+	}
 
 	/*
 	 * Workaround to avoid illegal assignments when referring to constant
@@ -59,24 +74,19 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 
 	@SCJAllowed(INFRASTRUCTURE)
 	@SCJRestricted(phase = INITIALIZATION)
-	ManagedEventHandler(PriorityParameters priority, ReleaseParameters release,
-			StorageParameters scp, String name) {
+	ManagedEventHandler(PriorityParameters priority, HighResolutionTime time,
+			ReleaseParameters release, StorageParameters scp, String name) {
 		this.name = new StringBuffer(name);
-	}
 
-	ManagedEventHandler(PriorityParameters priority, StorageParameters scp,
-			String name) {
-		this.name = new StringBuffer(name);
+		/* Default affinity set, can be overridden only at initialization phase */
+		AffinitySet defaultAffinity = Services.getSchedulingAllocationDoamins()[0];
+		AffinitySet.setProcessorAffinity(defaultAffinity, this);
+
 	}
 
 	ManagedEventHandler(PriorityParameters priority, HighResolutionTime time,
-			StorageParameters storage) {
-		this(priority, time, storage, "");
-	}
-
-	ManagedEventHandler(PriorityParameters priority, HighResolutionTime time,
-			StorageParameters storage, String name) {
-		this.name = new StringBuffer(name);
+			ReleaseParameters release, StorageParameters storage) {
+		this(priority, time, release, storage, "");
 	}
 
 	/**

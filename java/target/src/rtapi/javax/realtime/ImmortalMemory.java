@@ -49,7 +49,7 @@ public final class ImmortalMemory extends MemoryArea {
 
 	static SysHelper _sysHelper;
 
-	public static void setHelper(SysHelper sysHelper) {
+	public static void setSysHelper(SysHelper sysHelper) {
 		_sysHelper = sysHelper;
 	}
 	

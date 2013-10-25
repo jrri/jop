@@ -23,17 +23,8 @@
  */
 package javax.safetycritical;
 
-import java.util.Vector;
-
-import javax.realtime.AbsoluteTime;
-import javax.realtime.Clock;
 import javax.realtime.ImmortalMemory;
-import javax.realtime.MemoryArea;
-
-import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.RtThreadImpl;
-
-import joprt.RtThread;
 
 /**
  * This class represents JOP's SCJ framework.
@@ -47,7 +38,7 @@ import joprt.RtThread;
  */
 public class JopSystem {
 
-	public void startMission(Safelet<Mission> scj) {
+	public void startMission(Safelet scj) {
 
 		TerminationHelper terminationHelper = new TerminationHelper();
 		SequencerHelper sequencerHelper = new SequencerHelper();
@@ -89,13 +80,22 @@ public class JopSystem {
 
 		/*
 		 * Initial MissionMemory is sized according to the sequencer's storage
-		 * parameters
+		 * parameters. Before executing the missions's initialize() method, the
+		 * MissionMemory allocation space is resized according to the value
+		 * returned by the missionMemorySize() method. The remaining backing
+		 * store of the MissionMemory is equal to the remaining backing store of
+		 * the ImmortalMemory.
+		 * 
+		 * For a L2 application, each MissionMemory created must also specify its
+		 * backing store requirements.
 		 */
 		int size = (int) missionSequencer.storage.getTotalBackingStoreSize();
+		MissionMemory missionMem = new MissionMemory(size);
 
 		while (terminationHelper.nextMission
 				&& !MissionSequencer.terminationRequest) {
-			ManagedMemory.enterPrivateMemory(size, sequencerHelper);
+//			ManagedMemory.enterPrivateMemory(size, sequencerHelper);
+			missionMem.enter(sequencerHelper);
 			RtThreadImpl.reInitialize();
 		}
 

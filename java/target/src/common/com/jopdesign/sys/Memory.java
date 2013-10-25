@@ -38,6 +38,11 @@ import javax.safetycritical.MissionMemory;
  */
 public class Memory {
 	
+	/**
+	 * Pointer to a ManagedMemory object, used for the getManagedMemory method
+	 * (or some flavor of it ) in SCJ
+	 */
+	public ManagedMemory managedMemory;
 
 	// TODO should be set at some time, before the first
 	// scope (e.g. mission memory) is created
@@ -45,35 +50,40 @@ public class Memory {
 	final static int IM_SIZE = Config.IMM_MEM_SIZE;
 
 	int cnt;
+	
 	/** Start address of memory area */
 	public int startPtr;
+	
 	/** Allocation pointer */
 	public int allocPtr;
+	
 	/**
-	 * End of area for local allocations.
-	 * Points to the last usable word.
+	 * End of area for local allocations. Points to the last usable word.
 	 */
 	public int endLocalPtr;
+	
 	/**
-	 * End of backing store.
-	 * Points to the last usable word.
+	 * End of backing store. Points to the last usable word.
 	 */
 	public int endBsPtr;
+	
 	/**
 	 * Allocation pointer for the nested backing store.
 	 */
 	public int allocBsPtr;
+	
 	// TODO: support for multiple parallel scopes
 	// We need also an allocation pointer for the backing
 	// store.
 	/** Parent scope */
 	Memory parent;
+	
 	/** Nesting level */
 	public int level;
 	
 	/**
-	 * A reference for an inner memory that shall be reused
-	 * for enterPrivateMemory.
+	 * A reference for an inner memory that shall be reused for
+	 * enterPrivateMemory.
 	 */
 	Memory inner;
 
@@ -82,21 +92,14 @@ public class Memory {
 	 */
 	public static Memory immortal;
 
-	static {
-		SysHelper sysHelper = new SysHelper();
-		ImmortalMemory.setHelper(sysHelper);
-		ManagedMemory.setHelper(sysHelper);
-		MissionMemory.setHelper(sysHelper);
-		PrivateMemory.setHelper(sysHelper);
-	}
-	
 	Memory() {
 	}
 	
 	/**
-	 * Create a Scope object that represents immortal memory.
-	 * Should only be called by GC on JVM startup.
-	 * @return
+	 * Create a Scope object that represents immortal memory. Should only be
+	 * called by GC on JVM startup.
+	 * 
+	 * @return The singleton instance of ImmortalMemory
 	 */
 	static Memory getImmortal(int start, int end) {
 		if (immortal==null) {
@@ -145,6 +148,7 @@ public class Memory {
 		allocBsPtr = endLocalPtr+1;
 		level = parent.level+1;
 	}
+	
 	/**
 	 * Create a scope and use all available backing store from the outer scope.
 	 * 
@@ -266,12 +270,15 @@ public class Memory {
 		return m;
 	}
 	
+	static ManagedMemory getCurrentManagedMemory(){
+		return getCurrentMemory().managedMemory;
+	}
+	
 	/**
 	 * This is SCJ style inner scopes for private memory.
 	 * 
-	 * At the moment we will just create a local Memory
-	 * object for each enter. However, this is a memory
-	 * leak and one instance shall be reused.
+	 * At the moment we will just create a local Memory object for each enter.
+	 * However, this is a memory leak and one instance shall be reused.
 	 * 
 	 * @param size
 	 * @param logic
@@ -361,7 +368,7 @@ public class Memory {
 	}
 	
 	/**
-	 * Used only to set the resize the mission memory
+	 * Used resize only the mission memory
 	 * 
 	 * @param size
 	 */

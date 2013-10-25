@@ -7,7 +7,6 @@ import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-
 import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.SysHelper;
 
@@ -25,20 +24,32 @@ import com.jopdesign.sys.SysHelper;
  */
 @SCJAllowed
 public abstract class ManagedMemory extends LTMemory {
-	
+
 	Memory memory;
+	ManagedMemory inner;
 
 	static SysHelper _sysHelper;
 
-	public static void setHelper(SysHelper sysHelper) {
+	ManagedMemory(int size, int bsSize) {
+		memory = _sysHelper.getMemory(size, bsSize);
+		_sysHelper.setManagedMemory(memory, this);
+	}
+
+	ManagedMemory() {
+		memory = _sysHelper.getMemory();
+		_sysHelper.setManagedMemory(memory, this);
+	}
+
+	public static void setSysHelper(SysHelper sysHelper) {
 		_sysHelper = sysHelper;
 	}
 
 	/**
 	 * This method causes the calling schedulable object to execute the logic in
 	 * a nested private memory area. If a private memory does not exist, one is
-	 * created with the specified size; otherwise, its size is set. Then the
-	 * private memory area is cleared and entered.
+	 * created with the specified size; otherwise (if a private memory already
+	 * exist), its size is set. Then the private memory area is cleared and
+	 * entered.
 	 * 
 	 * The private memory object representing the inner scope memory area may be
 	 * reused on subsequent calls to enterPrivateMemory during the lifetime of
@@ -58,11 +69,42 @@ public abstract class ManagedMemory extends LTMemory {
 	@SCJAllowed
 	public static void enterPrivateMemory(long size, Runnable logic)
 			throws IllegalStateException {
-		Memory m = _sysHelper.getCurrentMemory();
-		_sysHelper.enterPrivateMemory(m, (int) size, logic);
-//		m.enterPrivateMemory((int) size, logic);
+
+		final ManagedMemory current = _sysHelper.getCurrentManagedMemory();
+
+		if (current.inner == null) {
+
+			/*
+			 * The current memory object has a longer lifetime than the current
+			 * memory area, so the following assignment is illegal:
+			 * 
+			 * current.inner = new PrivateMemory();
+			 * 
+			 * Doing so in this way also eliminates the illegal reference of
+			 * enterPrivateMemory in Memory.java.
+			 * 
+			 * The runnable object is created only when the reusable nested
+			 * private memory does not exist.
+			 */
+			executeInOuterArea(new Runnable() {
+
+				@Override
+				public void run() {
+					current.inner = new PrivateMemory();
+				}
+			});
+
+			_sysHelper.setInner(current.memory, current.inner.memory,
+					current.inner);
+		}
+
+		_sysHelper.enterPrivateMemory(current.memory, (int) size, logic);
+
+		/* For nested uses of enterPrivateMemory */
+		current.inner.inner = null;
+
 	}
-	
+
 	/**
 	 * Change the allocation context to the outer memory area where the object
 	 * obj is allocated and invoke the run method of the logic Runnable.
@@ -74,11 +116,11 @@ public abstract class ManagedMemory extends LTMemory {
 	 *            is the code to be executed in the entered memory area.
 	 */
 	@SCJAllowed
-	public static void executeInAreaOf(Object obj, Runnable logic){
+	public static void executeInAreaOf(Object obj, Runnable logic) {
 		Memory m = _sysHelper.getMemoryArea(obj);
 		_sysHelper.executeInArea(m, logic);
 	}
-	
+
 	/**
 	 * Change the allocation context to the immediate outer memory area and
 	 * invoke the run method if the Runnable.
@@ -88,18 +130,20 @@ public abstract class ManagedMemory extends LTMemory {
 	 * @throws InaccessibleAreaException
 	 */
 	@SCJAllowed
-	public static void executeInOuterArea(Runnable logic) throws InaccessibleAreaException{
+	public static void executeInOuterArea(Runnable logic)
+			throws InaccessibleAreaException {
 		Memory m = _sysHelper.getCurrentMemory();
-		
-		// Objects representing memory areas, except for ImmortalMemory, 
+
+		// Objects representing memory areas, except for ImmortalMemory,
 		// hold a reference to the memory area were they were created
 		m = _sysHelper.getMemoryArea(m);
-		if(m == null){
-			throw new InaccessibleAreaException("Not possible to move to an area outer than ImmortalMemory" );
+		if (m == null) {
+			throw new InaccessibleAreaException(
+					"Not possible to move to an area outer than ImmortalMemory");
 		}
 		_sysHelper.executeInArea(m, logic);
 	}
-	
+
 	/**
 	 * This method can be used to manage the use of backing store by any SCJ
 	 * memory area.
@@ -108,10 +152,10 @@ public abstract class ManagedMemory extends LTMemory {
 	 *         ManagedMemory area.
 	 */
 	@SCJAllowed
-	public long getRemainingBackingStore(){
+	public long getRemainingBackingStore() {
 		return _sysHelper.getRemainingBackingStore(memory);
 	}
-	
+
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public long size() {
@@ -134,15 +178,15 @@ public abstract class ManagedMemory extends LTMemory {
 		Memory m = _sysHelper.getCurrentMemory();
 		return _sysHelper.size(m);
 	}
-	
-	static void setSize(int size){
+
+	static void setSize(int size) {
 		Memory m = _sysHelper.getCurrentMemory();
 		_sysHelper.setSize(m, size);
 	}
-	
-	static ManagedMemory getManagedMemory(Object o){
+
+	public static ManagedMemory getManagedMemory(Object o) {
 		Memory m = _sysHelper.getMemoryArea(o);
-		return null;//_sysHelper.getCurrentMemory();
+		return _sysHelper.getManagedMemory(m);
 	}
 
 }

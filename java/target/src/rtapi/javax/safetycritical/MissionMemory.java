@@ -13,12 +13,6 @@ import com.jopdesign.sys.SysHelper;
 @SCJAllowed
 public class MissionMemory extends ManagedMemory {
 
-	static SysHelper _sysHelper;
-
-	public static void setHelper(SysHelper sysHelper) {
-		_sysHelper = sysHelper;
-	}
-
 	/**
 	 * Package private constructor
 	 * 
@@ -28,7 +22,9 @@ public class MissionMemory extends ManagedMemory {
 	 *            is the total size of the backing store for this area
 	 */
 	MissionMemory(int size, int bsSize) {
-		memory = _sysHelper.getMemory(size, bsSize);
+		super(size, bsSize);
+//		memory = _sysHelper.getMemory(size, bsSize);
+//		_sysHelper.setManagedMemory(memory, this);
 	}
 
 	/**

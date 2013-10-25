@@ -130,9 +130,17 @@ class JVM {
 					int val_level; 
 					ref_level = Native.rdMem(ref + GC.OFF_SPACE);
 					val_level = Native.rdMem(value + GC.OFF_SPACE);
-					if (val_level > ref_level){
-						GC.log("Illegal array reference");
-					};
+					
+					/*
+					 * Objects located before mem_start are in ImmortalMemory.
+					 * They are either constant strings or class objects
+					 */
+					if (value > GC.mem_start) {
+						if (val_level > ref_level){
+							GC.log("Illegal array reference");
+						};
+					}
+					
 				}
 
 			} else {
@@ -1102,24 +1110,32 @@ class JVM {
 	private static void f_resDE() { JVMHelp.noim();}
 	private static void f_resDF() { JVMHelp.noim();}
 	private static void f_resE0() { JVMHelp.noim();}
+
 	private static void f_putstatic_ref(int val, int addr) {
-		
+
 		synchronized (GC.mutex) {
 			if (Config.USE_SCOPES) {
 				if (Config.USE_SCOPECHECKS) {
-					
-					// Pointer version
-					//	if ((val >>> 25) != 0){
-					//	GC.log("Illegal static reference");
-					//}
 
-				// Handler version (Default)
-					int val_level; 
+					// Pointer version
+					// if ((val >>> 25) != 0){
+					// GC.log("Illegal static reference");
+					// }
+
+					// Handler version (Default)
+					int val_level;
 					val_level = Native.rdMem(val + GC.OFF_SPACE);
-					if (val_level != 0){
-						GC.log("Illegal static reference");
+
+					/*
+					 * Objects located before mem_start are in ImmortalMemory.
+					 * They are either constant strings or class objects
+					 */
+					if (val > GC.mem_start) {
+						if (val_level != 0) {
+							GC.log("Illegal static reference");
 						}
-				
+					}
+
 				}
 
 			} else {
@@ -1127,53 +1143,60 @@ class JVM {
 				int oldVal = Native.getStatic(addr);
 				// Is it white?
 				if (oldVal != 0
-					&& Native.rdMem(oldVal+GC.OFF_SPACE) != GC.toSpace
-					&& Native.rdMem(oldVal+GC.OFF_GREY)==0) {
+						&& Native.rdMem(oldVal + GC.OFF_SPACE) != GC.toSpace
+						&& Native.rdMem(oldVal + GC.OFF_GREY) == 0) {
 					// Mark grey
-					Native.wrMem(GC.grayList, oldVal+GC.OFF_GREY);
+					Native.wrMem(GC.grayList, oldVal + GC.OFF_GREY);
 					GC.grayList = oldVal;
-				}				
+				}
 			}
 
 			Native.putStatic(val, addr);
 		}
 	}
+	
 	private static void f_resE2() { JVMHelp.noim();}
+
 	private static void f_putfield_ref(int ref, int value, int index) {
-		
+
 		synchronized (GC.mutex) {
-			
+
 			if (Config.USE_SCOPES) {
 
 				if (Config.USE_SCOPECHECKS) {
-					
-					// Pointer version
-					//	if ((value >>> 25) > (ref  >>> 25)){
-					//	GC.log("Illegal field reference");
-					//	}
 
-				// Handler version (default)
-					int ref_level; 
-					int val_level; 
+					// Pointer version
+					// if ((value >>> 25) > (ref >>> 25)){
+					// GC.log("Illegal field reference");
+					// }
+
+					// Handler version (default)
+					int ref_level;
+					int val_level;
 					ref_level = Native.rdMem(ref + GC.OFF_SPACE);
 					val_level = Native.rdMem(value + GC.OFF_SPACE);
-					if (val_level > ref_level){
-						//GC.log("Illegal field reference");
+
+					/*
+					 * Objects located before mem_start are in ImmortalMemory.
+					 * They are either constant strings or class objects
+					 */
+					if (value > GC.mem_start) {
+						if (val_level > ref_level) {
+							GC.log("Illegal field reference");
+						}
 					}
 				}
-				
-			} 
-			else {
+			} else {
 				// snapshot-at-beginning barrier
 				int oldVal = Native.getField(ref, index);
 				// Is it white?
 				if (oldVal != 0
-					&& Native.rdMem(oldVal+GC.OFF_SPACE) != GC.toSpace
-					&& Native.rdMem(oldVal+GC.OFF_GREY)==0) {
+						&& Native.rdMem(oldVal + GC.OFF_SPACE) != GC.toSpace
+						&& Native.rdMem(oldVal + GC.OFF_GREY) == 0) {
 					// Mark grey
-					Native.wrMem(GC.grayList, oldVal+GC.OFF_GREY);
+					Native.wrMem(GC.grayList, oldVal + GC.OFF_GREY);
 					GC.grayList = oldVal;
-				}				
+				}
 			}
 			Native.putField(ref, index, value);
 		}

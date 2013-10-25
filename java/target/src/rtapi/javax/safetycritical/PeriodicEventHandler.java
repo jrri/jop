@@ -21,21 +21,19 @@
 package javax.safetycritical;
 
 import static javax.safetycritical.annotate.Level.LEVEL_1;
-import static javax.safetycritical.annotate.Level.LEVEL_0;
 
 import java.util.Vector;
 
 import javax.realtime.AbsoluteTime;
+import javax.realtime.AffinitySet;
 import javax.realtime.HighResolutionTime;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.realtime.RelativeTime;
-import javax.realtime.RtsjHelper;
 import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
 import com.jopdesign.sys.RtThreadImpl;
 
@@ -64,6 +62,8 @@ import joprt.RtThread;
  * 
  * @author Martin Schoeberl, Juan Rios
  * @version SCJ 0.93
+ * @note Trying to change the affinity of this PeriodicEventHandler after the
+ *       register() method has been called has no effect.
  * 
  */
 
@@ -79,11 +79,6 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	RtThreadImpl rtt;
 
 	long scopeSize;
-	
-	static RtsjHelper _rtsjHelper;
-	public static void setRtsjHelper(RtsjHelper rtsjHelper){
-		_rtsjHelper = rtsjHelper;
-	}
 
 	/**
 	 * Constructs a periodic event handler.
@@ -148,13 +143,13 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 			PeriodicParameters release, StorageParameters storage,
 			long scopeSize, String name) {
 		// TODO: what are we doing with this Managed thing?
-		super(priority, release, storage, name);
+		super(priority, null, release, storage, name);
 
 		this.scopeSize = scopeSize;
 		this.storage = storage;
 
-//		start = (RelativeTime) release.getStart();
-//		period = release.getPeriod();
+		// start = (RelativeTime) release.getStart();
+		// period = release.getPeriod();
 		start = (RelativeTime) _rtsjHelper.getStart(release);
 		period = _rtsjHelper.getPeriod(release);
 
@@ -174,10 +169,12 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		m = Mission.getCurrentMission();
 
 		if (storage != null) {
-			// Create handler's private memory, except for cyclic executives,
-			// where a single private memory is reused for all handlers.
-			// Mission should not be null at this point, as PEH's are created at
-			// mission initialization.
+			/*
+			 * Create handler's private memory, except for cyclic executives,
+			 * where a single private memory is reused for all handlers. Mission
+			 * should not be null at this point, as PEH's are created at mission
+			 * initialization.
+			 */
 			if (!m.isCyclicExecutive) {
 
 				// privMem = new Memory((int) scopeSize, (int)
@@ -188,8 +185,10 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 			}
 		}
 
-		// No need to create this runnable or a RT thread for cyclic executives
-		// where handler's handleAsyncEvent method is called directly.
+		/*
+		 * No need to create runnables or RT threads for cyclic executives where
+		 * handler's handleAsyncEvent method is called directly.
+		 */
 		if (!m.isCyclicExecutive) {
 			final Runnable runner = new Runnable() {
 				@Override
@@ -234,6 +233,16 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		/* L0 applications do not schedule event handlers */
 		if (!m.isCyclicExecutive) {
 			RtThreadImpl.register(rtt);
+			_sysHelper.setSchedulable(rtt, this);
+
+			/*
+			 * Change the processor where the RtThread will run in case its
+			 * affinity was changed from the default value. Note that trying to
+			 * change the affinity after the register method has been called has
+			 * no effect.
+			 */
+			AffinitySet set = AffinitySet.getAffinitySet(this);
+			thread.setProcessor(_rtsjHelper.getAffinitySetProcessor(set));
 		}
 
 	}
@@ -251,6 +260,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 * 
 	 * @return a reference to a time parameter based on the clock used to start
 	 *         the timer.
+	 * @todo Not yet implemented
 	 */
 	@SCJAllowed(LEVEL_1)
 	public HighResolutionTime getActualStartTime() {
@@ -269,6 +279,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 * 
 	 * @return a reference based on the clock associated with the interval
 	 *         parameter.
+	 * @todo Not yet implemented
 	 */
 	@SCJAllowed(LEVEL_1)
 	public HighResolutionTime getEffectiveStartTime() {
@@ -286,6 +297,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 * @throws IllegalStateException
 	 *             if this timer has not been released since it was last
 	 *             started.
+	 * @todo Not yet implemented
 	 */
 	@SCJAllowed(LEVEL_1)
 	public AbsoluteTime getLastReleaseTime() throws IllegalStateException {
@@ -307,6 +319,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 *             if the result does not fit in the normalized format. Throws
 	 *             IllegalStateException Thrown if this handler has not been
 	 *             started.
+	 * @todo Not yet implemented
 	 */
 	@SCJAllowed(LEVEL_1)
 	public AbsoluteTime getNextReleaseTime() throws ArithmeticException {
@@ -321,6 +334,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 * 
 	 * @return a reference to the start time parameter in the release parameters
 	 *         used when constructing this handler.
+	 * @todo Not yet implemented
 	 */
 	@SCJAllowed(LEVEL_1)
 	public HighResolutionTime getRequestedStartTime() {
@@ -349,6 +363,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 * 
 	 * @throws IllegalStateException
 	 *             If this handler has not been started.
+	 * @todo Not yet implemented
 	 */
 	@SCJAllowed(LEVEL_1)
 	public AbsoluteTime getnextReleaseTime(AbsoluteTime dest)

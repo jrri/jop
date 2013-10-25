@@ -1,5 +1,8 @@
 package javax.realtime;
 
+import javax.safetycritical.ManagedEventHandler;
+import javax.safetycritical.ManagedLongEventHandler;
+
 /**
  * A helper class to allow sharing of package protected methods between classes
  * in javax.realtime and javax.safetycritical
@@ -10,11 +13,21 @@ package javax.realtime;
  */
 public final class RtsjHelper {
 	
-	RtsjHelper(){
+	/*
+	 * Register all classes that need access to the exposed methods from
+	 * javax.realtime
+	 */
+	static {
+		RtsjHelper rtsjHelper = new RtsjHelper();
+		ManagedEventHandler.setRtsjHelper(rtsjHelper);
+		ManagedLongEventHandler.setRtsjHelper(rtsjHelper);
+	}
+	
+	private RtsjHelper(){
 		
 	}
 	
-	/* Methods to be exposed from javax.realtime to javax.safetycritical */
+	/* Methods to be exposed to friend packages */
 	
 	public RelativeTime getPeriod(PeriodicParameters periodicParameters) {
 		return periodicParameters.getPeriod();
@@ -30,6 +43,10 @@ public final class RtsjHelper {
 	
 	AsyncEventHandler getDeadlineMissHandler(ReleaseParameters releaseParameters) {
 		return releaseParameters.getDeadlineMissHandler();
+	}
+	
+	public int getAffinitySetProcessor(AffinitySet set){
+		return set.processorNumber;
 	}
 	
 }

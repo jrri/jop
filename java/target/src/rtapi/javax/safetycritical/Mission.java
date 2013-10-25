@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import javax.realtime.AsyncEventHandler;
 import javax.realtime.AsyncLongEventHandler;
+import javax.realtime.Scheduler;
 import javax.safetycritical.annotate.Allocate;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.Allocate.Area;
@@ -46,10 +47,10 @@ import com.jopdesign.sys.Native;
  */
 @SCJAllowed
 public abstract class Mission {
-
+	
 	/*
 	 * Workaround to avoid illegal references: Store the address itself (a
-	 * number) of the structure containing the handler's registerd in this
+	 * number) of the structure containing the handler's registered in this
 	 * mission.
 	 */
 	int eventHandlersRef;
@@ -229,6 +230,7 @@ public abstract class Mission {
 		 * AEH/ALEH
 		 */
 		terminationPending = true;
+		terminationHook();
 		
 //		/*
 //		 * The following code runs in the main thread, that is, the one with the
@@ -244,7 +246,11 @@ public abstract class Mission {
 //			terminate();
 		
 	}
-	
+
+	/**
+	 * Used to call the cleanUp() method of every managed handler associated
+	 * with the mission
+	 */
 	void terminate() {
 
 		if (hasEventHandlers) {
@@ -320,7 +326,7 @@ public abstract class Mission {
 	}
 
 	/**
-	 * This method shall be invoked by requestTermination. Application-specific
+	 * This method shall be invoked by requestTermination(). Application-specific
 	 * subclasses of Mission may override the terminationHook method to supply
 	 * application-specific mission shutdown code.
 	 */
@@ -331,6 +337,7 @@ public abstract class Mission {
 	/**
 	 * Implementation specific
 	 */
+	
 	Vector getHandlers() {
 		return (Vector) Native.toObject(eventHandlersRef);
 	}

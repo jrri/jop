@@ -10,11 +10,11 @@ public class MyLevel0App {
 
 		term = Terminal.getTerminal();
 
-		Level0Safelet s = new Level0Safelet();
+		Safelet s = new Level0Safelet();
 		term.writeln("Safelet created");
 
 		JopSystem js = new JopSystem();
-		js.startCycle(s);
+		js.startMission(s);
 
 		term.writeln("Main method finished");
 	}

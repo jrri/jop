@@ -4,13 +4,13 @@ import static javax.safetycritical.annotate.Level.LEVEL_1;
 
 import java.util.Vector;
 
+import javax.realtime.AffinitySet;
 import javax.realtime.AperiodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
 import com.jopdesign.sys.RtThreadImpl;
 
@@ -32,6 +32,9 @@ import static javax.safetycritical.annotate.Phase.INITIALIZATION;
  * 
  * @author Juan Rios
  * @version SCJ 0.93
+ * @note Trying to change the affinity of this AperiodicLongEventHandler after
+ *       the register() method has been called has no effect.
+ * 
  * 
  */
 @SCJAllowed(LEVEL_1)
@@ -157,6 +160,7 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 					privMem.enter(runner);
 			}
 		};
+
 		rtt = event.thr;
 	}
 
@@ -178,6 +182,15 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 
 		((Vector) Native.toObject(m.longEventHandlersRef)).addElement(this);
 		RtThreadImpl.register(rtt);
+
+		/*
+		 * Change the processor where the RtThread will run in case its affinity
+		 * was changed from the default value. Note that trying to change the
+		 * affinity after the register method has been called has no effect.
+		 */
+		AffinitySet set = AffinitySet.getAffinitySet(this);
+		event.setProcessor(_rtsjHelper.getAffinitySetProcessor(set));
+
 	}
 
 	/**

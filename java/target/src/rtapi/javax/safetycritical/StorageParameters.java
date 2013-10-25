@@ -23,15 +23,66 @@ package javax.safetycritical;
 import javax.safetycritical.annotate.SCJAllowed;
 
 /**
- * StorageParameters
+ * StorageParameters provide storage size parameters for ISRs and schedulable
+ * objects in a ManagedSchedulable: event handlers, threads, and sequencers. A
+ * StorageParameters object is passed as a parameter to the constructor of
+ * mission sequencers and other SCJ schedulable objects.
  * 
  * This class might get renamed to MemoryParameters (back again).
  * 
  */
 @SCJAllowed
-public class StorageParameters {
+public final class StorageParameters {
 
 	private long totalBackingStore;
+
+	/**
+	 * This is the primary constructor for a StorageParameters object,
+	 * permitting specification of all settable values.
+	 * 
+	 * @param totalBackingStore
+	 *            size of the backing store reservation for worst-case scope
+	 *            usage by the associated ManagedSchedulable: object, in bytes.
+	 * @param sizes
+	 *            is an array of parameters for configuring VM resources such as
+	 *            native stack or Java stack size. The meanings of the entries
+	 *            in the array are vendor specific. The array passed is not
+	 *            stored in the object.
+	 * @param messageLength
+	 *            memory space in bytes dedicated to the message associated with
+	 *            this ManagedSchedulable object’s ThrowBoundaryError exception,
+	 *            plus references to the method names/identifiers in the stack
+	 *            backtrace.
+	 * @param stackTraceLength
+	 *            is the number of elements in the StackTraceElement array
+	 *            dedicated to stack backtrace associated with this
+	 *            StorageParameters object’s Throw- BoundaryError exception.
+	 * @param maxMemoryArea
+	 *            is the maximum amount of memory in the per-release private
+	 *            memory area.
+	 * @param maxImmortal
+	 *            is the maximum amount of memory in the immortal memory area
+	 *            required by the associated schedulable object.
+	 * @param maxMissionMemory
+	 *            is the maximum amount of memory in the mission memory area
+	 *            required by the associated schedulable object.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if any value other than positive. zero, or NO_MAX is passed
+	 *             as the value of maxMemoryArea or maxImmortal.
+	 */
+	@SCJAllowed
+	public StorageParameters(long totalBackingStore, long[] sizes,
+			int messageLength, int stackTraceLength, long maxMemoryArea,
+			long maxImmortal, long maxMissionMemory) {
+
+	}
+
+	@SCJAllowed
+	public StorageParameters(long totalBackingStore, long[] sizes,
+			long maxMemoryArea, long maxImmortal, long maxMissionMemory) {
+
+	}
 
 	@SCJAllowed
 	public StorageParameters(long totalBackingStore, long[] sizes,
@@ -45,8 +96,6 @@ public class StorageParameters {
 	public StorageParameters(long totalBackingStore, long[] sizes) {
 		this(totalBackingStore, sizes, 0, 0);
 	}
-
-	// Both of these methods are not in the spec:
 
 	long getTotalBackingStoreSize() {
 		return totalBackingStore;

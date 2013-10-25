@@ -2,17 +2,20 @@ package test.level1;
 
 import java.util.Random;
 
+import javax.realtime.AffinitySet;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
+import javax.realtime.Schedulable;
+import javax.realtime.Scheduler;
 import javax.safetycritical.AperiodicEventHandler;
 import javax.safetycritical.AperiodicLongEventHandler;
+import javax.safetycritical.ManagedEventHandler;
 import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.PrivateMemory;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.Terminal;
-
-import com.jopdesign.sys.Memory;
+import javax.safetycritical.Services;
 
 public class TestPEH extends PeriodicEventHandler {
 
@@ -32,11 +35,13 @@ public class TestPEH extends PeriodicEventHandler {
 
 	@Override
 	public void handleAsyncEvent() {
-
-		Terminal.getTerminal().writeln(getName()+"Hello!");
-//		Object object = new Object();
-//		Memory m = Memory.getMemoryArea(object);
-//		Terminal.getTerminal().writeln("Level: "+m.level);
+		
+		/* One way to get the currently executing schedulable object */
+		Schedulable s = Scheduler.getCurrentSO();
+		ManagedEventHandler meh = (ManagedEventHandler) s;
+		
+		Terminal.getTerminal().writeln(meh.getName()+"Hello!");
+//		Terminal.getTerminal().writeln(getName()+"Hello!");
 		
 		PrivateMemory.enterPrivateMemory(256, new Runnable() {
 			

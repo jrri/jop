@@ -139,7 +139,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		// really extend the handler.... We want to run in the
 		// plain Java thread!
 		// in Level 1 we can simply ignore the priority
-		super(priority, storage, name);
+		super(priority, null, null, storage);
 
 		this.storage = storage;
 
@@ -320,11 +320,9 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 			m.terminationPending = false;
 
 			Terminal.getTerminal().writeln("[SYSTEM]: Got new mission");
-
 			ManagedMemory.setSize((int) m.missionMemorySize());
-
 			m.initialize();
-
+			
 			if (!m.isCyclicExecutive) {
 				executeMission(m);
 			} else {

@@ -66,7 +66,7 @@ public abstract class OneShotEventHandler extends ManagedEventHandler {
 	public OneShotEventHandler(PriorityParameters priority,
 			HighResolutionTime time, AperiodicParameters release,
 			StorageParameters storage) {
-		super(priority, time, storage);
+		super(priority, time, release, storage);
 
 	}
 
@@ -108,7 +108,7 @@ public abstract class OneShotEventHandler extends ManagedEventHandler {
 	public OneShotEventHandler(PriorityParameters priority,
 			HighResolutionTime time, AperiodicParameters release,
 			StorageParameters storage, String name) {
-		super(priority, time, storage, name);
+		super(priority, time, release, storage, name);
 	}
 
 	/**

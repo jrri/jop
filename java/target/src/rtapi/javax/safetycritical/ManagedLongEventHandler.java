@@ -1,8 +1,10 @@
 package javax.safetycritical;
 
+import javax.realtime.AffinitySet;
 import javax.realtime.BoundAsyncLongEventHandler;
 import javax.realtime.PriorityParameters;
 import javax.realtime.ReleaseParameters;
+import javax.realtime.RtsjHelper;
 
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
@@ -40,6 +42,12 @@ public abstract class ManagedLongEventHandler extends
 	 * strings. Constant strings in JOP have no associated memory area
 	 */
 	private StringBuffer name;
+	
+	static RtsjHelper _rtsjHelper;
+
+	public static void setRtsjHelper(RtsjHelper rtsjHelper) {
+		_rtsjHelper = rtsjHelper;
+	}
 
 	/**
 	 * Constructor to create an event handler.
@@ -76,6 +84,10 @@ public abstract class ManagedLongEventHandler extends
 		}
 
 		this.name = new StringBuffer(name);
+		
+		/* Default affinity set, can be overridden only at initialization phase */
+		AffinitySet defaultAffinity = Services.getSchedulingAllocationDoamins()[0];
+		AffinitySet.setProcessorAffinity(defaultAffinity, this);
 	}
 
 	/**

@@ -23,12 +23,33 @@
 package javax.realtime;
 
 import javax.safetycritical.annotate.SCJAllowed;
+import com.jopdesign.sys.SysHelper;
 
+/**
+ * The RTSJ supports generic on-line feasibility analysis via the Scheduler
+ * class. SCJ supports off-line analysis; hence most of the methods in this
+ * class are omitted. Only the static method getCurrentSO is provided.
+ * 
+ * @author Juan Rios
+ * @version SCJ 0.93
+ * 
+ */
 @SCJAllowed
 public abstract class Scheduler {
 
+	static SysHelper _sysHelper;
+
+	public static void setSysHelper(SysHelper sysHelper) {
+		_sysHelper = sysHelper;
+	}
+
+	/**
+	 * 
+	 * @return the current asynchronous event handler or real-time thread of the
+	 *         caller.
+	 */
 	@SCJAllowed
 	public static Schedulable getCurrentSO() {
-		throw new Error("implement me");
+		return _sysHelper.getSchedulable();
 	}
 }

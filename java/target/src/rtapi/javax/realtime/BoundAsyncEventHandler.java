@@ -23,6 +23,8 @@ package javax.realtime;
 import javax.safetycritical.annotate.SCJAllowed;
 
 /**
+ * A bound asynchronous event handler is an instance of AsyncEventHandler that
+ * is permanently bound to a dedicated real-time thread.
  * 
  * The BoundAsyncEventHandler class is not directly available to the safety
  * critical Java application developers. Hence none of its methods or
@@ -34,5 +36,6 @@ import javax.safetycritical.annotate.SCJAllowed;
  */
 @SCJAllowed
 public class BoundAsyncEventHandler extends AsyncEventHandler {
+
 
 }

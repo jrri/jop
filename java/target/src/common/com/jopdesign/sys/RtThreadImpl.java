@@ -24,6 +24,8 @@
 
 package com.jopdesign.sys;
 
+import javax.realtime.Schedulable;
+
 import com.jopdesign.io.IOFactory;
 import com.jopdesign.io.SysDevice;
 
@@ -136,6 +138,14 @@ public class RtThreadImpl {
 
 
 	static SysDevice sys = IOFactory.getFactory().getSysDevice();
+	
+	/*
+	 * A reference to the schedulable object (ManagedEventHandler or
+	 * ManagedLongEventHandler) associated with this RtThreadImpl object. The
+	 * reference is set when the Schedulable object is registered to its
+	 * corresponding mission.
+	 */
+	Schedulable schedOblect;
 
 
 	//	no synchronization necessary:
@@ -635,6 +645,16 @@ static void trace(int[] stack, int sp) {
 		fp = vp+args+loc;			// new fp can be calc. with vp and count of local vars
 	}
 }
+
+	void setSchedOblect(Schedulable schedulable) {
+		schedOblect = schedulable;
+
+	}
+	
+	Schedulable getSchedOblect() {
+		return schedOblect;
+
+	}
 
 
 

@@ -1,5 +1,6 @@
 package test.level1;
 
+import javax.realtime.AffinitySet;
 import javax.realtime.AperiodicParameters;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
@@ -45,9 +46,9 @@ public class MyMission extends Mission{
 		aleh.register();
 		
 		PriorityParameters eh0_prio = new PriorityParameters(13);
-		RelativeTime eh0_tart = new RelativeTime(0,0);
+		RelativeTime eh0_start = new RelativeTime(0,0);
 		RelativeTime eh0_period = new RelativeTime(1000, 0);
-		PeriodicParameters eh0_pparams = new PeriodicParameters(eh0_tart, eh0_period);
+		PeriodicParameters eh0_pparams = new PeriodicParameters(eh0_start, eh0_period);
 		
 		
 		StorageParameters eh0_storage = new StorageParameters(1024, null, 0, 0);
@@ -62,8 +63,7 @@ public class MyMission extends Mission{
 
 	@Override
 	public long missionMemorySize() {
-		// TODO Auto-generated method stub
-		return 2735;
+		return 4800*number;
 	}
 
 }

@@ -29,7 +29,7 @@ import test.cyclic.EventHandler;
 public class Level0Mission extends CyclicExecutive {
 
 	int id;
-	long missionMemory = 1024;
+	long missionMemory = 2048;
 	int totalPeriodicHandlers = 3;
 	
 	public Level0Mission(int id) {
