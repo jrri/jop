@@ -90,7 +90,7 @@ CLDC11=false
 #
 JDK16=false
 
-SCJLIBS=true
+SCJLIBS=false
 
 # Currently same hardware is used so all three cannot be "yes" at the same time
 # Remember to edit decode.vhd file and uncomment/comment the appropriate microcode
@@ -132,22 +132,39 @@ USE_SCOPES=true
 USE_SCOPECHECKS=true
 ADD_REF_INFO=false
 MEASURE=true
-JOP_CONF_STR=USE_SCOPES=$(USE_SCOPES) USE_SCOPECHECKS=$(USE_SCOPECHECKS) ADD_REF_INFO=$(ADD_REF_INFO) MEASURE=$(MEASURE)
+IMM_MEM_SIZE=90000
+JOP_CONF_STR=USE_SCOPES=$(USE_SCOPES) USE_SCOPECHECKS=$(USE_SCOPECHECKS) ADD_REF_INFO=$(ADD_REF_INFO) MEASURE=$(MEASURE) IMM_MEM_SIZE=$(IMM_MEM_SIZE)
 
-P1=test
-P2=scjlibs
-P3=StringTest
+P1=paper
+P2=libs/check/scj
+P3=Launcher
 
 #P1=paper
+#P2=libs/check/scj
+#P3=TestDIS
+
+#P1=paper
+#P2=libs/check
+#P3=Check
+
+#P1=test
 #P2=scjlibs
-#P3=NonSCJ_002
+#P3=WCATest
+
+#P1=app
+#P2=libcsp/src/system
+#P3=SCJApplication
+
+P1=test
+P2=test
+P3=TestClass
 
 #P1=paper
 #P2=scjlibs
 #P3=TestNonSCJ
 
 #P1=paper
-#P2=scjlibs/examples/hijac/cdx
+#P2=libs/examples/hijac/cdx
 #P3=Main
 
 #P1=rtapi
@@ -178,6 +195,10 @@ P3=StringTest
 #P2=test/level1
 #P3=MyLevel1App
 
+#P1=rtapi
+#P2=test/mixed
+#P3=MixedLevelApp
+
 #P1=test
 #P2=i2c
 #P3=HelloI2C
@@ -202,13 +223,33 @@ P3=StringTest
 #P2=org/reprap
 #P3=Main
 
-#P1=rtapi
-#P2=examples/safetycritical
-#P3=HelloSCJ
+#P1=paper
+#P2=udclock
+#P3=HelloClock
 
 #P1=rtapi
 #P2=test
 #P3=Test
+
+#P1=test
+#P2=misc
+#P3=TwoThreadsTest
+
+#P1=rtapi
+#P2=scjtck
+#P3=RunOnJop
+
+#P1=common
+#P2=com/jopdesign/sys
+#P3=MemoryTest
+
+#P1=bench
+#P2=jembench
+#P3=Main
+
+#P1=test
+#P2=gctest
+#P3=GCBench
 
 #
 # Run JVM Tests
@@ -288,7 +329,7 @@ ifeq ($(JDK16),true)
 	TARGET_SOURCE=$(TARGET_SRC_PATH)/common$(S)$(TARGET_SRC_PATH)/jdk_base$(S)$(TARGET_SRC_PATH)/jdk16$(S)$(TARGET_SRC_PATH)/rtapi$(S)$(TARGET_APP_SOURCE_PATH)
 else
 ifeq ($(SCJLIBS),true)
-	TARGET_SOURCE=$(TARGET_SRC_PATH)/common$(S)$(TARGET_SRC_PATH)/scjlibs$(S)$(TARGET_SRC_PATH)/rtapi$(S)$(TARGET_APP_SOURCE_PATH)
+	TARGET_SOURCE=$(TARGET_SRC_PATH)/common$(S)$(TARGET_SRC_PATH)/scjlibs#$(S)$(TARGET_SRC_PATH)/rtapi$(S)$(TARGET_APP_SOURCE_PATH)
 else
 	TARGET_SOURCE=$(TARGET_SRC_PATH)/common$(S)$(TARGET_SRC_PATH)/jdk_base$(S)$(TARGET_SRC_PATH)/jdk11$(S)$(TARGET_SRC_PATH)/rtapi$(S)$(TARGET_APP_SOURCE_PATH)
 endif
