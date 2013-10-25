@@ -12,6 +12,9 @@ import libcsp.csp.core.PacketCore;
 import libcsp.csp.core.Port;
 import libcsp.csp.core.ResourcePool;
 import libcsp.csp.handlers.RouteHandler;
+import libcsp.csp.interfaces.InterfaceI2C_A;
+import libcsp.csp.interfaces.InterfaceI2C_B;
+import libcsp.csp.interfaces.InterfaceLoopback;
 import libcsp.csp.util.Const;
 import libcsp.csp.util.Queue;
 
@@ -66,6 +69,12 @@ public abstract class ImmortalEntry {
 	public static Queue<PacketCore> packetsToBeProcessed;
 	
 	public static CRC32 crc32 = null;
+	
+	public static InterfaceI2C_A interfaceI2C_A = null;
+	public static InterfaceI2C_B interfaceI2C_B = null;
+	public static InterfaceLoopback interfaceLoopback = null;
+	
+	public static CSPManager manager = null;
 
 
 	public static void setup() {
@@ -86,13 +95,26 @@ public abstract class ImmortalEntry {
 		/* Initialize port table*/
 		initializePortTable();
 
+		/* Initialize the router's packet queue */
 		packetsToBeProcessed = new Queue<PacketCore>(Const.DEFAULT_PACKET_QUEUE_SIZE_ROUTING);
 		
+		/* If CRC is used, create a new CRC object to provide the functionality */
 		if (Const.CSP_USE_CRC32) {
 			crc32 = new CRC32();
 		}
+		
+		/* Get the loopback interface object */
+		interfaceLoopback = InterfaceLoopback.getInterface();
+		
+		/* Get the I2C interface objects */
+		interfaceI2C_A = InterfaceI2C_A.getInterface();
+		interfaceI2C_B = InterfaceI2C_B.getInterface();
+		
+		manager = new CSPManager();
 
+		/* Just a message to display the initial parameters of the application */ 
 		dumpInitialParameters();
+		
 		term.writeln("Setup ok...");
 
 	}
@@ -177,10 +199,10 @@ public abstract class ImmortalEntry {
 	}
 	
 	public static void dumpInitialParameters(){
-		term.writeln("Packets: "+ ImmortalEntry.resourcePool.packets.capacity);
-		term.writeln("Connections: "+ ImmortalEntry.resourcePool.connections.capacity);
-		term.writeln("Sockets: "+ ImmortalEntry.resourcePool.sockets.capacity);
-		term.writeln("Max. payload (bytes): "+ Const.MAX_PAYLOAD_SIZE_IN_BYTES);
+		term.writeln("Available packets per queue: "+ ImmortalEntry.resourcePool.packets.capacity);
+		term.writeln("Available Connections: "+ ImmortalEntry.resourcePool.connections.capacity);
+		term.writeln("Available Sockets: "+ ImmortalEntry.resourcePool.sockets.capacity);
+		term.writeln("Maximum packet payload (bytes): "+ Const.MAX_PAYLOAD_SIZE_IN_BYTES);
 	}
 
 }

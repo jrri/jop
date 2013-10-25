@@ -67,6 +67,7 @@ public class Queue<T extends IDispose> {
 	 * dequeue operation succeeds or the supplied timeout occurs
 	 */
 	public T dequeue(long timeout) {
+		
 		T value = null;
 
 		boolean waitForever = (timeout == ImmortalEntry.TIMEOUT_NONE);

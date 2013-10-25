@@ -5,7 +5,9 @@ import javax.realtime.PriorityParameters;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.annotate.Level;
+import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
+import javax.safetycritical.annotate.SCJRestricted;
 
 import libcsp.csp.CSPManager;
 import libcsp.csp.ImmortalEntry;
@@ -27,22 +29,17 @@ public class RouteHandler extends PeriodicEventHandler {
 	private TransportUDP transportExtensionUDP;
 	
 	public RouteHandler(PriorityParameters priority,
-			PeriodicParameters parameters, StorageParameters scp,
-			long scopeSize) {
+			PeriodicParameters parameters, StorageParameters scp, long scopeSize) {
 		super(priority, parameters, scp, scopeSize, "[router]");
-
 
 		transportExtensionUDP = new TransportUDP();
 
 	}
 
-
-
 	@Override
 	@SCJAllowed(Level.SUPPORT)
 	public void handleAsyncEvent() {
-		
-//		System.out.println(getName()+" pkts CT " + packetsToBeProcessed.count);
+		// System.out.println(getName()+" pkts CT " + packetsToBeProcessed.count);
 		PacketCore packet = ImmortalEntry.packetsToBeProcessed.dequeue(ImmortalEntry.TIMEOUT_SINGLE_ATTEMPT);
 
 		
@@ -111,4 +108,13 @@ public class RouteHandler extends PeriodicEventHandler {
 		//TODO: Is this a todo thing?
 		return transportExtensionUDP;
 	}
+	
+	@Override
+	@SCJAllowed(Level.SUPPORT)
+	@SCJRestricted(phase = Phase.CLEANUP)
+	public void cleanUp() {
+		// TODO Auto-generated method stub
+		System.out.println("cleanup router handler");
+	}
+
 }

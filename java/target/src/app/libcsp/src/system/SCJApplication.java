@@ -7,6 +7,7 @@ import libcsp.csp.app.ping.PingMission;
 public class SCJApplication {
 	
 	public static void main(String[] args) {
-		JopSystem.startMission(new PingMission());
+		JopSystem js = new JopSystem();
+		js.startMission(new PingMission());
 	}
 }

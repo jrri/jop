@@ -6,6 +6,7 @@ public class InterfaceI2C_A extends InterfaceI2C {
 
 	private static InterfaceI2C_A instance;
 
+	/* Singleton pattern requires special care when using scopes */
 	public static InterfaceI2C_A getInterface() {
 		if (instance == null) {
 			instance = new InterfaceI2C_A();

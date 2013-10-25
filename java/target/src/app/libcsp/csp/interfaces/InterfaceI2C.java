@@ -40,7 +40,7 @@ public abstract class InterfaceI2C implements IMACProtocol {
 		
 		/* Set the I2C interface to slave mode to be able to receive messages */
 		i2cPort.slaveMode();
-		
+
 		frameByteIndex = 0;
 		ImmortalEntry.resourcePool.putPacket(packet);
 		

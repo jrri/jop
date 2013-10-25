@@ -17,20 +17,22 @@ import libcsp.csp.interfaces.InterfaceLoopback;
 
 public abstract class CSPGenericMission extends Mission{
 	
-	protected CSPManager manager;
+//	protected CSPManager manager;
 	
 	/* A reference to the router handler */
-	protected RouteHandler routeHandler;
+//	protected RouteHandler routeHandler;
 	
 	/* Reference to packet interrupt handlers */
 	protected ISRHandler isrHandlers;
 	
 	/* Expected memory consumption for router handler */
-	protected StorageParameters routeHandlerStorageParameters;
+//	protected StorageParameters routeHandlerStorageParameters;
 	
-	protected PriorityParameters routingPriorityParameters;
+	/* Priority at which the router handler will execute */
+//	protected PriorityParameters routingPriorityParameters;
 	
-	protected PeriodicParameters routingPeriodicParameters;
+	/* Periodic release time for router handler */
+//	protected PeriodicParameters routingPeriodicParameters;
 	
 	/**
 	 * This must be the first invoked method in the mission initialization
@@ -45,39 +47,42 @@ public abstract class CSPGenericMission extends Mission{
 	public void init(int nodeAddress, int intNumber,
 			IMACProtocol interruptProtocolInterface) {
 		
-		manager = new CSPManager();
-
+		// TODO illegal field reference
+//		manager = new CSPManager();
+		
 		CSPManager.nodeAddress = (byte) nodeAddress;
+
 		ImmortalEntry.outgoingPorts = 0;
 
 		/* Initialize router handler with default memory parameters */
 		initializeDefaultRouteHandler();
-		
+				
 		initilaizeInterruptHandler(intNumber, interruptProtocolInterface);
 
-		manager.routeSet(nodeAddress, InterfaceLoopback.getInterface(), 0x0);
+		ImmortalEntry.manager.routeSet(nodeAddress, ImmortalEntry.interfaceLoopback, 0x0);
+		
 	}
 
 	private void initializeDefaultRouteHandler() {
 
-		final int ROUTING_HANDLER_RELEASE_PERIOD_IN_MS = 20;
+		final int ROUTING_HANDLER_RELEASE_PERIOD_IN_MS = 40;
 		final int ROUTING_HANDLER_PRIORITY = 20;
 		final int ROUTE_HANDLER_BACKING_STORE_SIZE_IN_BYTES = 2048;
 		final int ROUTE_HANDLER_SCOPE_SIZE_IN_BYTES = 1024;
 
-		routingPriorityParameters = new PriorityParameters(
+		PriorityParameters routingPriorityParameters = new PriorityParameters(
 				ROUTING_HANDLER_PRIORITY);
 
-		routingPeriodicParameters = new PeriodicParameters(new RelativeTime(0,
+		PeriodicParameters routingPeriodicParameters = new PeriodicParameters(new RelativeTime(0,
 				0), new RelativeTime(ROUTING_HANDLER_RELEASE_PERIOD_IN_MS, 0));
 
-		routeHandlerStorageParameters = new StorageParameters(
+		StorageParameters routeHandlerStorageParameters = new StorageParameters(
 				ROUTE_HANDLER_BACKING_STORE_SIZE_IN_BYTES, null, 0, 0);
 
-		routeHandler = new RouteHandler(routingPriorityParameters,
+		RouteHandler routeHandler = new RouteHandler(routingPriorityParameters,
 				routingPeriodicParameters, routeHandlerStorageParameters,
 				ROUTE_HANDLER_SCOPE_SIZE_IN_BYTES);
-
+		
 		routeHandler.register();
 	}
 	
@@ -87,7 +92,7 @@ public abstract class CSPGenericMission extends Mission{
 	 *            Total number of interrupt
 	 */
 	private void initilaizeInterruptHandler(int intNumber, IMACProtocol interruptProtocolInterface){
-		
+
 		ISRHandler isr = new ISRHandler(new StorageParameters(512, null), 256, interruptProtocolInterface);
 		isr.register(intNumber);
 		

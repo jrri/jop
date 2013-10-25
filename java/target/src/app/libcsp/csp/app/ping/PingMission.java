@@ -32,8 +32,8 @@ public class PingMission extends CSPGenericMission implements Safelet<Mission> {
 	@SCJAllowed(Level.SUPPORT)
 	@SCJRestricted(phase = Phase.INITIALIZATION)
 	public MissionSequencer<Mission> getSequencer() {
-		return new LinearMissionSequencer<Mission>(new PriorityParameters(20),
-				new StorageParameters(8000, null), false, this);
+		return new LinearMissionSequencer<Mission>(new PriorityParameters(1),
+				new StorageParameters(16000, null), false, this);
 	}
 
 	@Override
@@ -46,23 +46,19 @@ public class PingMission extends CSPGenericMission implements Safelet<Mission> {
 	@Override
 	@SCJAllowed(Level.SUPPORT)
 	protected void initialize() {
-		
-		/* Get the I2C interface objects */
-		InterfaceI2C_A interfaceI2C_A = InterfaceI2C_A.getInterface();
-		InterfaceI2C_B interfaceI2C_B = InterfaceI2C_B.getInterface();
-		
+
 		/* I2C MAC address is the device address */
-		interfaceI2C_A.initialize(ImmortalEntry.NODE_ADDRESS);
-		interfaceI2C_B.initialize(0);
-		
+		ImmortalEntry.interfaceI2C_A.initialize(ImmortalEntry.NODE_ADDRESS);
+		ImmortalEntry.interfaceI2C_B.initialize(0);
+
 		/* Initialize router task, interrupt tasks, and Loopback route */
-		init((byte) ImmortalEntry.NODE_ADDRESS, 2, interfaceI2C_B);
+		init((byte) ImmortalEntry.NODE_ADDRESS, 2, ImmortalEntry.interfaceI2C_B);
 		
 		/* Add a route to a node through I2C interface */
-		manager.routeSet(1, interfaceI2C_A, 1);
+		ImmortalEntry.manager.routeSet(1, ImmortalEntry.interfaceI2C_A, 1);
 		
 		/* Initialize application specific handlers */
-		initializePingHandler(5);
+		initializePingHandler(15);
 
 	}
 
@@ -70,14 +66,14 @@ public class PingMission extends CSPGenericMission implements Safelet<Mission> {
 	@SCJAllowed
 	public long missionMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 8000;
 	}
 	
 	private void initializePingHandler(int priority) {
 		
 		final int PING_HANDLER_BACKING_STORE_SIZE_IN_BYTES = 1024;
 		final int PING_HANDLER_SCOPE_SIZE_IN_BYTES = 800;
-		final int PING_HANDLER_RELEASE_PERIOD_IN_MS = 800;
+		final int PING_HANDLER_RELEASE_PERIOD_IN_MS = 1000;
 		final int PING_HANDLER_PRIORITY = priority;
 
 		PriorityParameters clientHandlerPriorityParameters = new PriorityParameters(
@@ -92,7 +88,9 @@ public class PingMission extends CSPGenericMission implements Safelet<Mission> {
 				clientHandlerPriorityParameters,
 				clientHandlerPeriodicParameters,
 				clientHandlerStorageParameters,
-				PING_HANDLER_SCOPE_SIZE_IN_BYTES, manager);
+				PING_HANDLER_SCOPE_SIZE_IN_BYTES, 
+				"[ping]: ",
+				ImmortalEntry.manager);
 
 		ping.register();
 	}

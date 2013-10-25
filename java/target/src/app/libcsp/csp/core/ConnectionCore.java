@@ -164,7 +164,9 @@ public class ConnectionCore implements IDispose, Connection {
 	 *         empty or the timeout expires
 	 */
 	public PacketCore read(int timeout) {
+
 		PacketCore packet = packets.dequeue(timeout);
+
 		if (packet != null) {
 			PacketCore packetCopy = new PacketCore(packet.header, packet.data);
 			ImmortalEntry.resourcePool.putPacket(packet);

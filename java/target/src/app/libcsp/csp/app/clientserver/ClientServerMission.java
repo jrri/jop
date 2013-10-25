@@ -84,7 +84,7 @@ public class ClientServerMission extends CSPGenericMission implements Safelet<Mi
 				clientHandlerPriorityParameters,
 				clientHandlerPeriodicParameters,
 				clientHandlerStorageParameters,
-				CLIENT_HANDLER_SCOPE_SIZE_IN_BYTES, manager, data);
+				CLIENT_HANDLER_SCOPE_SIZE_IN_BYTES, ImmortalEntry.manager, data);
 
 		client.register();
 	}
@@ -107,7 +107,7 @@ public class ClientServerMission extends CSPGenericMission implements Safelet<Mi
 				serverHandlerPriorityParameters,
 				serverHandlerPeriodicParameters,
 				serverHandlerStorageParameters,
-				SERVER_HANDLER_SCOPE_SIZE_IN_BYTES, manager);
+				SERVER_HANDLER_SCOPE_SIZE_IN_BYTES, ImmortalEntry.manager);
 
 		server.register();
 	}
