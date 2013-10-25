@@ -6,9 +6,9 @@ import com.jopdesign.io.I2CFactory;
 import com.jopdesign.io.I2Cport;
 import com.jopdesign.sys.RtThreadImpl;
 
-import csp.CSP;
-import csp.CSPconnection;
-//import csp.CSPmanager;
+import csp.Connection;
+import csp.Constants;
+import csp.ImmortalEntry;
 
 public class TestClient {
 
@@ -26,7 +26,7 @@ public class TestClient {
 
 		// Source IIC
 		I2Cport portA = fact.getI2CportA();
-		portA.initConf(SRC_ADDRESS);
+		portA.initialize(SRC_ADDRESS, true);
 
 		// Destination IIC
 //		I2Cport portB = fact.getI2CportB();
@@ -34,7 +34,7 @@ public class TestClient {
 //		portB.slaveMode();
 
 		// Initialize CSP buffer pool
-		CSP.initBufferPool();
+		ImmortalEntry.setup();
 
 		//CSPmanager manager = new CSPmanager();
 
@@ -43,7 +43,7 @@ public class TestClient {
 //		Server server = new Server(RtThreadImpl.MAX_PRIORITY-1, 2000);
 
 //		CSPconnection conn = new CSPconnection(SRC_ADDRESS, DES_ADDRESS, 0, 0, CSP.CSP_PRIO_NORM, 0, portA, portB);
-		CSPconnection conn = new CSPconnection(SRC_ADDRESS, DES_ADDRESS, 0, CSP.CSP_PING, CSP.CSP_PRIO_NORM, 0, portA);
+		Connection conn = new Connection(SRC_ADDRESS, DES_ADDRESS, 0, Constants.CSP_PING, Constants.CSP_PRIO_NORM, 0, portA);
 		client.connBind(conn);
 
 		client.data = new int[11];

@@ -4,8 +4,8 @@ import com.jopdesign.io.I2CFactory;
 import com.jopdesign.io.I2Cport;
 import com.jopdesign.sys.RtThreadImpl;
 
-import csp.CSP;
-import csp.CSPconnection;
+import csp.Connection;
+import csp.ImmortalEntry;
 
 public class TestServer {
 
@@ -21,14 +21,14 @@ public class TestServer {
 
 		// Source IIC
 		I2Cport portA = fact.getI2CportA();
-		portA.initConf(SRC_ADDRESS);
+		portA.initialize(SRC_ADDRESS, true);
 
 		// Initialize CSP buffer pool
-		CSP.initBufferPool();
+		ImmortalEntry.setup();
 
 		Server server = new Server(RtThreadImpl.MAX_PRIORITY, 0);
 
-		CSPconnection conn = new CSPconnection(SRC_ADDRESS, 0, 0, 0, portA);
+		Connection conn = new Connection(SRC_ADDRESS, 0, 0, 0, portA);
 		server.connBind(conn);
 
 		RtThreadImpl.startMission();

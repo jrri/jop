@@ -11,8 +11,9 @@ public class WatchDogAppSCJ {
 		Safelet<Mission> safelet = new WatchDogSaflet();
 
 		System.out.println("Safelet created");
-
-		JopSystem.startMission(safelet);
+		JopSystem js = new JopSystem();
+		
+		js.startMission(safelet);
 
 	}
 

@@ -64,7 +64,7 @@ public class WatchdogHandler extends PeriodicEventHandler {
 		count++;
 		if (count == 1000) {
 			cleanUp();
-			Mission.getCurrentMission().requestSequenceTermination();
+			Mission.getCurrentMission().requestTermination();
 		}
 	}
 

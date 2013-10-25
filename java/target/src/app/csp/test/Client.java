@@ -3,10 +3,10 @@ package csp.test;
 import joprt.RtThread;
 
 import com.jopdesign.io.I2Cport;
-import csp.CSP;
-import csp.CSPbuffer;
-import csp.CSPconnection;
-import csp.CSPmanager;
+import csp.Buffer;
+import csp.Connection;
+import csp.ImmortalEntry;
+import csp.Services;
 
 public class Client extends RtThread {
 
@@ -17,7 +17,7 @@ public class Client extends RtThread {
 //	int src_address;
 //	int des_address;
 
-	CSPconnection conn;
+	Connection conn;
 	public int[] data;
 
 	int source;
@@ -30,7 +30,7 @@ public class Client extends RtThread {
 //
 //	}
 
-	public void connBind(CSPconnection conn){
+	public void connBind(Connection conn){
 
 		this.conn = conn;
 
@@ -41,9 +41,7 @@ public class Client extends RtThread {
 
 		for(;;){
 
-
-
-		conn.tx_port.masterTX();
+//		conn.tx_port.masterTX();
 
 		// Payload data
 
@@ -52,7 +50,7 @@ public class Client extends RtThread {
 		}
 
 		// Send CSP packet
-		CSPmanager.i2c_send(conn, data);
+		Services.sendPacket(conn, data);
 
 		// Wait until we have valid data in the rx buffer
 //		while (((conn.rx_port.status & I2Cport.DATA_VALID)) == 0);
@@ -91,7 +89,7 @@ public class Client extends RtThread {
 
 		// Can this instruction execute fast enough to avoid curruption of
 		// data in the RX buffer?
-		conn.tx_port.flushFifo();
+		conn.tx_port.flushTXBuff();
 		conn.tx_port.slaveMode();
 
 //		long now = System.currentTimeMillis();
@@ -104,17 +102,17 @@ public class Client extends RtThread {
 
 //		}
 
-		if (((conn.tx_port.status & I2Cport.DATA_VALID)) == 0){
+		if (((conn.tx_port.status & I2Cport.DATA_RDY)) == 0){
 
 			System.out.println("Request timeout");
 
 		}else {
 
 			// Get one free CSPbuffer
-			CSPbuffer buffer = CSP.getCSPbuffer();
+			Buffer buffer = ImmortalEntry.bufferPool.getCSPbuffer();
 
 			// Read the data in the RX buffer
-			CSPmanager.i2c_callback(conn, buffer);
+			Services.receivePacket(conn, buffer);
 
 			// Process header
 			conn.prio = buffer.header[0] >>> 6;
@@ -132,7 +130,7 @@ public class Client extends RtThread {
 			// Print received data
 			System.out.println("Rply from "+source );
 
-			CSP.freeCSPbuffer(buffer);
+			ImmortalEntry.bufferPool.freeCSPbuffer(buffer);
 
 //			for (int i=0; i < buffer.length.length; i++){
 //				System.out.println(buffer.length[i]);

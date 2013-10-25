@@ -4,10 +4,10 @@ import joprt.RtThread;
 
 import com.jopdesign.io.I2Cport;
 
-import csp.CSP;
-import csp.CSPbuffer;
-import csp.CSPconnection;
-import csp.CSPmanager;
+import csp.Buffer;
+import csp.Connection;
+import csp.ImmortalEntry;
+import csp.Services;
 
 public class Watchdog extends RtThread {
 
@@ -15,11 +15,11 @@ public class Watchdog extends RtThread {
 		super(prio, us);
 	}
 
-	CSPconnection conn;
+	Connection conn;
 	public int[] slaves;
 	int source;
 
-	public void connBind(CSPconnection conn) {
+	public void connBind(Connection conn) {
 
 		this.conn = conn;
 
@@ -34,10 +34,10 @@ public class Watchdog extends RtThread {
 
 				conn.destination = slaves[i];
 
-				conn.tx_port.masterTX();
+//				conn.tx_port.masterTX();
 
 				// Send CSP ping packet
-				CSPmanager.i2c_send(conn, null);
+				Services.sendPacket(conn, null);
 
 				// Can this instruction execute fast enough to avoid corruption
 				// of data in the RX buffer?
@@ -45,7 +45,7 @@ public class Watchdog extends RtThread {
 
 				sleepMs(TestWatchdog.TIMEOUT);
 
-				if (((conn.tx_port.status & I2Cport.DATA_VALID)) == 0) {
+				if (((conn.tx_port.status & I2Cport.DATA_RDY)) == 0) {
 
 					System.out.println("Timeout " + conn.destination);
 					// Slave not responding, take actions
@@ -53,10 +53,10 @@ public class Watchdog extends RtThread {
 				} else {
 
 					// Get one free CSPbuffer
-					CSPbuffer buffer = CSP.getCSPbuffer();
+					Buffer buffer = ImmortalEntry.bufferPool.getCSPbuffer();
 
 					// Read the data in the RX buffer
-					CSPmanager.i2c_callback(conn, buffer);
+					Services.receivePacket(conn, buffer);
 
 					// Process header
 					conn.prio = buffer.header[0] >>> 6;
@@ -76,7 +76,7 @@ public class Watchdog extends RtThread {
 					// Print received data
 					System.out.println("Reply from " + source);
 
-					CSP.freeCSPbuffer(buffer);
+					ImmortalEntry.bufferPool.freeCSPbuffer(buffer);
 
 				}
 			}

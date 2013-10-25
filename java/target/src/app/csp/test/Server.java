@@ -3,10 +3,10 @@ package csp.test;
 import com.jopdesign.io.I2Cport;
 
 import joprt.RtThread;
-import csp.CSP;
-import csp.CSPbuffer;
-import csp.CSPconnection;
-import csp.CSPmanager;
+import csp.Buffer;
+import csp.Connection;
+import csp.ImmortalEntry;
+import csp.Services;
 
 public class Server extends RtThread {
 
@@ -17,10 +17,10 @@ public Server(int prio, int us) {
 	}
 
 
-	CSPconnection conn;
+	Connection conn;
 	public int[] data;
 
-	public void connBind(CSPconnection conn){
+	public void connBind(Connection conn){
 
 		this.conn = conn;
 
@@ -31,16 +31,16 @@ public Server(int prio, int us) {
 
 		for(;;){
 
-			conn.rx_port.flushFifo();
+			conn.rx_port.flushTXBuff();
 
 		// Wait until we have valid data in the rx buffer
-		while (((conn.rx_port.status & I2Cport.DATA_VALID)) == 0);
+		while (((conn.rx_port.status & I2Cport.DATA_RDY)) == 0);
 
 		// Get one free CSPbuffer
-		CSPbuffer buffer = CSP.getCSPbuffer();
+		Buffer buffer = ImmortalEntry.bufferPool.getCSPbuffer();
 
 		// Read the data in the RX buffer
-		CSPmanager.i2c_callback(conn, buffer);
+		Services.receivePacket(conn, buffer);
 
 		// Process header and set missing connection parameters
 		conn.prio = buffer.header[0] >>> 6;
@@ -59,19 +59,19 @@ public Server(int prio, int us) {
 
 		// Change to master mode, flush buffers
 //		conn.rx_port.flushFifo();
-		conn.rx_port.masterTX();
+//		conn.rx_port.masterTX();
 
 		// Send CSP packet
-		CSPmanager.i2c_send(conn, buffer.data);
+		Services.sendPacket(conn, buffer.data);
 
 		while((conn.tx_port.status & I2Cport.BUS_BUSY) == 1);
 
 		// Free RX buffer
-		CSP.freeCSPbuffer(buffer);
+		ImmortalEntry.bufferPool.freeCSPbuffer(buffer);
 
 		// Can this instruction execute fast enough to avoid corruption of
 		// data in the RX buffer?
-		conn.rx_port.flushFifo();
+		conn.rx_port.flushTXBuff();
 		conn.rx_port.slaveMode();
 
 		waitForNextPeriod();

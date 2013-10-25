@@ -4,8 +4,9 @@ import com.jopdesign.io.I2CFactory;
 import com.jopdesign.io.I2Cport;
 import com.jopdesign.sys.RtThreadImpl;
 
-import csp.CSP;
-import csp.CSPconnection;
+import csp.Connection;
+import csp.Constants;
+import csp.ImmortalEntry;
 
 public class TestWatchdog {
 
@@ -20,13 +21,13 @@ public class TestWatchdog {
 
 		// Source IIC
 		I2Cport portA = fact.getI2CportA();
-		portA.initConf(SRC_ADDRESS);
+		portA.initialize(SRC_ADDRESS, true);
 
 		// Initialize CSP buffer pool
-		CSP.initBufferPool();
+		ImmortalEntry.setup();
 
 		Watchdog WD = new Watchdog(RtThreadImpl.MAX_PRIORITY, 20000);
-		CSPconnection conn = new CSPconnection(SRC_ADDRESS, 0, 0, CSP.CSP_PING, CSP.CSP_PRIO_NORM, 0, portA);
+		Connection conn = new Connection(SRC_ADDRESS, 0, 0, Constants.CSP_PING, Constants.CSP_PRIO_NORM, 0, portA);
 
 		WD.connBind(conn);
 		WD.slaves = new int[NUM_SLAVES];
