@@ -2,6 +2,8 @@ package hwScopeEx.nbody;
 
 import java.util.Random;
 
+import javax.safetycritical.ManagedMemory;
+
 import com.jopdesign.sys.Memory;
 
 /*
@@ -109,7 +111,9 @@ public class NBodyScoped {
 		
 //		COUNT_REF = true;
 	
-		m.enterPrivateMemory(512, nBodyCalc);
+//		m.enterPrivateMemory(512, nBodyCalc);
+		ManagedMemory.enterPrivateMemory(512, nBodyCalc);
+		
 		
 		double total_time = time/ITERATIONS;
 

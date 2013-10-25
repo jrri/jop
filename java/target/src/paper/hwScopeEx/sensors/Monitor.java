@@ -1,5 +1,7 @@
 package hwScopeEx.sensors;
 
+import javax.safetycritical.ManagedMemory;
+
 import joprt.RtThread;
 
 import com.jopdesign.sys.Memory;
@@ -72,7 +74,7 @@ public class Monitor {
 			 * When the enterPrivate() method returns, we have the necessary
 			 * information to take a decision (i.e. start some actuator)
 			 */ 
-			Memory m = Memory.getCurrentMemory();
+//			Memory m = Memory.getCurrentMemory();
 
 			time = 0;
 			for(int k=0;k<SAMPLES;k++){
@@ -80,11 +82,13 @@ public class Monitor {
 			
 			t1 = System.currentTimeMillis();
 			
-			m.enterPrivateMemory(Monitor.S_SIZE, sensorCalibrate);
+//			m.enterPrivateMemory(Monitor.S_SIZE, sensorCalibrate);
+			ManagedMemory.enterPrivateMemory(Monitor.S_SIZE, sensorCalibrate);
 			
 			for(int i=0; i<Monitor.NO_OF_SENSORS; i++){
 				sensorMeassure.setIdx(i);
-				m.enterPrivateMemory(Monitor.S_SIZE, sensorMeassure);	
+//				m.enterPrivateMemory(Monitor.S_SIZE, sensorMeassure);
+				ManagedMemory.enterPrivateMemory(Monitor.S_SIZE, sensorMeassure);
 			}
 			
 			//System.out.println(meassurements[0].average);
