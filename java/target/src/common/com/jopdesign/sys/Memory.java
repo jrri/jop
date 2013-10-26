@@ -383,4 +383,3 @@ public class Memory {
 		allocBsPtr = endLocalPtr + 1;
 	}
 	
-}
