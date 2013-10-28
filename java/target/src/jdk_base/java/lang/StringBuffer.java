@@ -64,9 +64,11 @@ public final class StringBuffer implements CharSequence {
 		// count = str.count;
 		count = str.length();
 		value = new char[count];
+		append(str);
+
 		//TODO: System.arraycopy()
-		for (int i = 0; i < count; ++i)
-			value[i] = str.value[i];
+		//for (int i = 0; i < count; ++i)
+		//	value[i] = str.value[i];
 		// str.getChars(0, count, value, 0);
 	}
 
