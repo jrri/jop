@@ -14,7 +14,7 @@ import com.jopdesign.sys.Native;
 import libs.lang.SafeStringBuilder;
 
 public class TestSafeStringBuilder extends PeriodicEventHandler {
-	
+
 	public TestSafeStringBuilder(PriorityParameters priority,
 			PeriodicParameters release, StorageParameters storage,
 			long scopeSize, String name) {
@@ -26,9 +26,9 @@ public class TestSafeStringBuilder extends PeriodicEventHandler {
 	public void handleAsyncEvent() {
 
 		System.out.println("---- SafeStringBuilder tests ---");
-		
+
 		TestHelper testHelper = new TestHelper();
-		
+
 		for (int i = 0; i < 9; i++) {
 			testHelper.test = i;
 			ManagedMemory.enterPrivateMemory(700, testHelper);
@@ -120,7 +120,9 @@ public class TestSafeStringBuilder extends PeriodicEventHandler {
 					fixture.append(extra);
 				} catch (IllegalStateException e) {
 					fin = (int) mm.memoryConsumed();
-					assertEquals(9, fin - init, 4);
+					
+					/* Preallocated exceptions do not consume scope memory */
+					assertEquals(0, fin - init, 4);
 				}
 
 				break;
@@ -164,20 +166,17 @@ public class TestSafeStringBuilder extends PeriodicEventHandler {
 
 			case 8:
 
-				/* Does not work in jop due to constant string layout */
 				String hello = new String("Hello");
 				String world = new String("World");
-				
-				fixture = new SafeStringBuilder(hello);
+
+				fixture = new SafeStringBuilder(10);
 
 				init = (int) mm.memoryConsumed();
-				try {
-					fixture.insert(0, world);
-				} catch (Exception e) {
-					fin = (int) mm.memoryConsumed();
-					/* dummy test */
-					assertEquals(9, fin-init, 8);
-				}
+				fixture.insert(0, hello);
+				fixture.insert(5, world);
+				fin = (int) mm.memoryConsumed();
+				
+				assertEquals(0, fin - init, 8);
 
 				break;
 

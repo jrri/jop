@@ -109,7 +109,9 @@ public class TestSafeVector extends PeriodicEventHandler {
 					fixture.elementAt(100);
 				} catch (ArrayIndexOutOfBoundsException e) {
 					fin = (int) mm.memoryConsumed();
-					assertEquals(9, fin - init, 3);
+					
+					/* Preallocated exceptions do not consume scope memory */
+					assertEquals(0, fin - init, 3);
 				}
 				
 				break;

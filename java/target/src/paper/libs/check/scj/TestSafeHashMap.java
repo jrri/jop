@@ -157,7 +157,7 @@ public class TestSafeHashMap extends PeriodicEventHandler {
 				es.iterator();
 				fin = (int) mm.memoryConsumed();
 
-				assertEquals(12, fin-init, 3);
+				assertEquals(12, fin-init, 5);
 				
 				break;
 				
