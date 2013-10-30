@@ -40,9 +40,6 @@ package java.lang;
 
 import java.io.UnsupportedEncodingException;
 
-import com.jopdesign.sys.GC;
-import com.jopdesign.sys.Native;
-
 public final class String implements CharSequence {
 	
 	/**
@@ -51,19 +48,11 @@ public final class String implements CharSequence {
 	 */
 	final char[] value;
 	
-	/** The offset is the first index of the storage that is used. */
-	private int offset;
-	
-	/** The count is the number of characters in the String. */
-	private int count;
-
 	/**
 	 * Creates an empty String (length 0). Unless you really need a new object,
 	 * consider using <code>""</code> instead. CLCD 1.0
 	 */
 	public String() {
-		this.offset = 0;
-        this.count = 0;
 		value = "".value;
 	}
 
@@ -126,8 +115,6 @@ public final class String implements CharSequence {
 			cbuf[i] = (char) data[i + offset];
 		}
 
-		this.offset = 0;
-        this.count = count;
 		this.value = cbuf;
 
 	}
@@ -181,8 +168,6 @@ public final class String implements CharSequence {
 			cbuf[i] = (char) data[i + offset];
 		}
 
-		this.offset = 0;
-        this.count = cbuf.length;
 		this.value = cbuf;
 
 	}
@@ -231,9 +216,6 @@ public final class String implements CharSequence {
 		value = new char[count];
 		for (int i = 0; i < count; ++i)
 			value[i] = ca[i];
-		
-		this.offset = 0;
-        this.count = value.length;
 	}
 
 	/**
@@ -273,8 +255,6 @@ public final class String implements CharSequence {
 			value[i] = data[i + offset];
 		}
 		// System.arraycopy(data, offset, value, 0, count);
-		this.offset = 0;
-        this.count = count;
 	}
 
 	/**
@@ -288,8 +268,6 @@ public final class String implements CharSequence {
 	 */
 	public String(String str) {
 		value = str.value;
-		this.offset = 0;
-        this.count = str.count;
 	}
 
 	/**
@@ -310,9 +288,6 @@ public final class String implements CharSequence {
 			// System.arraycopy(buffer.value, 0, value, 0, count);
 			for (int i = 0; i < count; i++)
 				value[i] = buffer.value[i];
-			
-			this.count = count;
-	        this.offset = 0;
 		}
 	}
 
@@ -444,7 +419,7 @@ public final class String implements CharSequence {
 		for (int i = 0; i < srcEnd - srcBegin; ++i)
 			dst[dstBegin + i] = value[srcBegin + i];
 	}
-
+	
 	public int hashCode() {
 
 		// Compute the hash code using a local variable to be reentrant.
@@ -741,16 +716,6 @@ public final class String implements CharSequence {
 		return new String(data, offset, count);
 	}
 	
-    /**
-     * Copy characters from this string into dst starting at dstBegin.
-     * This method doesn't perform any range checking.
-     * 
-     * @note should be package protected
-     */
-    public void getChars(char[] dst, int dstBegin) {
-        System.arraycopy(value, offset, dst, dstBegin, count);
-    }
-    
     /**
      * Code shared by String and StringBuffer to do searches. The
      * source is the character array being searched, and the target
