@@ -1051,7 +1051,7 @@ abstract class SafeAbstractStringBuilder implements Appendable, CharSequence {
 		// Could be done with sys.arrayCopy but String.value and String.count are private
 		// System.arraycopy(str.value, 0, value, offset, str.count)
 		
-		str.getChars(value, offset);
+		str.getChars(0, len, value, offset);
 		count = newCount;
 		return this;
 	}
