@@ -53,6 +53,8 @@ public class PingHandler extends PeriodicEventHandler {
 
 			if (response != null)
 				System.out.println("Response: " + response.readContent());
+			else
+				System.out.println("Ping timeout");
 
 			conn.close();
 		}

@@ -38,6 +38,12 @@ public abstract class InterfaceI2C implements IMACProtocol {
 		
 		i2cPort.write(packetDSTNode.nextHopMacAddress, frame);
 		
+		while((i2cPort.status & I2Cport.BUS_BUSY) != 0){
+			
+		}
+		
+		i2cPort.control = i2cPort.control & I2Cport.CLEAR_STRT;
+		
 		/* Set the I2C interface to slave mode to be able to receive messages */
 		i2cPort.slaveMode();
 
@@ -91,6 +97,10 @@ public abstract class InterfaceI2C implements IMACProtocol {
 	
 	public int position(int index) {
 		return (BYTE_SHIFT_COUNTER - index)*8;
+	}
+	
+	public void disable(){
+		i2cPort.disable();
 	}
 
 
