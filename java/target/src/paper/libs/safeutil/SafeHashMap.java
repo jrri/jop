@@ -118,7 +118,9 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
     /**
      * The default initial capacity - MUST be a power of two.
      */
-    static final int DEFAULT_INITIAL_CAPACITY = 16;
+    static final int DEFAULT_CAPACITY = 16;
+    
+    static final int DEFAULT_ENTRIES = 16; 
 
     /**
      * The maximum capacity, used if a higher value is implicitly specified
@@ -131,7 +133,13 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 	 * The table holding entries indexed by the hash function. Length MUST
 	 * Always be a power of two.
 	 */
-    public final Entry<K,V>[] table;
+    final Entry<K,V>[] table;
+    
+	/**
+	 * An array representing pre-allocated Entry objects. The number of
+	 * pre-allocated Entry objects is equal to the capacity of the SafeHashMap
+	 */
+    final Entry<K,V>[] entries;
 
     /**
      * The number of key-value mappings contained in this map.
@@ -146,13 +154,6 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 	 */
     volatile int modCount;
     
-	/**
-	 * Constructs an empty <tt>SafeHashMap</tt> with the specified capacity.
-	 * 
-	 * @param totalCapacity
-	 *            the capacity
-	 */
-    
     static final IllegalArgumentException negInitCapacityExc;
     static final IllegalStateException noFreeEntriesExc;
     static final ConcurrentModificationException concModExc;
@@ -161,61 +162,46 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
     
 	static {
 		negInitCapacityExc = new IllegalArgumentException(
-				"Negative initial capacity");
+				"Negative or not power of two initial capacity");
 		noFreeEntriesExc = new IllegalStateException("No more free entries");
 		concModExc = new ConcurrentModificationException();
 		noSuchElemExc = new NoSuchElementException();
 		illegalStateExc = new IllegalStateException();
 	}
 
-    // WCMEM = 46 + 13*totalCapacity
+    // WCMEM = 46 + 13*entriesSize
     // MOD
-    public SafeHashMap(int totalCapacity) {
+    public SafeHashMap(final int tableSize, final int entriesSize) {
     	
-        if (totalCapacity < 0)
+        if (tableSize <= 0)
             throw negInitCapacityExc;
         
-        if (totalCapacity > MAXIMUM_CAPACITY)
-            totalCapacity = MAXIMUM_CAPACITY;
-        
-		/*
-		 * Find a power of 2 >= initialCapacity. The original code used the
-		 * following loop:
-		 * 
-		 * int capacity = 1; 
-		 * while (capacity < initialCapacity) 
-		 * 	capacity <<= 1;
-		 * 
-		 * that can execute up to 30 times. The code below instead is more efficient and 
-		 * executed in a fixed amount of steps.
-		 */
-		totalCapacity -= 1;
-		totalCapacity |= totalCapacity >> 1;
-		totalCapacity |= totalCapacity >> 2;
-		totalCapacity |= totalCapacity >> 4;
-		totalCapacity |= totalCapacity >> 8;
-		totalCapacity |= totalCapacity >> 16;
-		totalCapacity++;
+		/* Force initial capacity to be power of two */
+		if ((tableSize & (tableSize - 1)) != 0)
+			throw negInitCapacityExc;
 
-        table = new Entry[totalCapacity];
+		if (tableSize > MAXIMUM_CAPACITY) {
+			table = new Entry[MAXIMUM_CAPACITY];
+		} else {
+			table = new Entry[tableSize];
+		}
         
        	/* Initialize Entry pool */
-    	freeEntries = new Entry[table.length];
-    	
+    	entries = new Entry[entriesSize];
+
     	/* Preallocate Entries into the entry pool */
-    	for(int i=0; i<table.length; i++){
-        	freeEntries[i] = new Entry<K, V>();
+    	for(int i=0; i<tableSize; i++){
+        	entries[i] = new Entry<K, V>();
     	}
     	
     	/* Initialize the views of the HashMap */
+    	
     	// WCMEM = 7
 		entrySet = new EntrySet();
 		// WCMEM = 7
 		keySet = new KeySet();
 		// WCMEM = 7
 		values = new Values();
-        
-        init();
     }
 
     /**
@@ -225,7 +211,7 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
     // WCMEM = 254
     // MOD
     public SafeHashMap() {
-    	this(DEFAULT_INITIAL_CAPACITY);
+    	this(DEFAULT_CAPACITY, DEFAULT_ENTRIES);
         init();
     }
 
@@ -247,12 +233,6 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 //    }
 
     /* internal utilities */
-
-	/**
-	 * An array representing pre-allocated Entry objects. The number of
-	 * pre-allocated Entry objects is equal to the capacity of the SafeHashMap
-	 */
-    final Entry<K,V>[] freeEntries;
 
     /**
      * Initialization hook for subclasses. This method is called
@@ -336,6 +316,7 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
      *
      * @see #put(Object, Object)
      */
+    // MOD
     // WCMEM = 0
     @MemSafe(risk ={MemoryRisk.NONE})
 	public V get(Object key) {
@@ -346,16 +327,29 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 		int hash = hash(key.hashCode());
 		
 		/*
-		 * The bound for this loop will be equal to the capacity of the
-		 * SafeHashMap, as in the worst case, for the worst hash function, all
-		 * elements will collide into the same bucket table
+		 * The bound for this loop will be equal to the number of free entries
+		 * of the SafeHashMap. In the worst case, for the worst hash function in
+		 * the world, all elements will collide into the same bucket table. To
+		 * make the search is made WCET analyzable like this:
 		 */
-		for (Entry<K, V> e = table[indexFor(hash, table.length)]; e != null; e = e.next) {
-			Object k;
-
-			if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
-				return e.value;
+		Entry<K, V> e = table[indexFor(hash, table.length)];
+		for (int i = 0; i < entries.length; i++) {
+			if (e != null) {
+				Object k;
+				if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
+					return e.value;
+				e = e.next;
+			}
 		}
+		
+		// Original code:
+		//
+		//	for (Entry<K, V> e = table[indexFor(hash, table.length)]; e != null; e = e.next) {
+		//		Object k;
+		//
+		//		if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
+		//			return e.value;
+		//	}
 
 		return null;
 	}
@@ -367,19 +361,27 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
      * operations (get and put), but incorporated with conditionals in
      * others.
      */
+    // MOD
     // WCMEM = 0
     @MemSafe(risk ={MemoryRisk.NONE})
     private V getForNullKey() {
     	
 		/*
-		 * The bound for this loop will be equal to the capacity of the
-		 * SafeHashMap, as in the worst case, for the worst hash function, all
-		 * elements will collide into the same bucket table
+		 * The bound for this loop will be equal to the number of free entries
+		 * of the SafeHashMap. In the worst case, for the worst hash function in
+		 * the world, all elements will collide into the same bucket table. To
+		 * make the search is made WCET analyzable like this:
 		 */
-        for (Entry<K,V> e = table[0]; e != null; e = e.next) {
-            if (e.key == null)
-                return e.value;
-        }
+		Entry<K, V> e = table[0];
+		for (int i = 0; i < entries.length; i++) {
+			if (e != null) {
+				if (e.key == null)
+					return e.value;
+
+				e = e.next;
+			}
+		}
+        
         return null;
     }
 
@@ -402,6 +404,7 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
      * HashMap.  Returns null if the HashMap contains no mapping
      * for the key.
      */
+    // MOD
     // WCMEM = 0
     @MemSafe(risk ={MemoryRisk.NONE})
 	final Entry<K, V> getEntry(Object key) {
@@ -413,11 +416,16 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 		 * SafeHashMap, as in the worst case, for the worst hash function, all
 		 * elements will collide into the same bucket table
 		 */
-		for (Entry<K, V> e = table[indexFor(hash, table.length)]; e != null; e = e.next) {
-			Object k;
-			if (e.hash == hash
-					&& ((k = e.key) == key || (key != null && key.equals(k))))
-				return e;
+		Entry<K, V> e = table[indexFor(hash, table.length)];
+		for (int i = 0; i < entries.length; i++) {
+			if (e != null) {
+				Object k;
+				if (e.hash == hash && ((k = e.key) == key || 
+						(key != null && key.equals(k))))
+					return e;
+				
+				e = e.next;
+			}
 		}
 		
 		return null;
@@ -447,13 +455,19 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 		int hash = hash(key.hashCode());
 		int i = indexFor(hash, table.length);
 		
-		for (Entry<K, V> e = table[i]; e != null; e = e.next) {
-			Object k;
-			if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
-				V oldValue = e.value;
-				e.value = value;
-				e.recordAccess(this);
-				return oldValue;
+		/* If the entry already exists */
+		Entry<K, V> e = table[i];
+		for (int j = 0; j < entries.length; j++) {
+			if (e != null) {
+				Object k;
+				if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
+					V oldValue = e.value;
+					e.value = value;
+					e.recordAccess(this);
+					return oldValue;
+				}
+
+				e = e.next;
 			}
 		}
 
@@ -466,23 +480,40 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
     /**
      * Offloaded version of put for null keys
      */
+	// MOD
 	// WCMEM = 9
     @MemSafe(risk = {MemoryRisk.UNREFERENCED_OBJ})
     private V putForNullKey(V value) {
     	
 		/*
-		 * The bound for this loop will be equal to the capacity of the
-		 * SafeHashMap, as in the worst case, for the worst hash function, all
-		 * elements will collide into the same bucket table
+		 * The bound for this loop will be equal to the number of free entries
+		 * of the SafeHashMap. In the worst case, for the worst hash function in
+		 * the world, all elements will collide into the same bucket table. To
+		 * make the search is made WCET analyzable like this:
 		 */
-        for (Entry<K,V> e = table[0]; e != null; e = e.next) {
-            if (e.key == null) {
-                V oldValue = e.value;
-                e.value = value;
-                e.recordAccess(this);
-                return oldValue;
-            }
-        }
+		Entry<K, V> e = table[0];
+		for (int i = 0; i < entries.length; i++) {
+			if (e != null) {
+				if (e.key == null) {
+					V oldValue = e.value;
+					e.value = value;
+					e.recordAccess(this);
+					return oldValue;
+				}
+				e = e.next;
+			}
+		}
+        
+        // Original code:
+        //
+        //   for (Entry<K,V> e = table[0]; e != null; e = e.next) {
+        //    	if (e.key == null) {
+        //        V oldValue = e.value;
+        //        e.value = value;
+        //        e.recordAccess(this);
+        //        return oldValue;
+        //      }
+        //    }
         
         modCount++;
         addEntry(0, null, value, 0);
@@ -574,6 +605,7 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 	 * SafeHashMap. Returns null if the SafeHashMap contains no mapping for this
 	 * key.
 	 */
+    // MOD
 	// WCMEM = 0
     @MemSafe(risk = {MemoryRisk.UNREFERENCED_OBJ})
 	final Entry<K, V> removeEntryForKey(Object key) {
@@ -589,22 +621,24 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 		 * SafeHashMap, as in the worst case, for the worst hash function, all
 		 * elements will collide into the same bucket table
 		 */
-		while (e != null) {
-			Entry<K, V> next = e.next;
-			Object k;
-			if (e.hash == hash
-					&& ((k = e.key) == key || (key != null && key.equals(k)))) {
-				modCount++;
-				size--;
-				if (prev == e)
-					table[i] = next;
-				else
-					prev.next = next;
-				e.recordRemoval(this);
-				return e;
+		for (int j = 0; j < entries.length; j++) {
+			if (e != null) {
+				Entry<K, V> next = e.next;
+				Object k;
+				if (e.hash == hash
+						&& ((k = e.key) == key || (key != null && key.equals(k)))) {
+					modCount++;
+					size--;
+					if (prev == e)
+						table[i] = next;
+					else
+						prev.next = next;
+					e.recordRemoval(this);
+					return e;
+				}
+				prev = e;
+				e = next;
 			}
-			prev = e;
-			e = next;
 		}
 
 		return e;
@@ -613,7 +647,7 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
     /**
      * Special version of remove for EntrySet.
      */
-    //MOD
+    // MOD
 	// WCMEM = 0
 	final Entry<K, V> removeMapping(Object o) {
 
@@ -634,7 +668,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 		 * SafeHashMap, as in the worst case, for the worst hash function, all
 		 * elements will collide into the same bucket table
 		 */
-		while (e != null) {
+		for (int j = 0; j < entries.length; j++) {
+			if (e != null) {
 			Entry<K, V> next = e.next;
 			if (e.hash == hash && e.equals(entry)) {
 				modCount++;
@@ -648,6 +683,7 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 			}
 			prev = e;
 			e = next;
+			}
 		}
 
 		/* Entry is returned to pool in the EntrySet.remove method */
@@ -658,28 +694,30 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 	 * Removes all of the mappings from this map. The map will be empty after
 	 * this call returns.
 	 */
-	//MOD
+	// MOD
 	// WCMEM = 0
-    @MemSafe(risk = {MemoryRisk.OBJ_REF_TO_NULL})
-    public void clear() {
-        
-    	modCount++;
-        for (int i = 0; i < table.length; i++){
-        	Entry<K,V> e = table[i];
-        	
+	@MemSafe(risk = { MemoryRisk.OBJ_REF_TO_NULL })
+	public void clear() {
+
+		modCount++;
+		for (int i = 0; i < table.length; i++) {
+			Entry<K, V> e = table[i];
+
 			/*
 			 * The bound for this loop will be equal to the capacity of the
 			 * SafeHashMap, as in the worst case, for the worst hash function,
 			 * all elements will collide into the same index in the table
 			 */
-        	while(e != null){
-        		Entry<K,V> next = e.next;
-        		e.clear();
-        		e = next;
-        	}
-        }
-        size = 0;
-    }
+			for (int j = 0; j < entries.length; j++) {
+				if (e != null) {
+					Entry<K, V> next = e.next;
+					e.clear();
+					e = next;
+				}
+			}
+		}
+		size = 0;
+	}
 
 	/**
 	 * Returns <tt>true</tt> if this map maps one or more keys to the specified
@@ -690,6 +728,7 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 	 * @return <tt>true</tt> if this map maps one or more keys to the specified
 	 *         value
 	 */
+	// MOD
 	// WCMEM = 0
 	@MemSafe(risk = { MemoryRisk.NONE })
 	public boolean containsValue(Object value) {
@@ -698,16 +737,22 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 			return containsNullValue();
 
 		Entry[] tab = table;
-		for (int i = 0; i < tab.length; i++)
-			
+		for (int i = 0; i < tab.length; i++) {
+
 			/*
 			 * The bound for this loop will be equal to the capacity of the
-			 * SafeHashMap, as in the worst case, for the worst hash function, all
-			 * elements will collide into the same index in the table
+			 * SafeHashMap, as in the worst case, for the worst hash function,
+			 * all elements will collide into the same index in the table
 			 */
-			for (Entry e = tab[i]; e != null; e = e.next)
-				if (value.equals(e.value))
-					return true;
+			Entry e = tab[i];
+			for (int j = 0; j < entries.length; j++) {
+				if (e != null) {
+					if (value.equals(e.value))
+						return true;
+					e = e.next;
+				}
+			}
+		}
 		
 		return false;
 	}
@@ -715,21 +760,28 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 	/**
 	 * Special-case code for containsValue with null argument
 	 */
+	// MOD
 	// WCMEM = 0
 	@MemSafe(risk = { MemoryRisk.NONE })
 	private boolean containsNullValue() {
 
 		Entry[] tab = table;
-		for (int i = 0; i < tab.length; i++)
+		for (int i = 0; i < tab.length; i++) {
 
 			/*
 			 * The bound for this loop will be equal to the capacity of the
 			 * SafeHashMap, as in the worst case, for the worst hash function,
 			 * all elements will collide into the same index in the table
 			 */
-			for (Entry e = tab[i]; e != null; e = e.next)
-				if (e.value == null)
-					return true;
+			Entry e = tab[i];
+			for (int j = 0; j < entries.length; j++) {
+				if (e != null) {
+					if (e.value == null)
+						return true;
+					e = e.next;
+				}
+			}
+		}
 
 		return false;
 	}
@@ -865,30 +917,30 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 	// MOD
 	// WCMEM = 9
 	@MemSafe(risk = { MemoryRisk.MIXED_CONTEXT, MemoryRisk.RESIZE })
-	void addEntry(int hash, K key, V value, int bucketIndex) {
-		
-		Entry<K, V> e = table[bucketIndex];
+	void addEntry(int hash, K key, V value, int tableIndex) {
+
+		Entry<K, V> e = table[tableIndex];
+
+		if (entries.length < size)
+			throw noFreeEntriesExc;
 
 		/* Get a free entry from the pool of entries */
-		if (size < freeEntries.length) {
-			for (int i = 0; i < freeEntries.length; i++) {
-				if (freeEntries[i].isFree) {
-					table[bucketIndex] = freeEntries[i];
-					// System.out.println("Found free entry");
-					break;
-				}
+		for (int i = 0; i < entries.length; i++) {
+			if (entries[i].isFree) {
+				table[tableIndex] = entries[i];
+				// System.out.println("Found free entry");
+				break;
 			}
-			table[bucketIndex].hash = hash;
-			table[bucketIndex].key = key;
-			table[bucketIndex].value = value;
-			table[bucketIndex].isFree = false;
-			table[bucketIndex].next = e;
-			
-			/* Increase size only if we find a free entry */
-			size++;
-		} else {
-			throw noFreeEntriesExc;
 		}
+
+		table[tableIndex].hash = hash;
+		table[tableIndex].key = key;
+		table[tableIndex].value = value;
+		table[tableIndex].isFree = false;
+		table[tableIndex].next = e;
+
+		/* Increase size only if we find a free entry */
+		size++;
 
 	}
     

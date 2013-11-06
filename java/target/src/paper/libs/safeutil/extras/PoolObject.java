@@ -20,5 +20,10 @@ public interface PoolObject {
 	 * to mark it as free.
 	 */
 	public void terminate();
+	
+	
+	public ObjectPool<?> getPool();
+	
+	public void setPool(ObjectPool<PoolObject> pool);
 
 }

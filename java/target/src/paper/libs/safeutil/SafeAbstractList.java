@@ -63,7 +63,7 @@ public abstract class SafeAbstractList<E> extends SafeAbstractCollection<E>
 	static final ConcurrentModificationException concModExc;
 
 	static {
-		noSuchElemExc = new NoSuchElementException();
+		noSuchElemExc = new NoSuchElementException("No element");
 		illegalStateExc = new IllegalStateException();
 		concModExc = new ConcurrentModificationException();
 	}

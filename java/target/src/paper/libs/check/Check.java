@@ -1,22 +1,22 @@
 package libs.check;
 
+import libs.safeutil.SafeHashMap;
 import libs.safeutil.SafeVector;
-import libs.safeutil.extras.AbstractPoolObject;
 import libs.safeutil.extras.ObjectPool;
+import libs.safeutil.extras.PoolObject;
 import libs.safeutil.extras.PoolObjectFactory;
 
 public class Check {
 	
 	public static final int CAPACITY = 10;
-	SafeVector<MyPoolObject> fixture = new SafeVector<MyPoolObject>();
-	ObjectPool<MyPoolObject> myPool = new ObjectPool<MyPoolObject>(CAPACITY, new MyFactory());
-	Object[] anArray = new Object[100];
 	
-	public Check() {
-		// TODO Auto-generated constructor stub
+	public final int lim;
+	
+	public Check(int limit) {
+		lim = limit;
 	}
 
-	class MyPoolObject extends AbstractPoolObject {
+	class MyPoolObject implements PoolObject {
 
 		private boolean isFree = true;
 		public int number = 0;
@@ -42,6 +42,18 @@ public class Check {
 			
 		}
 
+		@Override
+		public ObjectPool<?> getPool() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void setPool(ObjectPool<PoolObject> pool) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	}
 
 	class MyFactory implements PoolObjectFactory {
@@ -49,7 +61,7 @@ public class Check {
 		private int count = 0;
 
 		@Override
-		public AbstractPoolObject createObject() {
+		public PoolObject createObject() {
 			MyPoolObject temp = new MyPoolObject();
 			temp.number = count;
 			count++;
@@ -60,75 +72,69 @@ public class Check {
 
 	public static void main(String[] args) {
 		
-		System.out.println("Hello");
-		
-		char[] buf = new char[12];
-		
-		Long.getChars(274877906944L, 12, buf);
-		
-		System.out.println(buf);
-		
-		
-//		Check app = new Check();
+		Check app = new Check(100);
+		app.measure();
 
 	}
 	
-	public void foo(){
+	public void measurer(){
+		int x=0;
+		int y=0;
+		int z=0;
 		
-		Object o = new Object();
+		for(int i = 0; i<lim; i++)
+			z = x+y;
+		
+		measureX(11);
+		
+	}
+	
+	public void measureX(int l){
+		int x =0;
+		for(int i =0; i<l;i++)
+			x++;
+		
 	}
 	
 	public void measure1(){
+
+		/* Test one method at a time with WCA tool */
+		SafeVector<MyPoolObject> fixture = new SafeVector<MyPoolObject>(5);
+		ObjectPool<MyPoolObject> MyPool = new ObjectPool<MyPoolObject>(CAPACITY, new MyFactory());
 		
-//		SafeVector<MyPoolObject> fixture = new SafeVector<MyPoolObject>();
+		Object[] array = new Object[10];
+		fixture.copyInto(array);
+		fixture.add(MyPool.getPoolObject());
+		fixture.capacity();
+		fixture.size();
+		fixture.isEmpty();
+		fixture.elements();
+		fixture.contains(null);
+		fixture.lastIndexOf(null, 4);
+		fixture.removeAllElements();
 		
-//		Object[] array = new Object[10];
-//		fixture.copyInto(array);
-//		fixture.capacity();
-//		fixture.size();
-//		fixture.isEmpty();
-//		fixture.elements();
-//		fixture.removeAllElements();
-//		ObjectPool<MyPoolObject> MyPool = new ObjectPool<MyPoolObject>(CAPACITY, new MyFactory());
-		
-//		fixture.add(MyPool.getPoolObject());
 	}
 	
 	public void measure(){
+
+		/* Test one method at a time with WCA tool */
+		SafeHashMap<String, String> fixture = new SafeHashMap<String, String>();
 		
-//		MyPoolObject e = myPool.getPoolObject();
-//		fixture.add(e);
-//		SafeVector<MyPoolObject> fixture = new SafeVector<MyPoolObject>(1000);
-//		fixture.isEmpty();
-//		fixture.lastElement();
-//		fixture.copyInto(anArray);
-//		fixture.indexOf(e, 5);
-//		fixture.elements();
-//		fixture.setElementAt(e, 10000);
-		fixture.removeElementAt(100000000);
-//		int x = 0;
-//		for(int i = 0; i < 10; i++){
-//			x++;
-//		}
-//		System.out.println("Hello");
+		String key = "key";
+		String value = "value";
+		
+		fixture.put(key, value);
+		
+		String s = fixture.get(key);
+		
+		fixture.remove(key);
+		fixture.clear();
+		
+		Object[] array = new Object[10];
+		fixture.capacity();
+		fixture.size();
+		fixture.isEmpty();
+
 	}
 	
-//	public void measure(){
-		
-//		measure2();
-//	}
-	
-//	public void measure(){
-//		
-//		int j= 0;
-//		System.out.println("Name" + j + "last name");
-		
-//		int j= 0;
-//		
-//		for(int i=0; i < 10; i++){
-////			j++;
-//		}
-		
-//	}
-
 }

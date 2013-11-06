@@ -99,7 +99,8 @@ public class SafeHashSet<E> extends SafeAbstractSet<E> implements Set<E> // ,
      * @throws NullPointerException if the specified collection is null
      */
 	public SafeHashSet(Collection<? extends E> c) {
-		map = new SafeHashMap<E, Object>(Math.max((int) (c.size() / .75f) + 1, 16));
+		map = new SafeHashMap<E, Object>(Math.max((int) (c.size() / .75f) + 1,
+				16), Math.max((int) (c.size() / .75f) + 1, 16));
 		addAll(c);
 	}
 
@@ -113,8 +114,8 @@ public class SafeHashSet<E> extends SafeAbstractSet<E> implements Set<E> // ,
      *             than zero, or if the load factor is nonpositive
      */
 	//MOD
-	public SafeHashSet(int initialCapacity, float loadFactor) {
-		map = new SafeHashMap<E, Object>(initialCapacity);
+	public SafeHashSet(int initialCapacity, int initialEntries, float loadFactor) {
+		map = new SafeHashMap<E, Object>(initialCapacity, initialEntries);
 	}
 
     /**
@@ -125,8 +126,8 @@ public class SafeHashSet<E> extends SafeAbstractSet<E> implements Set<E> // ,
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero
      */
-	public SafeHashSet(int initialCapacity) {
-		map = new SafeHashMap<E, Object>(initialCapacity);
+	public SafeHashSet(int initialCapacity, int initialEntries) {
+		map = new SafeHashMap<E, Object>(initialCapacity, initialEntries);
 	}
 
 //    /**

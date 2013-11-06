@@ -1,7 +1,5 @@
 package libs.safeutil;
 
-import libs.safeutil.extras.GenericKey;
-
 /*
  * %W% %E%
  *

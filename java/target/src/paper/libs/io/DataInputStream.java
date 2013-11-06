@@ -45,6 +45,10 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 
 	private ReadUtfHelper readUtfHelper;
 	
+	static EOFException eofExc = new EOFException();
+	static IndexOutOfBoundsException iobExc = new IndexOutOfBoundsException();
+	static UTFDataFormatException malFormedInputExc = new UTFDataFormatException("malformed input");
+	
     /**
      * Creates a DataInputStream that uses the specified
      * underlying InputStream.
@@ -193,14 +197,15 @@ public class DataInputStream extends FilterInputStream implements DataInput {
      */
 	public final void readFully(byte b[], int off, int len) throws IOException {
 		if (len < 0)
-			throw new IndexOutOfBoundsException();
+			throw iobExc;
 
 		int n = 0;
+		
 		/* Needs manual loop bound annotation */
 		while (n < len) {
 			int count = in.read(b, off + n, len - n);
 			if (count < 0)
-				throw new EOFException();
+				throw eofExc;
 			n += count;
 		}
 	}
@@ -249,7 +254,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
     public final boolean readBoolean() throws IOException {
         int ch = in.read();
         if (ch < 0)
-            throw new EOFException();
+            throw eofExc;
         return (ch != 0);
     }
 
@@ -272,7 +277,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
     public final byte readByte() throws IOException {
         int ch = in.read();
         if (ch < 0)
-            throw new EOFException();
+            throw eofExc;
         return (byte)(ch);
     }
 
@@ -295,7 +300,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
     public final int readUnsignedByte() throws IOException {
         int ch = in.read();
         if (ch < 0)
-            throw new EOFException();
+            throw eofExc;
         return ch;
     }
 
@@ -320,7 +325,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         int ch1 = in.read();
         int ch2 = in.read();
         if ((ch1 | ch2) < 0)
-            throw new EOFException();
+            throw eofExc;
         return (short)((ch1 << 8) + (ch2 << 0));
     }
 
@@ -345,7 +350,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 		int ch1 = in.read();
 		int ch2 = in.read();
 		if ((ch1 | ch2) < 0)
-			throw new EOFException();
+			throw eofExc;
 		return (ch1 << 8) + (ch2 << 0);
 	}
 
@@ -370,7 +375,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 		int ch1 = in.read();
 		int ch2 = in.read();
 		if ((ch1 | ch2) < 0)
-			throw new EOFException();
+			throw eofExc;
 		return (char) ((ch1 << 8) + (ch2 << 0));
 	}
 
@@ -397,7 +402,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         int ch3 = in.read();
         int ch4 = in.read();
         if ((ch1 | ch2 | ch3 | ch4) < 0)
-            throw new EOFException();
+            throw eofExc;
         return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
     }
 
@@ -798,33 +803,26 @@ class ReadUtfHelper implements Runnable{
 					/* 110x xxxx 10xx xxxx */
 					count += 2;
 					if (count > utflen)
-						throw new UTFDataFormatException(
-								"malformed input: partial character at end");
+						throw DataInputStream.malFormedInputExc;
 					char2 = (int) bytearr[count - 1];
 					if ((char2 & 0xC0) != 0x80)
-						throw new UTFDataFormatException(
-								"malformed input around byte ");
+						throw DataInputStream.malFormedInputExc;
 					chararr[chararr_count++] = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
 					break;
 				case 14:
 					/* 1110 xxxx 10xx xxxx 10xx xxxx */
 					count += 3;
 					if (count > utflen)
-						throw new UTFDataFormatException(
-								"malformed input: partial character at end");
-					char2 = (int) bytearr[count - 2];
+						throw DataInputStream.malFormedInputExc;					char2 = (int) bytearr[count - 2];
 					char3 = (int) bytearr[count - 1];
 					if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-						throw new UTFDataFormatException(
-								"malformed input around byte ");
-					chararr[chararr_count++] = (char) (((c & 0x0F) << 12)
+						throw DataInputStream.malFormedInputExc;					chararr[chararr_count++] = (char) (((c & 0x0F) << 12)
 							| ((char2 & 0x3F) << 6) | ((char3 & 0x3F) << 0));
 					break;
 				default:
 					/* 10xx xxxx, 1111 xxxx */
-					throw new UTFDataFormatException(
-							"malformed input around byte ");
-				}
+					throw DataInputStream.malFormedInputExc;
+					}
 			}
 			
 			final int cc = chararr_count;

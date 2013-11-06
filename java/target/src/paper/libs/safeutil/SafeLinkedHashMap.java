@@ -169,8 +169,8 @@ public class SafeLinkedHashMap<K,V>
      * @param  initialCapacity the initial capacity
      * @throws IllegalArgumentException if the initial capacity is negative
      */
-    public SafeLinkedHashMap(int initialCapacity) {
-	super(initialCapacity);
+    public SafeLinkedHashMap(int initialCapacity, int initialEntries) {
+	super(initialCapacity, initialEntries);
         accessOrder = false;
     }
 

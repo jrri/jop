@@ -3,6 +3,7 @@ package libs.check.scj;
 import javax.realtime.AperiodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.AperiodicEventHandler;
+import javax.safetycritical.Mission;
 import javax.safetycritical.StorageParameters;
 
 public class TerminationHandler extends AperiodicEventHandler {
@@ -16,7 +17,8 @@ public class TerminationHandler extends AperiodicEventHandler {
 
 	@Override
 	public void handleAsyncEvent() {
-		// TODO Auto-generated method stub
+		
+		Mission.getCurrentMission().requestTermination();
 		
 	}
 

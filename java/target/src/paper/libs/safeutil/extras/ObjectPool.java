@@ -1,7 +1,7 @@
 package libs.safeutil.extras;
 
 
-public class ObjectPool<E> {
+public class ObjectPool<E extends PoolObject> {
 
 	/**
 	 * Default capacity when the pool is constructed without indicating an
@@ -12,12 +12,12 @@ public class ObjectPool<E> {
 	/**
 	 * Maximum number of elements in the pool.
 	 */
-	protected final int MAX_OBJECTS;
+	public final int MAX_OBJECTS;
 	
 	/**
 	 * Array containing the pool elements.
 	 */
-	protected AbstractPoolObject[] objects;
+	protected PoolObject[] objects;
 	
 	/**
 	 * Number of elements used in the pool.
@@ -53,13 +53,13 @@ public class ObjectPool<E> {
 	 *            elements are created
 	 */
 	public ObjectPool(int size, PoolObjectFactory factory) {
-		this.MAX_OBJECTS = size;
+		MAX_OBJECTS = size;
 		this.factory = factory;
-		objects = new AbstractPoolObject[MAX_OBJECTS];
+		objects = new PoolObject[MAX_OBJECTS];
 
 		for (int i = 0; i < MAX_OBJECTS; i++) {
 			objects[i] = factory.createObject();
-			objects[i].objectPool = this;
+			objects[i].setPool((ObjectPool<PoolObject>) this);
 		}
 
 	}
@@ -89,7 +89,7 @@ public class ObjectPool<E> {
 	 */
 	public synchronized E getPoolObject() {
 
-		PoolObject obj = null;
+		E obj = null;
 
 		if (usedObjects >= MAX_OBJECTS) {
 			obj = null;
@@ -99,13 +99,13 @@ public class ObjectPool<E> {
 		for (int i = 0; i < MAX_OBJECTS; i++) {
 			if (objects[i].isFree()) {
 				objects[i].initialize();
-				obj = objects[i];
+				obj = (E) objects[i];
 				usedObjects++;
 				break;
 			}
 		}
 
-		return (E) obj;
+		return obj;
 
 	}
 
@@ -116,10 +116,8 @@ public class ObjectPool<E> {
 	 *            The object to be returned into the pool.
 	 */
 	public synchronized void releasePoolObject(PoolObject object) {
-
 		object.terminate();
 		usedObjects--;
-
 	}
 
 }

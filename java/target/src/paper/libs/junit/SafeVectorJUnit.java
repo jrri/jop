@@ -3,8 +3,9 @@ package libs.junit;
 import static org.junit.Assert.*;
 import libs.safeutil.Iterator;
 import libs.safeutil.SafeVector;
-import libs.safeutil.extras.AbstractPoolObject;
+//import libs.safeutil.extras.AbstractPoolObject;
 import libs.safeutil.extras.ObjectPool;
+import libs.safeutil.extras.PoolObject;
 import libs.safeutil.extras.PoolObjectFactory;
 
 import org.junit.After;
@@ -15,10 +16,11 @@ import org.junit.Test;
 
 public class SafeVectorJUnit {
 
-	class MyPoolObject extends AbstractPoolObject {
+	class MyPoolObject implements PoolObject {
 
 		private boolean isFree = true;
 		public int number = 0;
+		private ObjectPool<?> pool;
 
 		@Override
 		public void initialize() {
@@ -36,6 +38,16 @@ public class SafeVectorJUnit {
 			this.isFree = true;
 		}
 
+		@Override
+		public ObjectPool<?> getPool() {
+			return pool;
+		}
+
+		@Override
+		public void setPool(ObjectPool<PoolObject> pool) {
+			this.pool = pool;
+		}
+
 	}
 
 	class MyFactory implements PoolObjectFactory {
@@ -43,7 +55,7 @@ public class SafeVectorJUnit {
 		private int count = 0;
 
 		@Override
-		public AbstractPoolObject createObject() {
+		public PoolObject createObject() {
 			MyPoolObject temp = new MyPoolObject();
 			temp.number = count;
 			count++;

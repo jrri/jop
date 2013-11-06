@@ -26,8 +26,7 @@
 package libs.safeutil;
 import libs.io.Serializable;
 import libs.lang.Cloneable;
-import libs.safeutil.extras.AbstractPoolObject;
-//import libs.lang.SuppressWarnings;
+import libs.safeutil.extras.PoolObject;
 
 /**
  * The {@code Vector} class implements a growable array of
@@ -102,7 +101,7 @@ import libs.safeutil.extras.AbstractPoolObject;
  * @see LinkedList
  * @since   JDK1.0
  */
-public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E> implements
+public class SafeVector<E extends PoolObject> extends SafeAbstractList<E> implements
 		List<E>, RandomAccess, Serializable, Cloneable
 {
     /**
@@ -114,7 +113,7 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
      *
      * @serial
      */
-	protected final AbstractPoolObject[] elementData;
+	protected final PoolObject[] elementData;
 
     /**
      * The number of valid components in this {@code Vector} object.
@@ -135,6 +134,7 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	static final ArrayIndexOutOfBoundsException biggerThanElemCntExc;
 	static final IndexOutOfBoundsException indexExc;
 	static final IllegalStateException maxCapExc;
+	static final IllegalArgumentException initCapExc;
 	
 	static {
 		biggerThanElemCntExc = new ArrayIndexOutOfBoundsException(
@@ -142,6 +142,9 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 		indexExc = new IndexOutOfBoundsException(
 				"Index bigger or smaller than the number of valid elemets");
 		maxCapExc = new IllegalStateException("Cannot add element");
+		
+		initCapExc = new IllegalArgumentException("Capacity smaller than zero");
+		
 	}
 	
 	/**
@@ -153,14 +156,15 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 *             if the specified initial capacity is negative
 	 */
 	// OK
-	// WCET = 1751
 	// WCMEM = 15 + initialCapacity
 	// MOD
-	public SafeVector(int initialCapacity) {
+	public SafeVector(final int initialCapacity) {
 		super();
 		if (initialCapacity < 0)
-			throw new IllegalArgumentException("Capacity smaller than zero");
-		this.elementData = new AbstractPoolObject[initialCapacity];
+			throw initCapExc;
+		
+		/* TODO: The field assignment has excessively high WCET */
+		elementData = new PoolObject[initialCapacity];
 	}
 
 	/**
@@ -170,7 +174,6 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 */
 	// OK
 	// WCMEM = 25
-	// WCET = 1849
 	public SafeVector() {
 		this(DEFAULT_CAPACITY);
 	}
@@ -190,7 +193,7 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 */
 	//TODO
 	public synchronized void copyInto(Object[] anArray) {
-		//WCA tool can't find loop bounds on System.arraycopy 
+		/* WCA tool can't find loop bounds on System.arraycopy */ 
 		System.arraycopy(elementData, 0, anArray, 0, elementCount);
 	}
 
@@ -203,7 +206,6 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 */
 	// OK
 	// WCMEM = 0
-	// WCET = 220
 	public synchronized int capacity() {
 		return elementData.length;
 	}
@@ -215,7 +217,6 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 */
 	// OK
 	// WCMEM = 0
-	// WCET = 213
 	public synchronized int size() {
 		return elementCount;
 	}
@@ -229,7 +230,6 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 */
 	// OK
 	// WCMEM = 0
-	// WCET = 222
 	public synchronized boolean isEmpty() {
 		return elementCount == 0;
 	}
@@ -245,10 +245,10 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 */
 	// The returned enumeration object is located in the scope of the caller
 	// TEST = OK
-	// WCET = 1082
 	// WCMEM = 8
 	// MOD
 	public Enumeration<E> elements() {
+		
 		return new Enumeration<E>() {
 			int count = 0;
 
@@ -320,14 +320,15 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 * @see Object#equals(Object)
 	 */
 	// MOD
-	// WCET = 263 + 50*n, where n is the number of elements in the collection
+	/* DFA can find bounds in the loops but "o.equals(elementData[i])" generates
+	 * a call graph with cycles */ 
 	public synchronized int indexOf(E o, int index) {
 		if (o == null) {
-			for (int i = index; i < elementCount; i++)
+			for (int i = index; i < elementData.length; i++)
 				if (elementData[i] == null)
 					return i;
 		} else {
-			for (int i = index; i < elementCount; i++)
+			for (int i = index; i < elementData.length; i++)
 				if (o.equals(elementData[i]))
 					return i;
 		}
@@ -366,7 +367,8 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	 * @throws IndexOutOfBoundsException if the specified index is greater
 	 *         than or equal to the current size of this vector
 	 */
-	// WCET = 297 + 39*n, where n is the number of elements in the collection 
+	/* DFA can find bounds in the loops but "o.equals(elementData[i])" generates
+	 * a call graph with cycles */ 
 	public synchronized int lastIndexOf(Object o, int index) {
 		if (index >= elementCount)
 			throw indexExc;
@@ -599,9 +601,11 @@ public class SafeVector<E extends AbstractPoolObject> extends SafeAbstractList<E
 	public synchronized void removeAllElements() {
 		modCount++;
 
-		for (int i = 0; i < elementCount; i++) {
+		for (int i = 0; i < elementData.length; i++) {
 			/* Restore entries into the pool */
-			returnToPool(elementData(i));
+			E element = elementData(i);
+			if (element != null)
+				returnToPool(elementData(i));
 		}
 
 		elementCount = 0;
