@@ -273,6 +273,8 @@ synchronized (o) {
 	 */
 	public static void addInterruptHandler(int core, int nr, Runnable r) {
 		if (nr>=0 && nr<ih[core].length) {
+			// TODO: Illegal array reference if interrupt handler runnables are 
+			// not in immortal
 			ih[core][nr] = r;
 		}
 	}

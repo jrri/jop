@@ -259,7 +259,8 @@ public class Memory {
 	 * Return the memory region which we are currently in.
 	 * @return
 	 */
-	public static Memory getCurrentMemory() {
+	static Memory getCurrentMemory() {
+		
 		Memory m;
 		if (RtThreadImpl.mission) {
 			Scheduler s = Scheduler.sched[RtThreadImpl.sys.cpuId];

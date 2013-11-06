@@ -137,7 +137,9 @@ class JVM {
 					 */
 					if (value > GC.mem_start) {
 						if (val_level > ref_level){
-							GC.log("Illegal array reference");
+							int fp = Native.getSP()-4;
+							int mp = Native.rdIntMem(fp+4);
+							GC.log("Illegal array reference, mp: ",mp);
 						};
 					}
 					
@@ -1132,7 +1134,9 @@ class JVM {
 					 */
 					if (val > GC.mem_start) {
 						if (val_level != 0) {
-							GC.log("Illegal static reference");
+							int fp = Native.getSP()-4;
+							int mp = Native.rdIntMem(fp+4);
+							GC.log("Illegal static reference, mp: ",mp);
 						}
 					}
 
@@ -1182,7 +1186,9 @@ class JVM {
 					 */
 					if (value > GC.mem_start) {
 						if (val_level > ref_level) {
-							GC.log("Illegal field reference");
+							int fp = Native.getSP()-4;
+							int mp = Native.rdIntMem(fp+4);
+							GC.log("Illegal field reference, mp: ",mp);
 						}
 					}
 				}
