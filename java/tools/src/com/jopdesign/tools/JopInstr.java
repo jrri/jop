@@ -377,7 +377,7 @@ public class JopInstr{
 
 		new JopInstr("sys_int", 1, IMP_ASM, 1),			// 0xF0
 		new JopInstr("sys_exc", 1, IMP_ASM, 1),			// 0xF1
-		new JopInstr("resF2", 1, IMP_NO, 1),			// 0xF2
+		new JopInstr("ldc_w_ref", 3, IMP_ASM, 9),		// 0xF2
 		new JopInstr("resF3", 1, IMP_NO, 1),			// 0xF3
 		new JopInstr("resF4", 1, IMP_NO, 1),			// 0xF4
 		new JopInstr("resF5", 1, IMP_NO, 1),			// 0xF5
@@ -433,8 +433,10 @@ public class JopInstr{
 			"getField", "jopsys_getfield",
 			"arrayLoad", "iaload",
 			"arrayStore", "iastore",
-			"arrayLength", "arraylength"
+			"arrayLength", "arraylength",
+			"ldc_w_ref", "ldc_w_ref"
 	};
+	
 	static {
 		for (int i=0; i<ia.length; ++i) {
 			map.put(ia[i].name, new Integer(i));

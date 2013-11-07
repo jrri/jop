@@ -695,6 +695,11 @@ System.out.println(mp+" "+pc);
 		stack[sp] = readMem(ref+off, Access.FIELD);
 		stack[++sp] = readMem(ref+off+1, Access.FIELD);
 	}
+	
+	void ldc_w_ref() {
+		int ref = readMem(cp+readOpd16u(), Access.CONST);
+		stack[++sp] = readMem(ref+Const.CLASS_OBJECT, Access.CLINFO);
+	}
 
 /**
 *	the simulaton.
@@ -1722,7 +1727,7 @@ System.out.println("new heap: "+heap);
 					invoke(jjhp+6);	// exception() is at offset 3*2
 					break;
 				case 242 :		// resF2
-					noim(242);
+					ldc_w_ref();
 					break;
 				case 243 :		// resF3
 					noim(243);
