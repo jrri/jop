@@ -467,7 +467,7 @@ public class SafeVector<E extends PoolObject> extends SafeAbstractList<E> implem
 		if (index >= elementCount)
 			throw biggerThanElemCntExc;
 
-		elementData[index].terminate();
+		elementData[index].reset();
 		elementData[index] = obj;
 		obj.initialize();
 

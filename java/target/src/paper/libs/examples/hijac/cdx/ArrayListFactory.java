@@ -6,7 +6,7 @@ package libs.examples.hijac.cdx;
 import libs.examples.hijac.cdx.Error;
 //import libs.safeutil.ArrayList;
 import libs.safeutil.SafeVector;
-import libs.safeutil.extras.AbstractPoolObject;
+import libs.safeutil.extras.PoolObject;
 
 /**
  * This class is used to pre-allocate ArrayList objects in mission memory.
@@ -14,7 +14,7 @@ import libs.safeutil.extras.AbstractPoolObject;
 public class ArrayListFactory {
 
 //	private final ArrayList[] store;
-	private final SafeVector<AbstractPoolObject>[] store;
+	private final SafeVector<PoolObject>[] store;
 	private int index;
 
 	/**
@@ -31,14 +31,14 @@ public class ArrayListFactory {
 		for (int i = 0; i < store.length; i++) {
 			/* TODO: Why "capacity + 1" here? */
 //			store[i] = new ArrayList<Object>(capacity + 1);
-			store[i] = new SafeVector<AbstractPoolObject>(capacity + 1);
+			store[i] = new SafeVector<PoolObject>(capacity + 1);
 		}
 		
 		index = 0;
 	}
 
 	/* Return a new pre-allocated instance of the ArrayList class. */
-	public SafeVector<AbstractPoolObject> getNewList() {
+	public SafeVector<PoolObject> getNewList() {
 		if (index < store.length) {
 			return store[index++];
 		} else {

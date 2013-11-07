@@ -34,7 +34,7 @@ public class SafeVectorJUnit {
 		}
 
 		@Override
-		public void terminate() {
+		public void reset() {
 			this.isFree = true;
 		}
 

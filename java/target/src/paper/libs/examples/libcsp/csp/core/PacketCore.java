@@ -172,7 +172,7 @@ public class PacketCore implements PoolObject, Packet {
 	}
 
 	@Override
-	public void terminate() {
+	public void reset() {
 		isFree = true;
 	}
 

@@ -19,7 +19,7 @@ public interface PoolObject {
 	 * Used when returning the object into the pool e.g. to reset its state and
 	 * to mark it as free.
 	 */
-	public void terminate();
+	public void reset();
 	
 	
 	public ObjectPool<?> getPool();

@@ -116,7 +116,7 @@ public class ObjectPool<E extends PoolObject> {
 	 *            The object to be returned into the pool.
 	 */
 	public synchronized void releasePoolObject(PoolObject object) {
-		object.terminate();
+		object.reset();
 		usedObjects--;
 	}
 

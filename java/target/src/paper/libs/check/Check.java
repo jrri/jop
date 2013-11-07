@@ -33,7 +33,7 @@ public class Check {
 		}
 
 		@Override
-		public void terminate() {
+		public void reset() {
 			this.isFree = true;
 		}
 		

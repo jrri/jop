@@ -28,7 +28,7 @@ public class DataPacket implements PoolObject{
 	}
 
 	@Override
-	public void terminate() {
+	public void reset() {
 		data = 0;
 		isFree = true;
 	}

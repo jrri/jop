@@ -152,7 +152,7 @@ public class TestSafeVector extends PeriodicEventHandler {
 		}
 
 		@Override
-		public void terminate() {
+		public void reset() {
 			// TODO Auto-generated method stub
 
 		}
