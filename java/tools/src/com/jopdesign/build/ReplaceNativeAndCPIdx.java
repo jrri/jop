@@ -42,6 +42,7 @@ import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
 import org.apache.bcel.generic.InvokeInstruction;
+import org.apache.bcel.generic.LDC;
 import org.apache.bcel.generic.LDC_W;
 import org.apache.bcel.generic.MONITORENTER;
 import org.apache.bcel.generic.MONITOREXIT;
@@ -247,7 +248,8 @@ public class ReplaceNativeAndCPIdx extends JOPizerVisitor {
 			int pos = getCli().cpoolUsed.indexOf(idx);
 			int new_index = pos + 1;
 			
-			if(cpii instanceof LDC_W){
+			if (((cpii instanceof LDC_W) || (cpii instanceof LDC))
+					& (cpoolgen.getConstant(cpii.getIndex()).getTag() == 7)) {
 				ih.setInstruction(new LDC_W_REF(new_index));
 			}else{
 			
