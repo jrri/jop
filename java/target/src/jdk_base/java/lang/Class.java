@@ -25,103 +25,231 @@
 
 package java.lang;
 
+import static javax.safetycritical.annotate.Phase.ALL;
+
 import javax.safetycritical.annotate.SCJAllowed;
+import javax.safetycritical.annotate.SCJRestricted;
 
 import com.jopdesign.sys.Const;
 import com.jopdesign.sys.GC;
 import com.jopdesign.sys.JVMHelp;
 import com.jopdesign.sys.Native;
 
-public final class Class<T> implements java.io.Serializable {
+public final class Class<T> {
 	
-	/** use serialVersionUID from JDK 1.1 for interoperability */
-	private static final long serialVersionUID = 3206093459760846163L;
-
-	// The memory address of the class info structure
-	public int classRefAddress;
-
-	public boolean _isArray = false;
-	int arrayDimensions = 0;
+	/* Masks */
+	static final int IS_ANNOTATION = 0x01;
+	static final int IS_ARRAY = 0x02;
+	static final int IS_ENUM = 0x04;
+	static final int IS_INTERFACE = 0x08;
+	static final int IS_PRIMITIVE = 0x10;
+	static final int IS_ABSTRACT = 0x20;
 	
-	public boolean _isInterface = false;
-	public int _interfaceNumber = 0;
+	/* Class info structure of the type represented by this instance */
+	 private int clinfo;
 	
+	/* Reference to the empty constructor of the type represented by this instance */
+	 private int init;
 	
-	public boolean _isPrimitive = false;
-
-	private final char _boolean = 'Z';
-	private final char _char = 'C';
-	private final char _byte = 'B';
-	private final char _short = 'S';
-	private final char _int = 'I';
-	private final char _long = 'J';
-	private final char _float = 'F';
-	private final char _double = 'D';
-	private final char _void = 'V';
-
-	private final char _cl_int = 'L';
-
-	public int primitiveType = 0;
-
+	 private int attributes;
+	
 	/**
 	 * Package protected constructor to create Class objects at boot time.
 	 */
 	Class() {
 	}
-
-	/**
-	 * Converts the object to a string. The string representation is the string
-	 * "class" or "interface", followed by a number representing the reference
-	 * of the class info structure the class represents
-	 * 
-	 * @return a string representation of this class object.
-	 */
-    @SCJAllowed
-    public String toString() {
-        return (isInterface() ? "interface " : (isPrimitive() ? "" : "class ")) + classRefAddress;
-    }
-
-	/**
-	 * Creates a new instance of the class represented by this {@code Class}
-	 * object. The class is instantiated as if by a {@code new} expression with
-	 * an empty argument list.
-	 * 
-	 * @return a newly allocated instance of the class represented by this
-	 *         object.
-	 * @exception IllegalAccessException
-	 *                if the class or its nullary constructor is not accessible.
-	 * @exception InstantiationException
-	 *                if this {@code Class} represents an abstract class, an
-	 *                interface, an array class, a primitive type, or void; or
-	 *                if the class has no nullary constructor; or if the
-	 *                instantiation fails for some other reason.
-	 */
-    @SCJAllowed
-	public T newInstance() throws InstantiationException,
-			IllegalAccessException {
-    	
-    	// Pointer to <init> method of a no argument constructor
-    	int initPtr = Native.rdMem(classRefAddress + Const.INIT_METH);
-    	
-    	int specialPointers = Native.rdMem(1);
-    	int javaLangClass = Native.rdMem(specialPointers + Const.CLASS_CLASS_OFFSET);
-    	
-		if (classRefAddress == javaLangClass) {
-			throw new IllegalAccessException(
-					"Can not call newInstance() on the Class for java.lang.Class");
-		}
-    	
-    	//TODO: Cannot see if it is abstract class
-		if (_isInterface || _isPrimitive || (initPtr == 0))
-			throw new InstantiationException(
-					"Trying to instantiate an interface, primitive, or the class has no empty constructor");
-
-		int newObj = GC.newObject(classRefAddress); 
-		Native.invoke(newObj,initPtr);
-
-		return (T) Native.toObject(newObj);
+	
+	@SCJAllowed
+	@SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
+	public boolean desiredAssertionStatus( ){
+		throw new Error("not yet implemented");
 	}
+	
+	/**
+	 * Returns the Class representing the component type of an array. If this
+	 * class does not represent an array class this method returns null.
+	 * 
+	 * @return the Class representing the component type of this class if this
+	 *         class is an array
+	 */
+	@SCJAllowed
+	@SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
+	public Class<?> getComponentType() {
+		throw new Error("not yet implemented");
+	}
+	
+	/**
+	 * If the class or interface represented by this Class object is a member of
+	 * another class, returns the Class object representing the class in which
+	 * it was declared. This method returns null if this class or interface is
+	 * not a member of any other class. If this Class object represents an array
+	 * class, a primitive type, or void,then this method returns null.
+	 * 
+	 * @return the declaring class for this class
+	 */
+	@SCJAllowed
+	@SCJRestricted(phase = ALL,	maySelfSuspend = false, mayAllocate = true)
+	public Class<?> getDeclaringClass(){
+		throw new Error("not yet implemented");
+	}
+	
+	/**
+	 * Returns the elements of this enum class or null if this Class object does
+	 * not represent an enum type.
+	 * 
+	 * @return an array containing the values comprising the enum class
+	 *         represented by this Class object in the order they're declared,
+	 *         or null if this Class object does not represent an enum type
+	 */
+	@SCJAllowed
+	@SCJRestricted(phase = ALL,	maySelfSuspend = false, mayAllocate = true)
+	public T[] getEnumConstants(){
+		throw new Error("not yet implemented");
+	}
+	
+	/**
+	 * 
+	 * Returns the name of the entity (class, interface, array class, primitive
+	 * type, or void) represented by this Class object, as a String.
+	 * 
+	 * If this class object represents a reference type that is not an array
+	 * type then the binary name of the class is returned, as specified by the
+	 * Java Language Specification, Second Edition.
+	 * 
+	 * If this class object represents a primitive type or void, then the name
+	 * returned is a String equal to the Java language keyword corresponding to
+	 * the primitive type or void.
+	 * 
+	 * If this class object represents a class of arrays, then the internal form
+	 * of the name consists of the name of the element type preceded by one or
+	 * more '[' characters representing the depth of the array nesting. The
+	 * encoding of element type names is as follows:
+	 * 
+	 * 			Element Type 			Encoding 
+	 * 				boolean 				Z 
+	 * 				byte		 			B 
+	 * 				char 					C 
+	 * 			class or interface 		Lclassname; 
+	 * 				double 					D 
+	 * 				float 					F 
+	 * 				int 					I	 
+	 * 				long 					J 
+	 * 				short 					S
+	 * 
+	 * The class or interface name classname is the binary name of the class
+	 * specified above.
+	 * 
+	 * Examples:
+	 * 
+	 * String.class.getName() returns "java.lang.String" 
+	 * byte.class.getName()	 returns "byte" 
+	 * (new Object[3]).getClass().getName() returns "[Ljava.lang.Object;" 
+	 * (new int[3][4][5][6][7][8][9]).getClass().getName() returns "[[[[[[[I"
+	 * 
+	 * @return the name of the class or interface represented by this object.
+	 * 
+	 */
+	@SCJAllowed
+	@SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
+	public String getName(){
+		throw new Error("not yet implemented");
+	}
+	
+    /**
+     * Returns the {@code Class} representing the superclass of the entity
+     * (class, interface, primitive type or void) represented by this
+     * {@code Class}.  If this {@code Class} represents either the
+     * {@code Object} class, an interface, a primitive type, or void, then
+     * null is returned.  If this object represents an array class then the
+     * {@code Class} object representing the {@code Object} class is
+     * returned.
+     *
+     * @return the superclass of the class represented by this object.
+     */
+    @SCJAllowed
+    public Class<?> getSuperclass(){
+    	
+    	if( isInterface() || isPrimitive() || (this == Object.class))
+    		return null;
+    	
+    	// Reference to superclass
+    	int sup = Native.rdMem(this.clinfo + Const.CLASS_SUPER);
+    	sup = Native.rdMem(sup+5);
+    	
+    	return (Class) Native.toObject(sup);
+    	
+    };
 
+	/**
+	 * Returns true if this Class object represents an annotation type. Note
+	 * that if this method returns true, isInterface() would also return true,
+	 * as all annotation types are also interfaces.
+	 * 
+	 * @return true if this class object represents an annotation type; false
+	 *         otherwise
+	 */
+    @SCJAllowed
+    @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
+    public boolean isAnnotation(){
+    	throw new Error("not yet implemented");
+    }
+    
+    /**
+     * Determines if this {@code Class} object represents an array class.
+     *
+     * @return  {@code true} if this object represents an array class;
+     *          {@code false} otherwise.
+     * @since   JDK1.1
+     */
+    @SCJAllowed
+    @SCJRestricted(phase = ALL, maySelfSuspend = false, 	mayAllocate = true)
+    public boolean isArray(){
+    	return ((attributes & IS_ARRAY) != 0);
+    }
+    
+	/**
+	 * Determines if the class or interface represented by this Class object is
+	 * either the same as, or is a superclass or superinterface of, the class or
+	 * interface represented by the specified Class parameter. It returns true
+	 * if so; otherwise it returns false. If this Class object represents a
+	 * primitive type, this method returns true if the specified Class parameter
+	 * is exactly this Class object; otherwise it returns false.
+	 * 
+	 * Specifically, this method tests whether the type represented by the
+	 * specified Class parameter can be converted to the type represented by
+	 * this Class object via an identity conversion or via a widening reference
+	 * conversion. See The Java Language Specification, sections 5.1.1 and 5.1.4
+	 * , for details.
+	 * 
+	 * @param cls
+	 *            - the Class object to be checked
+	 * @return the boolean value indicating whether objects of the type cls can
+	 *         be assigned to objects of this class
+	 * @throws NullPointerException
+	 *             - if the specified Class parameter is null.
+	 * 
+	 */
+    @SCJAllowed
+    @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
+    public boolean isAssignableFrom(Class<?> cls){
+    	throw new Error("not yet implemented");
+    }
+    
+    
+	/**
+	 * Returns true if and only if this class was declared as an enum in the
+	 * source code.
+	 * 
+	 * @return true if and only if this class was declared as an enum in the
+	 *         source code
+	 * 
+	 */
+    @SCJAllowed
+    @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
+    public boolean isEnum(){
+    	throw new Error("not yet implemented");
+    }
+    
     /**
      * Determines if the specified {@code Object} is assignment-compatible
      * with the object represented by this {@code Class}.  This method is
@@ -152,10 +280,11 @@ public final class Class<T> implements java.io.Serializable {
      *
      * @since JDK1.1
      */
-	@SCJAllowed
+    @SCJAllowed
+    @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
 	public boolean isInstance(Object obj) {
 
-		if (_isPrimitive) {
+		if ((attributes & IS_PRIMITIVE) != 0) {
 			return false;
 		}
 
@@ -169,10 +298,10 @@ public final class Class<T> implements java.io.Serializable {
 		 */
 
 		// class info of the type this class represents
-		int cons = this.classRefAddress;
+		int cons = this.clinfo;
 
 		// start of class info
-		int p = obj.getClass().classRefAddress;
+		int p = obj.getClass().clinfo;
 		
 		int res = 0;
 
@@ -206,6 +335,7 @@ public final class Class<T> implements java.io.Serializable {
 		}
 	}
 
+    
     /**
      * Determines if the specified {@code Class} object represents an
      * interface type.
@@ -214,23 +344,9 @@ public final class Class<T> implements java.io.Serializable {
      *          {@code false} otherwise.
      */
     public boolean isInterface(){
-    	return _isInterface;
+    	return ((attributes & IS_INTERFACE) != 0);
     }
-
-
-    /**
-     * Determines if this {@code Class} object represents an array class.
-     *
-     * @return  {@code true} if this object represents an array class;
-     *          {@code false} otherwise.
-     * @since   JDK1.1
-     */
-    @SCJAllowed
-    public boolean isArray(){
-    	return _isArray;
-    }
-
-
+    
     /**
      * Determines if the specified {@code Class} object represents a
      * primitive type.
@@ -260,61 +376,72 @@ public final class Class<T> implements java.io.Serializable {
      * @since JDK1.1
      */
     @SCJAllowed
+    @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
     public boolean isPrimitive(){
-    	return _isPrimitive;
+    	return ((attributes & IS_PRIMITIVE) != 0);
     }
-
-    /**
-     * Returns the {@code Class} representing the superclass of the entity
-     * (class, interface, primitive type or void) represented by this
-     * {@code Class}.  If this {@code Class} represents either the
-     * {@code Object} class, an interface, a primitive type, or void, then
-     * null is returned.  If this object represents an array class then the
-     * {@code Class} object representing the {@code Object} class is
-     * returned.
-     *
-     * @return the superclass of the class represented by this object.
-     */
-    @SCJAllowed
-    public Class getSuperclass(){
-    	
-    	if(_isInterface || _isPrimitive || (this == JVMHelp.getClassHelper(Object.class)))
-    		return null;
-    	
-    	// Reference to superclass
-    	int sup = Native.rdMem(this.classRefAddress + Const.CLASS_SUPER);
-    	sup = Native.rdMem(sup+5);
-    	
-    	return (Class) Native.toObject(sup);
-    	
-    };
     
-    public char getType(){
-    	
-    	switch (primitiveType) {
-		case 1:
-			return _boolean;
-		case 2:
-			return _char;
-		case 3:
-			return _byte;
-		case 4:
-			return _short;
-		case 5:
-			return _int;
-		case 6:
-			return _long;
-		case 7:
-			return _float;
-		case 8:
-			return _double;
-		case 9:
-			return _void;
-		default:
-			return _cl_int;
-		}
-    	
+    private boolean isAbstract(){
+    	return ((attributes & IS_ABSTRACT) != 0);
     }
+    
+	/**
+	 * Creates a new instance of the class represented by this {@code Class}
+	 * object. The class is instantiated as if by a {@code new} expression with
+	 * an empty argument list.
+	 * 
+	 * @return a newly allocated instance of the class represented by this
+	 *         object.
+	 * @exception IllegalAccessException
+	 *                if the class or its nullary constructor is not accessible.
+	 * @exception InstantiationException
+	 *                if this {@code Class} represents an abstract class, an
+	 *                interface, an array class, a primitive type, or void; or
+	 *                if the class has no nullary constructor; or if the
+	 *                instantiation fails for some other reason.
+	 */
+    @SCJAllowed
+	public T newInstance() throws InstantiationException,
+			IllegalAccessException {
+    	
+    	// Pointer to <init> method of a no argument constructor
+//    	int initPtr = Native.rdMem(classRefAddress + Const.INIT_METH);
+    	
+//    	int specialPointers = Native.rdMem(1);
+//    	int javaLangClass = Native.rdMem(specialPointers + Const.CLASS_CLASS_OFFSET);
+    	
+//		if (classRefAddress == javaLangClass) {
+//			throw new IllegalAccessException(
+//					"Can not call newInstance() on the Class for java.lang.Class");
+//		}
+    	
+		if (this == Class.class) {
+			throw new IllegalAccessException(
+					"Can not call newInstance() on the Class for java.lang.Class");
+		}
 
+    	
+    	//TODO: Cannot see if it is abstract class
+		if (isInterface() || isPrimitive() || init == 0 || isAbstract())
+			throw new InstantiationException(
+					"Trying to instantiate an interface, primitive, or the class has no empty constructor");
+
+		int newObj = GC.newObject(clinfo); 
+		Native.invoke(newObj,init);
+
+		return (T) Native.toObject(newObj);
+	}
+
+	/**
+	 * Converts the object to a string. The string representation is the string
+	 * "class" or "interface", followed by a number representing the reference
+	 * of the class info structure the class represents
+	 * 
+	 * @return a string representation of this class object.
+	 */
+    @SCJAllowed
+    public String toString() {
+        return (isInterface() ? "interface " : (isPrimitive() ? "" : "class ")) + clinfo;
+    }
 
 }

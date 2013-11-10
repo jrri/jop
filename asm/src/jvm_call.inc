@@ -116,7 +116,7 @@ interface_pointer_ok:
 			wait
 			ldmrd		 		// vt on TOS
 
-			ldi	3				// pointer to interface table
+			ldi	2				// pointer to interface table
 			sub					// befor method table
 			stmrac				// read interface table address
 			wait
@@ -187,7 +187,7 @@ invokesuper:					// this was invokespecial, replaced in JOPizer when calling sup
 			wait
 			ldmrd		 		// read ext. mem
 
-			ldi	7				// "super" method table is at superclass+7
+			ldi	6				// "super" method table is at superclass+6
 			add
 
 			jmp	invoke_addoffset

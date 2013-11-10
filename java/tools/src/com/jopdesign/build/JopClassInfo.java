@@ -42,8 +42,7 @@ import org.apache.bcel.classfile.*;
  * <li/>3: pointer to super class or interface id
  * <li/>4: pointer to interface table
  * <li/>5: pointer to Class object representing this type
- * <li/>6: pointer to no argument constructor if any (zero otherwise)
- * <li/>7+: method table, two words per entry, class reference (pointer back to
+ * <li/>6+: method table, two words per entry, class reference (pointer back to
  * class info), constant pool (cp), optional interface table
  * </ul>
  * <p>
@@ -166,14 +165,6 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 	static int addrValueStatic = 0;
 	static int addrRefStatic = 0;
 
-	/*
-	 * pointer to the table containing the pointers to all class info structures
-	 */
-	static int classTableRef = 0; // <=====
-
-	/* Pointer to java.lang.Class class info structure */
-	static int classClassRef = 0; // <=====
-
 	public ClVT clvt;
 
 	public ClFT clft;
@@ -185,7 +176,6 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 	public int interfaceID; // offset 3
 	public int iftableAddress; // offset 4
 	public int classObjectRef; // offset 5
-	public int initMethodRef; // offset 6
 
 	public List<Integer> cpoolUsed;
 	public int cpoolArry[];
@@ -824,9 +814,8 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 		out.println("\t\t" + iftableAddress
 				+ ",\t//\tpointer to interface table");
 
-		/* Pointer to Class object. Set at boot time */
-		out.println("\t\t" + classObjectRef + ",\t//\tpointer to Class object");// <====
-		out.println("\t\t" + initMethodRef + ",\t//\tpointer to <init> method");// <====
+		/* Pointer to Class object */
+		out.println("\t\t" + classObjectRef + ",\t//\tpointer to Class object");
 
 		if (!clazz.isInterface()) {
 			out.println("//");

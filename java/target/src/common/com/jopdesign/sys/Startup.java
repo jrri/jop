@@ -82,24 +82,9 @@ public class Startup {
 			// or in other words the heap start
 			val = Native.rdMem(1);		// pointer to 'special' pointers
 			
-			// pointer to table with references to class info table
-			int classObjectsTable = Native.rdMem(val + 6);
-
-			// Number of entries in the previous table
-			int classCount = Native.rdMem(classObjectsTable);
-
-			// pointer to java.lang.Class class info
-			int classClassInfo = Native.rdMem(val + 7);
+			/* First initialize the GC with the address of static ref. fields. */
+			GC.init(mem_size, val+4);
 			
-			// Reserved memory size. Reserved for Class objects
-			int resMem = (Native.rdMem(classClassInfo) + 6)*classCount;
-			
-			/*
-			 * First initialize the GC with the address of static ref. fields.
-			 * The memory area between the last word in the .jop file and resMem
-			 * is used to create Class objects
-			 */
-			GC.init(mem_size, resMem, val+4);
 			// place for some initialization:
 			// could be placed in <clinit> in the future
 			// System.init();
@@ -110,16 +95,6 @@ public class Startup {
 			// not in <clinit> as first methods are special and placement
 			// of <clinit> depends on compiler
 			JVMHelp.init();
-			
-			/*
-			 * Create the remaining Class objects. Class objects for primitive
-			 * types are created in its <clinit> method. Class info structures
-			 * for primitive types are located at the first 9 positions of a
-			 * table at the end of the .jop file
-			 */
-			for (int i = 10; i <= classCount; i++) {
-				GC.initializeClassObjects(i);
-			}
 			
 			GC.log("------ VM boot end ------");
 		}
@@ -276,7 +251,7 @@ public class Startup {
 
 		stack = new int[MAX_STACK];
 
-		int table = Native.rdMem(1)+8;		// start of clinit table <===
+		int table = Native.rdMem(1)+6;		// start of clinit table
 		int cnt = Native.rdMem(table);		// number of methods
 		++table;
 		for (int i=0; i<cnt; ++i) {

@@ -89,16 +89,22 @@ public class TestClass {
 		
 		boolean ok = true;
 		
-		Class klass = JVMHelp.getClassHelper(Object.class).getSuperclass();
+		Class klass = Object.class.getSuperclass();
 		
-		/* Should not be able to return the superclass of a Class object representing java.lang.Object*/
+		/*
+		 * Should not be able to return the superclass of a Class object
+		 * representing java.lang.Object
+		 */
 		if(klass != null){
 			System.out.println("Error! Object does not have super class!");
 			ok = false;
 		}
 		
-		/* Should not be able to create Class objects from an object representing java.lang.Class */
-		klass = JVMHelp.getClassHelper(Class.class);
+		/*
+		 * Should not be able to create Class objects from an object
+		 * representing java.lang.Class
+		 */
+		klass = Class.class;
 		try {
 			Class newClass = (Class) klass.newInstance();
 			ok = false;
@@ -158,8 +164,8 @@ public class TestClass {
 		boolean ok = true;
 		
 		ok = ok & (klazz.isPrimitive() == false);
-		ok = ok & (klazz.primitiveType == 0);
-		ok = ok & (klazz.getType() == 'L');
+//		ok = ok & (klazz.primitiveType == 0);
+//		ok = ok & (klazz.getType() == 'L');
 		ok = ok & (klazz.getSuperclass() == superClass);
 		ok = ok & (klazz.isArray() == false);
 		ok = ok & (superClass.isInstance(vee));
@@ -192,17 +198,17 @@ public class TestClass {
 
 	private static boolean testForNonInterface() {
 		
-		Class<String> klazz = JVMHelp.getClassHelper(String.class);
+		Class<String> klazz = String.class;
 		String testString = "Hello";
 		
 		// Get a Class object for java.lang.Object
-		Class objClass = JVMHelp.getClassHelper(Object.class);
+		Class objClass = Object.class;
 		
 		boolean ok = true;
 		
 		ok = ok & (klazz.isPrimitive() == false);
-		ok = ok & (klazz.primitiveType == 0);
-		ok = ok & (klazz.getType() == 'L');
+//		ok = ok & (klazz.primitiveType == 0);
+//		ok = ok & (klazz.getType() == 'L');
 		ok = ok & (klazz.getSuperclass() == objClass);
 		ok = ok & (klazz.isArray() == false);
 		ok = ok & (klazz.isInstance(testString));
@@ -234,7 +240,7 @@ public class TestClass {
 	private static boolean testForInterface() {
 		
 		
-		Class<Runnable> klazz = JVMHelp.getClassHelper(Runnable.class);
+		Class<Runnable> klazz = Runnable.class;
 		
 		boolean ok = true;
 		
@@ -243,8 +249,8 @@ public class TestClass {
 		Implementer myImplemener = new Implementer();
 
 			ok = ok & (klazz.isPrimitive() == false);
-			ok = ok & (klazz.primitiveType == 0);
-			ok = ok & (klazz.getType() == 'L');
+//			ok = ok & (klazz.primitiveType == 0);
+//			ok = ok & (klazz.getType() == 'L');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(myClass));
@@ -281,8 +287,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Boolean.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 1);
-			ok = ok & (klazz.getType() == 'Z');
+//			ok = ok & (klazz.primitiveType == 1);
+//			ok = ok & (klazz.getType() == 'Z');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -308,8 +314,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Character.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 2);
-			ok = ok & (klazz.getType() == 'C');
+//			ok = ok & (klazz.primitiveType == 2);
+//			ok = ok & (klazz.getType() == 'C');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -335,8 +341,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Byte.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 3);
-			ok = ok & (klazz.getType() == 'B');
+//			ok = ok & (klazz.primitiveType == 3);
+//			ok = ok & (klazz.getType() == 'B');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -362,8 +368,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Short.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 4);
-			ok = ok & (klazz.getType() == 'S');
+//			ok = ok & (klazz.primitiveType == 4);
+//			ok = ok & (klazz.getType() == 'S');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -389,8 +395,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Integer.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 5);
-			ok = ok & (klazz.getType() == 'I');
+//			ok = ok & (klazz.primitiveType == 5);
+//			ok = ok & (klazz.getType() == 'I');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -416,8 +422,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Long.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 6);
-			ok = ok & (klazz.getType() == 'J');
+//			ok = ok & (klazz.primitiveType == 6);
+//			ok = ok & (klazz.getType() == 'J');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -443,8 +449,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Float.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 7);
-			ok = ok & (klazz.getType() == 'F');
+//			ok = ok & (klazz.primitiveType == 7);
+//			ok = ok & (klazz.getType() == 'F');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -470,8 +476,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Double.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 8);
-			ok = ok & (klazz.getType() == 'D');
+//			ok = ok & (klazz.primitiveType == 8);
+//			ok = ok & (klazz.getType() == 'D');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -497,8 +503,8 @@ public class TestClass {
 		for (int i = 0; i < 2; i++) {
 			klazz = Void.TYPE;
 			ok = ok & klazz.isPrimitive();
-			ok = ok & (klazz.primitiveType == 9);
-			ok = ok & (klazz.getType() == 'V');
+//			ok = ok & (klazz.primitiveType == 9);
+//			ok = ok & (klazz.getType() == 'V');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);

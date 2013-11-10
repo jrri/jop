@@ -870,6 +870,22 @@ ldc_w:
 			wait
 			ldmrd		 nxt	// read ext. mem
 
+ldc_w_ref:
+			ldm	cp opd	// Read from local memory (stack) pointer to constant pool
+			nop	opd	// Index comes from bytecode operand
+			ld_opd_16u	// Push bytecode operand into operand stack
+			add		// Create the address (index) to read from the constant pool 
+			stmrac		// Load constant
+			wait		//
+			wait		//
+			ldmrd		// Push read result on TOS
+			ldi	5	// Load offset were pointer to Class object is
+			add		// Add Class object offset pointer
+			stmra		// Read from class info table
+			wait		//
+			wait		//
+			ldmrd	nxt	// Push read result on TOS
+
 aload:
 fload:
 iload:		nop opd
