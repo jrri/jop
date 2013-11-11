@@ -42,15 +42,25 @@ public final class Class<T> {
 	static final int IS_ARRAY = 0x02;
 	static final int IS_ENUM = 0x04;
 	static final int IS_INTERFACE = 0x08;
-	static final int IS_PRIMITIVE = 0x10;
-	static final int IS_ABSTRACT = 0x20;
+	static final int IS_ABSTRACT = 0x10;
+	static final int PRIM_TYPE = 0x1E0;
 	
 	/* Class info structure of the type represented by this instance */
 	 private int clinfo;
 	
-	/* Reference to the empty constructor of the type represented by this instance */
+	/* Reference to the empty constructor of the type represented by this instance. */
 	 private int init;
 	
+	 /* This field represent different attributes coded in several bits:
+	  * 
+	  * 0: Annotation
+	  * 1: Array
+	  * 2: Enumeration
+	  * 3: Interface
+	  * 4: Abstract
+	  * 5-8: Primitive type
+	  * 
+	  * */
 	 private int attributes;
 	
 	/**
@@ -191,7 +201,7 @@ public final class Class<T> {
     @SCJAllowed
     @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
     public boolean isAnnotation(){
-    	throw new Error("not yet implemented");
+    	return ((attributes & IS_ANNOTATION) != 0);
     }
     
     /**
@@ -232,7 +242,14 @@ public final class Class<T> {
     @SCJAllowed
     @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
     public boolean isAssignableFrom(Class<?> cls){
-    	throw new Error("not yet implemented");
+    	
+    	if(this.getClass().isPrimitive())
+    		return (this.getClass() == cls ? true: false);
+    	
+    	int cons = this.clinfo;
+		int p = cls.clinfo;
+    	return isInstance(cons, p);
+    	
     }
     
     
@@ -247,7 +264,7 @@ public final class Class<T> {
     @SCJAllowed
     @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
     public boolean isEnum(){
-    	throw new Error("not yet implemented");
+    	return ((attributes & IS_ENUM) != 0);
     }
     
     /**
@@ -284,7 +301,7 @@ public final class Class<T> {
     @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
 	public boolean isInstance(Object obj) {
 
-		if ((attributes & IS_PRIMITIVE) != 0) {
+		if (isPrimitive()) {
 			return false;
 		}
 
@@ -292,17 +309,23 @@ public final class Class<T> {
 			return false;
 		}
 
-		/*
-		 * This is the same as the JVM.f_instanceof method. Such method is
-		 * private so the code is repeated here
-		 */
-
 		// class info of the type this class represents
 		int cons = this.clinfo;
 
 		// start of class info
 		int p = obj.getClass().clinfo;
 		
+		return isInstance(cons, p);
+		
+	}
+    
+    private boolean isInstance(int cons, int p){
+    	
+		/*
+		 * This is the same as the JVM.f_instanceof method. Such method is
+		 * private so the code is repeated here
+		 */
+
 		int res = 0;
 
 		// check against interface
@@ -333,7 +356,7 @@ public final class Class<T> {
 				}
 			}
 		}
-	}
+    }
 
     
     /**
@@ -378,7 +401,7 @@ public final class Class<T> {
     @SCJAllowed
     @SCJRestricted(phase = ALL, maySelfSuspend = false, mayAllocate = true)
     public boolean isPrimitive(){
-    	return ((attributes & IS_PRIMITIVE) != 0);
+    	return ((attributes & PRIM_TYPE) != 0);
     }
     
     private boolean isAbstract(){
@@ -404,24 +427,11 @@ public final class Class<T> {
 	public T newInstance() throws InstantiationException,
 			IllegalAccessException {
     	
-    	// Pointer to <init> method of a no argument constructor
-//    	int initPtr = Native.rdMem(classRefAddress + Const.INIT_METH);
-    	
-//    	int specialPointers = Native.rdMem(1);
-//    	int javaLangClass = Native.rdMem(specialPointers + Const.CLASS_CLASS_OFFSET);
-    	
-//		if (classRefAddress == javaLangClass) {
-//			throw new IllegalAccessException(
-//					"Can not call newInstance() on the Class for java.lang.Class");
-//		}
-    	
 		if (this == Class.class) {
 			throw new IllegalAccessException(
 					"Can not call newInstance() on the Class for java.lang.Class");
 		}
-
     	
-    	//TODO: Cannot see if it is abstract class
 		if (isInterface() || isPrimitive() || init == 0 || isAbstract())
 			throw new InstantiationException(
 					"Trying to instantiate an interface, primitive, or the class has no empty constructor");
@@ -442,6 +452,48 @@ public final class Class<T> {
     @SCJAllowed
     public String toString() {
         return (isInterface() ? "interface " : (isPrimitive() ? "" : "class ")) + clinfo;
+    }
+    
+    static Class<?> getPrimitiveClass(char c){
+    	
+    	/* Primitive objects are the last Class objects */
+    	int p = Native.rdMem(0) - 9*Const.CLASS_INST_SIZE;
+    	int offset = 0;
+    	
+    	switch (c) {
+		case 'Z':
+			offset = 0;
+			break;
+		case 'B':
+			offset = 1;
+			break;
+		case 'C':
+			offset = 2;
+			break;
+		case 'D':
+			offset = 3;
+			break;
+		case 'F':
+			offset = 4;
+			break;
+		case 'I':
+			offset = 5;
+			break;
+		case 'J':
+			offset = 6;
+			break;
+		case 'S':
+			offset = 7;
+			break;
+		case 'V':
+			offset = 8;
+			break;
+		default:
+			break;
+		}
+    	
+    	int i = p + 5*offset;
+    	return (Class<?>) Native.toObject(i);
     }
 
 }

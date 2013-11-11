@@ -74,7 +74,7 @@ public final class Boolean {
 	 * 
 	 * @since 1.1
 	 */
-	public static final Class<Boolean> TYPE = (Class<Boolean>) Boolean.class;
+	public static final Class<Boolean> TYPE = (Class<Boolean>) Class.getPrimitiveClass('Z');
 	/**
 	 * The immutable value of this Boolean.
 	 * 

@@ -26,8 +26,7 @@ public class ClassObjectInfo {
 	static final int IS_ARRAY = 0x02;
 	static final int IS_ENUM = 0x04;
 	static final int IS_INTERFACE = 0x08;
-	static final int IS_PRIMITIVE = 0x10;
-	static final int IS_ABSTRACT = 0x20;
+	static final int IS_ABSTRACT = 0x10;
 
 	static int clinfo;
 	static int init;
@@ -74,19 +73,7 @@ public class ClassObjectInfo {
 		if (klass.isAbstract()) {
 			attributes |= IS_ABSTRACT;
 		}
-
-		if (value.equals("java.lang.Boolean")
-				|| value.equals("Java.lang.Character")
-				|| value.equals("java.lang.Byte")
-				|| value.equals("java.lang.Short")
-				|| value.equals("java.lang.Integer")
-				|| value.equals("java.lang.Long")
-				|| value.equals("java.lang.Float")
-				|| value.equals("java.lang.Double")
-				|| value.equals("java.lang.Void")) {
-			attributes |= IS_PRIMITIVE;
-		}
-
+		
 		init = 0;
 		List<OldMethodInfo> methods = cli.getMethods();
 		for (int i = 0; i < methods.size(); i++) {
@@ -128,6 +115,46 @@ public class ClassObjectInfo {
 			address += SIZE;
 
 		}
+		
+		/* Create primitive type classes */
+		for(int i = 1; i < 10; i++){
+			
+			out.println("//\t "+address+": "+ getPrimName(i) + " primitive type");
+			out.println("\t"+ (address + 2)+ ",\t//\tpointer to first instance variable");
+			out.println("\t" + javaLangClass+ ",\t//\tpointer to java.lang.Class mtab ");
+			out.println("\t" + 0 + ",\t//\tpointer to class info structure");
+			out.println("\t" + 0+ ",\t//\tpointer to empty <init> method");
+			out.println("\t" + (i << 5) + ",\t//\ttype attributes");
+			
+			address += SIZE;
 
+		}
+
+	}
+
+	private static String getPrimName(int i) {
+		
+		switch (i) {
+		case 1:
+			return "boolean";
+		case 2:
+			return "byte";
+		case 3:
+			return "char";
+		case 4:
+			return "double";
+		case 5:
+			return "float";
+		case 6:
+			return "int";
+		case 7:
+			return "long";
+		case 8:
+			return "short";
+		case 9:
+			return "void";
+		default:
+			return "null";
+		}
 	}
 }

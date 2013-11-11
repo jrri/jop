@@ -63,7 +63,7 @@ public final class Character {
 	 * 
 	 * @since 1.1
 	 */
-	public static final Class<Character> TYPE = (Class<Character>) Character.class;
+	public static final Class<Character> TYPE = (Class<Character>) Class.getPrimitiveClass('C');
 
 	/**
 	 * Smallest value allowed for radix arguments in Java. This value is 2.

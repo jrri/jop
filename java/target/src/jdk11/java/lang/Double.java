@@ -101,7 +101,7 @@ public final class Double extends Number implements Comparable
    * @since 1.1
    */
 //  public static final Class TYPE = VMClassLoader.getPrimitiveClass('D');
-  public static final Class<Double> TYPE = (Class<Double>) Double.class;
+  public static final Class<Double> TYPE = (Class<Double>) Class.getPrimitiveClass('D');
 
 
   /**

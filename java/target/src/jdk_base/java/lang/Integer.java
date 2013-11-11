@@ -88,7 +88,7 @@ public final class Integer
 	 * @since 1.1
 	 */
 //	public static final Class<Integer> TYPE = (Class<Integer>) GC.initializeClassObjects(5); 
-	public static final Class<Integer> TYPE = (Class<Integer>) Integer.class; 
+	public static final Class<Integer> TYPE = (Class<Integer>) Class.getPrimitiveClass('I'); 
 
 			
   /**

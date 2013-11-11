@@ -62,6 +62,8 @@ public class Const {
 	 * Pointer to class object, relative to start of MTAB
 	 */
 	public static final int MTAB2CLASS_OBJ = -1;
+	
+	public static final int CLASS_INST_SIZE = 5;
 
 	/**
 	 * Class info start relative to start of MTAB.

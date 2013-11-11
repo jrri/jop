@@ -226,7 +226,7 @@ public class JOPizer extends OldAppInfo implements Serializable {
 			/* Collect information about classes to generate Class objects */
 			 ClassObjectInfo.address = jz.length;
 			 ClassObjectInfo.objAddress = jz.length - ClassObjectInfo.SIZE;
-			 jz.length += jz.cliMap.size()*ClassObjectInfo.SIZE;
+			 jz.length += jz.cliMap.size()*ClassObjectInfo.SIZE+9*ClassObjectInfo.SIZE;
 			 
 			Iterator<? extends OldClassInfo> it1 = jz.cliMap.values()
 					.iterator();

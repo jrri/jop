@@ -78,7 +78,7 @@ public final class Long {
 	 * @since 1.1
 	 */
 //    public static final Class<Long>  TYPE = (Class<Long>) GC.initializeClassObjects(6);
-	public static final Class<Long>  TYPE = (Class<Long>) Long.class;
+	public static final Class<Long>  TYPE = (Class<Long>) Class.getPrimitiveClass('J');
     
 	
 	/**

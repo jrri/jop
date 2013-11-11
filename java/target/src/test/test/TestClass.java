@@ -284,11 +284,9 @@ public class TestClass {
 
 		Class<?> klazz;
 
+		klazz = Boolean.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Boolean.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 1);
-//			ok = ok & (klazz.getType() == 'Z');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -311,11 +309,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Character.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Character.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 2);
-//			ok = ok & (klazz.getType() == 'C');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -338,11 +334,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Byte.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Byte.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 3);
-//			ok = ok & (klazz.getType() == 'B');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -365,11 +359,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Short.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Short.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 4);
-//			ok = ok & (klazz.getType() == 'S');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -392,11 +384,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Integer.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Integer.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 5);
-//			ok = ok & (klazz.getType() == 'I');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -419,11 +409,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Long.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Long.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 6);
-//			ok = ok & (klazz.getType() == 'J');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -446,11 +434,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Float.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Float.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 7);
-//			ok = ok & (klazz.getType() == 'F');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -473,11 +459,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Double.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Double.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 8);
-//			ok = ok & (klazz.getType() == 'D');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);
@@ -500,11 +484,9 @@ public class TestClass {
 		}
 
 		// *******************************************************
+		klazz = Void.TYPE;
 		for (int i = 0; i < 2; i++) {
-			klazz = Void.TYPE;
 			ok = ok & klazz.isPrimitive();
-//			ok = ok & (klazz.primitiveType == 9);
-//			ok = ok & (klazz.getType() == 'V');
 			ok = ok & (klazz.getSuperclass() == null);
 			ok = ok & (klazz.isArray() == false);
 			ok = ok & (klazz.isInstance(testObj) == false);

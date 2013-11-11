@@ -77,7 +77,7 @@ public final class Byte  {
 	 * 
 	 * @since 1.1
 	 */
-	public static final Class<Byte> TYPE = (Class<Byte>) Byte.class;
+	public static final Class<Byte> TYPE = (Class<Byte>) Class.getPrimitiveClass('B');
 	
 	/**
 	 * The immutable value of this Byte.
