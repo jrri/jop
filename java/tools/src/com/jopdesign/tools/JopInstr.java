@@ -45,7 +45,7 @@ public class JopInstr{
 	private String name;
 	private int len;		// in byte codes (0 means variable length!)
 	private int imp;		// is implemented in JOP
-	private int cnt;
+	private int cnt;		// WCET value
 
 	private static Map<String,Integer> map = new HashMap<String,Integer>();
 
@@ -377,7 +377,7 @@ public class JopInstr{
 
 		new JopInstr("sys_int", 1, IMP_ASM, 1),			// 0xF0
 		new JopInstr("sys_exc", 1, IMP_ASM, 1),			// 0xF1
-		new JopInstr("ldc_w_ref", 3, IMP_ASM, 9),		// 0xF2
+		new JopInstr("ldc_w_ref", 3, IMP_ASM, 16),		// 0xF2
 		new JopInstr("resF3", 1, IMP_NO, 1),			// 0xF3
 		new JopInstr("resF4", 1, IMP_NO, 1),			// 0xF4
 		new JopInstr("resF5", 1, IMP_NO, 1),			// 0xF5
