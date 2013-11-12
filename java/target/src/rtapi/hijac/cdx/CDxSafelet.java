@@ -40,6 +40,6 @@ public class CDxSafelet implements Safelet<CDxMission> {
 	@Override
 	@SCJAllowed(Level.SUPPORT)
 	public long immortalMemorySize() {
-		return 0;
+		return 60000;
 	}
 }

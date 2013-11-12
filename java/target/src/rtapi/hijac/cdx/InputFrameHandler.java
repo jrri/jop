@@ -59,7 +59,7 @@ public class InputFrameHandler extends PeriodicEventHandler {
 
 		/* Terminate mission when enough frames have been processes. */
 		if ((mission.simulator.framesProcessed + mission.simulator.droppedFrames) == Constants.MAX_FRAMES) {
-			mission.requestSequenceTermination();
+			mission.requestTermination();
 			mission.dumpResults();
 			return;
 		}
