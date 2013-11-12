@@ -32,7 +32,6 @@ import javax.safetycritical.annotate.SCJRestricted;
 
 import com.jopdesign.sys.Const;
 import com.jopdesign.sys.GC;
-import com.jopdesign.sys.JVMHelp;
 import com.jopdesign.sys.Native;
 
 public final class Class<T> {
@@ -64,9 +63,9 @@ public final class Class<T> {
 	 private int attributes;
 	
 	/**
-	 * Package protected constructor to create Class objects at boot time.
+	 * Private constructor. Class objects are created only by the VM.
 	 */
-	Class() {
+	private Class() {
 	}
 	
 	@SCJAllowed

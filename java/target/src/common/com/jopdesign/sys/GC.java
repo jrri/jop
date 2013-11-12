@@ -33,7 +33,7 @@ package com.jopdesign.sys;
  */
 public class GC {
 	
-	/* First usable memory position (Native.rdMem(0) + resMem) */
+	/* First usable memory position (Native.rdMem(0)) */
 	static int mem_start;
 	
 	// get a effective heap size with fixed handle count
