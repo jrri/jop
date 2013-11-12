@@ -15,13 +15,13 @@ public class I2Cport extends HardwareObject implements RawInt{
 	public static final int BUFFER_SIZE = 32;
 	
 	// Status constants
-	public static final int TBUF_ERR  = 0x00000040;
-	public static final int RBUF_ERR  = 0x00000020;
-	public static final int ACK_ERR   = 0x00000010;
-	public static final int HDR_ERR   = 0x00000008;
-	public static final int BUS_BUSY  = 0x00000004;
-	public static final int STOP_STAT = 0x00000002;
-	public static final int DATA_RDY  = 0x00000001;
+	public static final int TBUF_ERR  = 0x00000040;//64
+	public static final int RBUF_ERR  = 0x00000020;//32
+	public static final int ACK_ERR   = 0x00000010;//16
+	public static final int HDR_ERR   = 0x00000008;//8
+	public static final int BUS_BUSY  = 0x00000004;//4
+	public static final int STOP_STAT = 0x00000002;//2
+	public static final int DATA_RDY  = 0x00000001;//1
 	
 	public static final int OCCU_RD  = 0xFFFF0000;
 	public static final int OCCU_WR  = 0x0000FFFF;
@@ -74,7 +74,7 @@ public class I2Cport extends HardwareObject implements RawInt{
 	// Data to send
 	public volatile int tx_fifo_data;
 	
-	// Data to receive
+	// Data received
 	public volatile int rx_fifo_data;
 	
 	// Timing high
@@ -88,6 +88,14 @@ public class I2Cport extends HardwareObject implements RawInt{
 
 	// Rx buffer occupancy
 	public volatile int rx_occu;
+	
+	public void disable(){
+		control = control & ~ENABLE;
+	}
+	
+	public void enable(){
+		control = control | ENABLE;
+	}
 	
 	/**
 	 * Load the initial configuration to the I2C device.
@@ -174,14 +182,14 @@ public class I2Cport extends HardwareObject implements RawInt{
 	}
 	
 	/**
-	 * Read ALL the bytes in the transmit buffer. Data is stored in the data
+	 * Read ALL the bytes in the receive buffer. Data is stored in the data
 	 * array. If buffer is empty, the array is filled with zeros.
 	 * 
 	 * @param data
 	 */
 	public void readBuffer(int[] data) {
 
-		// Read all data in buffer
+		// Read all data in rx buffer
 		int occu = (rx_occu & OCCU_RD ) >>> 16;
 		
 		for (int i=0; i < occu; i++){
@@ -306,6 +314,38 @@ public class I2Cport extends HardwareObject implements RawInt{
 			System.out.println("Can't start transmission, bus busy");
 		}
 		
+	}
+	
+	public void write(int slAddress, byte[] data){
+		// Clear STRT bit in case there was a previous transaction
+				control = control & CLEAR_STRT;
+				
+				if((status & BUS_BUSY) == 0){
+					// To write, the LSB of the address is set to zero
+					// and the first position of buffer is used to store the
+					// address of the slave we wish to communicate with.
+					tx_fifo_data = slAddress*2;
+					
+					// Write data to tx buffer
+					if(data.length > BUFFER_SIZE-1){
+						System.out.println("Data bigger than buffer size");
+					}else{
+						for(int i = 0; i<data.length; i++){
+							tx_fifo_data = data[i];
+						}
+					}
+						
+					// Set I2C to master
+					control = MASTER;
+					
+					msg_size = data.length + 1;
+
+					// Initiate transmission, set STRT bit = 1
+					control = control | STRT;
+
+				}else{
+					System.out.println("Can't start transmission, bus busy");
+				}
 	}
 
 	/**

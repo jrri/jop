@@ -38,14 +38,14 @@ public class WatchDogMission extends Mission {
 	@Override
 	public long missionMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 4096;
 	}
 
-	@Override
-	@SCJAllowed(Level.SUPPORT)
-	protected void cleanUp() {
-		dumpLog();
-	}
+//	@Override
+//	@SCJAllowed(Level.SUPPORT)
+//	protected void cleanUp() {
+//		dumpLog();
+//	}
 
 	private void dumpLog() {
 
@@ -54,7 +54,6 @@ public class WatchDogMission extends Mission {
 		// ImmortalEntry.dumpLog.logEntry = i;
 		// ManagedMemory.enterPrivateMemory(1500, ImmortalEntry.dumpLog);
 		// }
-
 		ImmortalEntry.dumpLog.selector = 1;
 		for (int i = 0; i < ImmortalEntry.slaves.length; i++) {
 			ImmortalEntry.dumpLog.logEntry = i;
