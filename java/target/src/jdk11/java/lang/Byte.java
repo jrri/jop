@@ -37,10 +37,6 @@
 
 package java.lang;
 
-import com.jopdesign.sys.GC;
-import com.jopdesign.sys.JVMHelp;
-import com.jopdesign.sys.Startup;
-
 /**
  * Instances of class <code>Byte</code> represent primitive <code>byte</code>
  * values.
@@ -75,13 +71,6 @@ public final class Byte  {
 	 */
 	public static final int SIZE = 8;
 
-	/**
-	 * The primitive type <code>byte</code> is represented by this
-	 * <code>Class</code> object.
-	 * 
-	 * @since 1.1
-	 */
-	public static final Class<Byte> TYPE = (Class<Byte>) GC.initializeClassObjects(3);
 	
 	/**
 	 * The immutable value of this Byte.
