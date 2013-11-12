@@ -93,8 +93,7 @@ public final class Float // JDK 1.4 extends Number implements Comparable
    * <code>Class</code> object.
    * @since 1.1
    */
-  	public static final Class<Float> TYPE = (Class<Float>) Class.getPrimitiveClass('F');
-
+//  public static final Class TYPE = VMClassLoader.getPrimitiveClass('F');
 
   /**
    * The number of bits needed to represent a <code>float</code>.

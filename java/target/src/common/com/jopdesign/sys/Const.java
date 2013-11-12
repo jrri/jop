@@ -39,7 +39,7 @@ public class Const {
 	 * Size of class header part.
 	 * Difference between class struct and method table.
 	 */
-	public static final int CLASS_HEADR = 6;
+	static final int CLASS_HEADR = 5;
 	/**
 	 * Size of instance relative to class struct.
 	 */
@@ -51,28 +51,16 @@ public class Const {
 	/**
 	 * Pointer to super class relative to class struct.
 	 */
-	public static final int CLASS_IFTAB = 4;
-
-	/**
-	 * Pointer to Class object, relative to class struct.
-	 */
-	public static final int CLASS_OBJECT = 5;
+	static final int CLASS_IFTAB = 4;
 	
-	/**
-	 * Pointer to class object, relative to start of MTAB
-	 */
-	public static final int MTAB2CLASS_OBJ = -1;
-	
-	public static final int CLASS_INST_SIZE = 5;
-
 	/**
 	 * Class info start relative to start of MTAB.
 	 */
-	public static final int MTAB2CLINFO = -6;
+	public static final int MTAB2CLINFO = -5;
 	/**
 	 * GC_INFO field relative to start of MTAB.
 	 */
-	static final int MTAB2GC_INFO = -4;
+	static final int MTAB2GC_INFO = -3;
 	
 	/**
 	 * Size of the on-chip stack cache including the area
@@ -87,7 +75,7 @@ public class Const {
 	 * Used in @link RtThreadImpl
 	 * 
 	 */
-	public static final int STACK_SIZE = 512;
+	public static final int STACK_SIZE = 256;
 	
 	/**
 	 * Set to true if support for double bytecodes should be

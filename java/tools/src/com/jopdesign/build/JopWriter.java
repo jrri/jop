@@ -30,6 +30,7 @@ package com.jopdesign.build;
 import java.io.*;
 import java.util.*;
 
+
 /**
  * @author Falvius, Martin
  */
@@ -38,7 +39,8 @@ public class JopWriter {
 	private JOPizer jz;
 	private PrintWriter out;
 	private PrintWriter outLinkInfo;
-	
+
+
 	public JopWriter(JOPizer jz) {
 		this.jz = jz;
 		out = jz.out;
@@ -81,14 +83,11 @@ public class JopWriter {
 		}
 
 		dumpClinit();
-		
 		out.println("//TODO: GC info");
 
 		dumpStrings();
 
 		dumpClassInfo();
-		
-		ClassObjectInfo.dump(out);
 
 		out.close();
 
@@ -97,11 +96,9 @@ public class JopWriter {
 	private int dumpByteCode() {
 
 		int cnt = 0;
-//		Iterator<? extends OldClassInfo> it = jz.cliMap.values().iterator();
-		Iterator<? extends JopClassInfo> it = (Iterator<? extends JopClassInfo>) jz.cliMap.values().iterator();
+		Iterator<? extends OldClassInfo> it = jz.cliMap.values().iterator();
 		while (it.hasNext()) {
-//			OldClassInfo cli = (OldClassInfo) it.next();
-			JopClassInfo cli = (JopClassInfo) it.next();
+			OldClassInfo cli = (OldClassInfo) it.next();
 
 			out.println("//\t"+cli.clazz.getClassName());
 			List methods = cli.getMethods();
@@ -111,11 +108,7 @@ public class JopWriter {
 				  // GCRT: dump the words before the method bytecode
 				  GCRTMethodInfo.dumpMethodGcis(((OldMethodInfo) methods.get(i)), out);
 				}
-				
-				JopMethodInfo jopMethodInfo = (JopMethodInfo) methods.get(i);
-				jopMethodInfo.dumpByteCode(out, outLinkInfo);
-				
-//				((JopMethodInfo) methods.get(i)).dumpByteCode(out, outLinkInfo);
+				((JopMethodInfo) methods.get(i)).dumpByteCode(out, outLinkInfo);
 				++cnt;
 			}
 		}
@@ -160,7 +153,7 @@ public class JopWriter {
 			out.println("\t\t"+mi.structAddress+",\t//\t"+mi.getCli().clazz.getClassName());
 		}
 	}
-	
+
 	private void dumpStrings() {
 		// find the string class
 		JopClassInfo strcli = StringInfo.cli;
@@ -178,5 +171,4 @@ public class JopWriter {
 			si.dump(out, strcli, StringInfo.stringTableAddress+JOPizer.CLASSINFO_NONREFARRY);
 		}
 	}
-	
 }

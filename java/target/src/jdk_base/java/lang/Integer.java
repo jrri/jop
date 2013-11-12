@@ -39,8 +39,6 @@ exception statement from your version. */
 
 package java.lang;
 
-//import com.jopdesign.sys.GC;
-
 /**
  * Instances of class <code>Integer</code> represent primitive
  * <code>int</code> values.
@@ -68,7 +66,6 @@ public final class Integer
     'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
     'u', 'v', 'w', 'x', 'y', 'z',
   };
-    
   /**
    * The minimum value an <code>int</code> can represent is -2147483648 (or
    * -2<sup>31</sup>).
@@ -81,16 +78,7 @@ public final class Integer
    */
   public static final int MAX_VALUE = 0x7fffffff;
 
-	/**
-	 * The primitive type <code>int</code> is represented by this
-	 * <code>Class</code> object.
-	 *  
-	 * @since 1.1
-	 */
-//	public static final Class<Integer> TYPE = (Class<Integer>) GC.initializeClassObjects(5); 
-	public static final Class<Integer> TYPE = (Class<Integer>) Class.getPrimitiveClass('I'); 
 
-			
   /**
    * The number of bits needed to represent an <code>int</code>.
    * @since 1.5

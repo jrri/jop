@@ -70,8 +70,7 @@ public final class Short {
 	 * The primitive type <code>short</code> is represented by this
 	 * <code>Class</code> object.
 	 */
-	 public static final Class<Short> TYPE = (Class<Short>) Class.getPrimitiveClass('S');
-
+	// public static final Class TYPE = VMClassLoader.getPrimitiveClass('S');
 	/**
 	 * The number of bits needed to represent a <code>short</code>.
 	 * 

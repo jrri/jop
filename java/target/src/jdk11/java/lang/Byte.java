@@ -71,13 +71,6 @@ public final class Byte  {
 	 */
 	public static final int SIZE = 8;
 
-	/**
-	 * The primitive type <code>byte</code> is represented by this
-	 * <code>Class</code> object.
-	 * 
-	 * @since 1.1
-	 */
-	public static final Class<Byte> TYPE = (Class<Byte>) Class.getPrimitiveClass('B');
 	
 	/**
 	 * The immutable value of this Byte.

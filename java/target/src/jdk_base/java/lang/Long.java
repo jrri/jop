@@ -37,8 +37,6 @@
 
 package java.lang;
 
-//import com.jopdesign.sys.GC;
-
 /**
  * Instances of class <code>Long</code> represent primitive <code>long</code>
  * values.
@@ -71,16 +69,6 @@ public final class Long {
 	 */
 	public static final long MAX_VALUE = 0x7fffffffffffffffL;
 
-	/**
-	 * The primitive type <code>long</code> is represented by this
-	 * <code>Class</code> object.
-	 * 
-	 * @since 1.1
-	 */
-//    public static final Class<Long>  TYPE = (Class<Long>) GC.initializeClassObjects(6);
-	public static final Class<Long>  TYPE = (Class<Long>) Class.getPrimitiveClass('J');
-    
-	
 	/**
 	 * The number of bits needed to represent a <code>long</code>.
 	 * 

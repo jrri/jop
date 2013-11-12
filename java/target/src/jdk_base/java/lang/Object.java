@@ -38,8 +38,6 @@ exception statement from your version. */
 
 package java.lang;
 
-import com.jopdesign.sys.Const;
-import com.jopdesign.sys.GC;
 import com.jopdesign.sys.Native;
 
 // import gnu.classpath.Configuration;
@@ -354,27 +352,15 @@ public class Object
    * <code>Foo.class</code>.  Notice that the class literal
    * also works on primitive types, making it useful for
    * reflection purposes.
- * @param <T>
    *
    * @return the class of this Object
    */
 /*
   public final native Class getClass();
 */
-	public final Class getClass() {
-
-		// Pointer to the handler of this object or array instance
-		int ptr = Native.toInt(this);
-
-		// Pointer to the method vector base in the class structure
-		int methodsAddress = Native.rdMem(ptr + GC.OFF_MTAB_ALEN);
-
-		// Pointer to the class object
-		int classObjRef = Native.rdMem(methodsAddress + Const.MTAB2CLASS_OBJ);
-		
-		return (Class) Native.toObject(classObjRef);
-
-	}
+  public final Class getClass() {
+	  throw new Error("getClass() NYI");
+  }
 
   /**
    * Wakes up one of the {@link Thread}s that has called

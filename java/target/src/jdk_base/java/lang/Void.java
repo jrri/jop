@@ -57,8 +57,7 @@ public final class Void
    * The return type <code>void</code> is represented by this
    * <code>Class</code> object.
    */
-   public static final Class<Void> TYPE = (Class<Void>) Class.getPrimitiveClass('V');
-
+  // public static final Class TYPE = VMClassLoader.getPrimitiveClass('V');
 
   /**
    * Void is non-instantiable.

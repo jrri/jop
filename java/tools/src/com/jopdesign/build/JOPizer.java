@@ -26,7 +26,6 @@ import com.jopdesign.common.bcel.CustomAttribute;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.util.Iterator;
 
 /**
  * @author flavius, martin
@@ -93,7 +92,7 @@ public class JOPizer extends OldAppInfo implements Serializable {
 	 * Address of class info structures
 	 */
 	int clinfoAddr;
-	
+
 	// Added to implement the symbol manager
 	public static JOPizer jz;
 
@@ -217,23 +216,11 @@ public class JOPizer extends OldAppInfo implements Serializable {
 			// Now all sizes are known
 			jz.length = cla.getAddress();
 			
-			
+			System.out.println("Classes: "+jz.cliMap.size());
+
 			// As all addresses are now known we can
 			// resolve the constants.
 			jz.iterate(new ResolveCPool(jz));
-
-			
-			/* Collect information about classes to generate Class objects */
-			 ClassObjectInfo.address = jz.length;
-			 ClassObjectInfo.objAddress = jz.length - ClassObjectInfo.SIZE;
-			 jz.length += jz.cliMap.size()*ClassObjectInfo.SIZE+9*ClassObjectInfo.SIZE;
-			 
-			Iterator<? extends OldClassInfo> it1 = jz.cliMap.values()
-					.iterator();
-			while (it1.hasNext()) {
-				JopClassInfo cli = (JopClassInfo) it1.next();
-				ClassObjectInfo.work(cli);
-			}
 
 			// Finally we can write the .jop file....
 			new JopWriter(jz).write();

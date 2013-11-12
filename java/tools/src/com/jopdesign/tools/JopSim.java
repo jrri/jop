@@ -464,9 +464,9 @@ System.out.println(mp+" "+pc);
 		// pointer to super class at offset 3
 		// == Const.CLASS_SUPER
 		int sup = readMem(vt+3, Access.CLINFO);
-		// the real VT is located at offset 6
+		// the real VT is located at offset 5
 		// == Const.CLASS_HEADR
-		vt = sup+6;
+		vt = sup+5;
 
 // System.err.println("invsuper: cp: "+cp+" off: "+off+" args: "+args+" ref: "+ref+" vt: "+vt+" addr: "+(vt+off));
 		invoke(vt+off);
@@ -501,7 +501,7 @@ System.out.println(mp+" "+pc);
 		
 		// pointer to method table in handle at offset 1
 		int vt = readMem(ref+1, Access.MVB);	// pointer to virtual table in obj-1
-		int it = readMem(vt-2, Access.CLINFO);	// pointer to interface table, two befor vt
+		int it = readMem(vt-1, Access.CLINFO);	// pointer to interface table, one befor vt
 
 		int mp = readMem(it+off, Access.IFTAB);
 // System.out.println("invint: off: "+off+" args: "+args+" ref: "+ref+" vt: "+vt+" mp: "+(mp));
@@ -694,11 +694,6 @@ System.out.println(mp+" "+pc);
 		stack[++sp] = readMem(ref+off+1, Access.FIELD);
 	}
 	
-	void ldc_w_ref() {
-		int ref = readMem(cp+readOpd16u(), Access.CONST);
-		stack[++sp] = readMem(ref+Const.CLASS_OBJECT, Access.CLINFO);
-	}
-
 /**
 *	the simulaton.
 *
@@ -1725,7 +1720,7 @@ System.out.println("new heap: "+heap);
 					invoke(jjhp+6);	// exception() is at offset 3*2
 					break;
 				case 242 :		// resF2
-					ldc_w_ref();
+					noim(243);
 					break;
 				case 243 :		// resF3
 					noim(243);

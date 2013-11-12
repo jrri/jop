@@ -37,6 +37,7 @@
 
 package java.lang;
 
+
 public final class Character {
 
 	//	TODO: NOTE:  works only for ASCII encoding
@@ -56,14 +57,6 @@ public final class Character {
 	 * <code>'\\uFFFF'</code>.
 	 */
 	public static final char MAX_VALUE = '\u007F';
-	
-	/**
-	 * The primitive type <code>char</code> is represented by this
-	 * <code>Class</code> object.
-	 * 
-	 * @since 1.1
-	 */
-	public static final Class<Character> TYPE = (Class<Character>) Class.getPrimitiveClass('C');
 
 	/**
 	 * Smallest value allowed for radix arguments in Java. This value is 2.
