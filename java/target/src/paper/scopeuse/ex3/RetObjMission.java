@@ -54,7 +54,7 @@ public class RetObjMission extends Mission{
 	@Override
 	public long missionMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 4096;
 	}
 
 }

@@ -20,6 +20,8 @@
 
 package scopeuse.ex4;
 
+import javax.safetycritical.ManagedMemory;
+
 import com.jopdesign.sys.Memory;
 
 /**
@@ -30,8 +32,7 @@ import com.jopdesign.sys.Memory;
 
 public class ParamObject {
 	
-	// TODO: Should be ManagedMemory mem;
-	Memory mem; // Memory reference
+	ManagedMemory mem; // Memory reference
 	int param_X;	   // Method parameters
 	ReturnObject retObject;  // Reference to return object
 

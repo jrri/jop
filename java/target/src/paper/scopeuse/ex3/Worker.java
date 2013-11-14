@@ -20,16 +20,15 @@
 
 package scopeuse.ex3;
 
+import javax.safetycritical.ManagedMemory;
+
 import com.jopdesign.sys.Memory;
 
 public class Worker implements Runnable{
 
 	RetObject rObj;
 	
-	Memory m;
-	
-	Worker(Memory m){
-		this.m = m;
+	Worker(){
 	}
 
 	@Override
@@ -39,12 +38,7 @@ public class Worker implements Runnable{
 		
 		//TODO: This example should use newInstance()
 		//TODO: ManagedMemory.getCurrentManagedMemory()
-		//TODO: MemoryArea.getMemoryArea(this), there is some issue
-		// using offsets 6 and 7 in the object handle. For now, we pass
-		// a reference to the memory area where we want the object to be 
-		// saved
-		
-		m.executeInArea(new Runnable() {
+		ManagedMemory.executeInAreaOf(this, new Runnable() {
 			
 			@Override
 			public void run() {

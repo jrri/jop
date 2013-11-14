@@ -20,6 +20,8 @@
 
 package scopeuse.ex4;
 
+import javax.safetycritical.ManagedMemory;
+
 /**
  * 
  * @author jrri
@@ -47,7 +49,7 @@ public class Method implements Runnable{
 		K = params.param_X * params.param_X;
 		
 		// Change context, create return object
-		params.mem.executeInArea(new Runnable() {
+		ManagedMemory.executeInAreaOf(params, new Runnable() {
 			
 			@Override
 			public void run() {

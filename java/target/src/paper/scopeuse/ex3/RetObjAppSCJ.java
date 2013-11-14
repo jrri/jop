@@ -34,7 +34,9 @@ public class RetObjAppSCJ {
 		
 		RetObjSafelet SS = new RetObjSafelet();
 		System.out.println("Safelet created");
-		JopSystem.startMission(SS);
+		JopSystem js = new JopSystem();
+		js.startMission(SS);
+
 		
 	}
 }

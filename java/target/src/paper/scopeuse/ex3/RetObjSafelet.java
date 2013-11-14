@@ -16,7 +16,7 @@ public class RetObjSafelet implements Safelet{
 	@Override
 	public MissionSequencer<Mission>getSequencer() {
 
-		StorageParameters sp = new StorageParameters(1000000000, null, 0, 0);
+		StorageParameters sp = new StorageParameters(1024, null, 0, 0);
 		RetObjMission m = new RetObjMission();
 		return new LinearMissionSequencer<Mission>(new PriorityParameters(13), sp, false, m); 
 		
@@ -25,7 +25,7 @@ public class RetObjSafelet implements Safelet{
 	@Override
 	public long immortalMemorySize() {
 		
-		return 100;
+		return 10000;
 	}
 
 	@Override

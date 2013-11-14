@@ -23,6 +23,7 @@ package scopeuse.ex3;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.ManagedMemory;
+import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 
@@ -38,6 +39,8 @@ import com.jopdesign.sys.Native;
 
 public class RetObjHandler extends PeriodicEventHandler{
 	
+	int cnt = 0;
+	
 	public RetObjHandler(PriorityParameters priority,
 			PeriodicParameters parameters, StorageParameters scp, long scopeSize) {
 		super(priority, parameters, scp, scopeSize);
@@ -45,16 +48,25 @@ public class RetObjHandler extends PeriodicEventHandler{
 
 	@Override
 	public void handleAsyncEvent() {
+		
+		if(cnt == 3)
+			Mission.getCurrentMission().requestTermination();
+		
+		
 		System.out.println("***************** Handler *****************");
 		System.out.println("");
 		
-		Worker w = new Worker(Memory.getCurrentMemory());
+		// The method getCurrentMemory() is no longer part of the SCJ API
+		//	Worker w = new Worker(ManagedMemory.getCurrentMemory());
+		Worker w = new Worker();
 				
 		ManagedMemory.enterPrivateMemory(256, w);
 		
 		// now we can use out.result
 		long a = w.rObj.a;
 		System.out.println("Result: "+ a);
+		
+		cnt++;
 
 	}
 }

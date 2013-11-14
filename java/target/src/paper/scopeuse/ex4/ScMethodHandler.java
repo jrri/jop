@@ -23,6 +23,7 @@ package scopeuse.ex4;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.ManagedMemory;
+import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 
@@ -38,6 +39,8 @@ import com.jopdesign.sys.Native;
 
 public class ScMethodHandler extends PeriodicEventHandler{
 	
+	private int cnt = 0;
+
 	public ScMethodHandler(PriorityParameters priority,
 			PeriodicParameters parameters, StorageParameters scp, long scopeSize) {
 		super(priority, parameters, scp, scopeSize);
@@ -45,13 +48,17 @@ public class ScMethodHandler extends PeriodicEventHandler{
 
 	@Override
 	public void handleAsyncEvent() {
+		
+		if(cnt == 3)
+			Mission.getCurrentMission().requestTermination();
+		
 		System.out.println("***************** Handler *****************");
 		System.out.println("");
 
 		// Created in the scope where handler executes
 		ParamObject pObj = new ParamObject();
 		
-		pObj.mem =  Memory.getCurrentMemory();
+		pObj.mem =  ManagedMemory.getManagedMemory(pObj);
 		pObj.param_X = 120;
 		pObj.retObject = null;
 		
@@ -62,6 +69,8 @@ public class ScMethodHandler extends PeriodicEventHandler{
 		
 		// Now the returned object can be used
 		System.out.println(pObj.retObject.keys[1]);
+		
+		cnt++;
 		
 	}
 }

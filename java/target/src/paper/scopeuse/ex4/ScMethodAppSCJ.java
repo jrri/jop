@@ -34,7 +34,8 @@ public class ScMethodAppSCJ {
 		
 		ScMethodSafelet SS = new ScMethodSafelet();
 		System.out.println("Safelet created");
-		JopSystem.startMission(SS);
+		JopSystem js = new JopSystem();
+		js.startMission(SS);
 		
 	}
 

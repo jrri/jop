@@ -22,6 +22,7 @@ package scopeuse.ex5;
 
 import javax.realtime.AbsoluteTime;
 import javax.realtime.RealtimeClock;
+import javax.safetycritical.ManagedMemory;
 
 /**
  * 
@@ -71,7 +72,7 @@ public class RunnableFactory implements IRunnable{
 //				auxObjIn.arbObj = P;
 //				
 				// Change execution context... another runnable... 
-				auxObjIn.retMem.executeInArea(new Runnable() {
+				ManagedMemory.executeInAreaOf(auxObjIn, new Runnable() {
 					
 					@Override
 					public void run() {

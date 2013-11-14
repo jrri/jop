@@ -23,6 +23,7 @@ package scopeuse.ex5;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.ManagedMemory;
+import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 
@@ -37,6 +38,8 @@ import com.jopdesign.sys.Memory;
 
 	public class RFactHandler extends PeriodicEventHandler {
 
+		private int cnt = 0;
+		
 		public RFactHandler(PriorityParameters priority,
 				PeriodicParameters parameters, StorageParameters scp,
 				long scopeSize) {
@@ -47,12 +50,14 @@ import com.jopdesign.sys.Memory;
 		@Override
 		public void handleAsyncEvent() {
 			
+			if(cnt == 3)
+				Mission.getCurrentMission().requestTermination();
+			
 			System.out.println("*********Handler begin*********");
 			
 			RunnableFactory factory = new RunnableFactory();
 			AuxObj auxObj = new AuxObj();
 			
-			auxObj.retMem = Memory.getCurrentMemory();
 			auxObj.a = 500;
 			
 			// Currently, entering memory areas generates two "Illegal field reference" 
@@ -70,6 +75,8 @@ import com.jopdesign.sys.Memory;
 			}
 			
 			System.out.println("*********Handler exit*********");
+			
+			cnt++;
 		}
 	}
 	
@@ -79,9 +86,6 @@ import com.jopdesign.sys.Memory;
 		
 		// Some return/argument field
 		int a,b,c;
-		
-		// Return memory area
-		Memory retMem;
 		
 		// Return arbitrary object
 		ArbObj arbObj = new ArbObj();

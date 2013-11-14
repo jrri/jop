@@ -42,7 +42,7 @@ public class RFactSafelet implements Safelet{
 	@Override
 	public MissionSequencer<Mission>getSequencer() {
 
-		StorageParameters sp = new StorageParameters(1000000, null);
+		StorageParameters sp = new StorageParameters(1024, null);
 		RFactMission m = new RFactMission();
 		return new LinearMissionSequencer<Mission>(new PriorityParameters(13), sp, false, m); 
 		
