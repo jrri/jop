@@ -216,7 +216,7 @@ public class JOPizer extends OldAppInfo implements Serializable {
 			// Now all sizes are known
 			jz.length = cla.getAddress();
 			
-			System.out.println("Classes: "+jz.cliMap.size());
+			System.out.println("Number of classes:" + jz.cliMap.size());
 
 			// As all addresses are now known we can
 			// resolve the constants.

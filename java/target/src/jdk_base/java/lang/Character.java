@@ -74,50 +74,7 @@ public final class Character {
 	 */
 	public static final char MIN_VALUE = '\u0000';
 
-	/***********************************************************/ 
 	/**
-     * The minimum value of a supplementary code point.
-     *
-     * @since 1.5
-     */
-    public static final int MIN_SUPPLEMENTARY_CODE_POINT = 0x010000;
-
-    /**
-     * The maximum value of a Unicode code point.
-     *
-     * @since 1.5
-     */
-    public static final int MAX_CODE_POINT = 0x10ffff;  
-    
-    /**
-     * The minimum value of a Unicode low-surrogate code unit in the
-     * UTF-16 encoding. A low-surrogate is also known as a
-     * <i>trailing-surrogate</i>.
-     *
-     * @since 1.5
-     */
-    public static final char MIN_LOW_SURROGATE  = '\uDC00';
-
-    /**
-     * The maximum value of a Unicode low-surrogate code unit in the
-     * UTF-16 encoding. A low-surrogate is also known as a
-     * <i>trailing-surrogate</i>.
-     *
-     * @since 1.5
-     */
-    public static final char MAX_LOW_SURROGATE  = '\uDFFF';
-    
-    /**
-     * The minimum value of a Unicode high-surrogate code unit in the
-     * UTF-16 encoding. A high-surrogate is also known as a
-     * <i>leading-surrogate</i>.
-     *
-     * @since 1.5
-     */
-    public static final char MIN_HIGH_SURROGATE = '\uD800';
-    /*************************************************************/
-    
-    /**
 	 * The immutable value of this Character.
 	 * 
 	 * @serial the value of this Character
@@ -202,39 +159,5 @@ public final class Character {
 			return ch;
 		return ch;
 	}
-
-    /**
-     * Converts the specified character (Unicode code point) to its
-     * UTF-16 representation stored in a <code>char</code> array. If
-     * the specified code point is a BMP (Basic Multilingual Plane or
-     * Plane 0) value, the resulting <code>char</code> array has
-     * the same value as <code>codePoint</code>. If the specified code
-     * point is a supplementary code point, the resulting
-     * <code>char</code> array has the corresponding surrogate pair.
-     *
-     * @param  codePoint a Unicode code point
-     * @return a <code>char</code> array having
-     *         <code>codePoint</code>'s UTF-16 representation.
-     * @exception IllegalArgumentException if the specified
-     * <code>codePoint</code> is not a valid Unicode code point.
-     * @since  1.5
-     */
-    public static char[] toChars(int codePoint) {
-        if (codePoint < 0 || codePoint > MAX_CODE_POINT) {
-            throw new IllegalArgumentException();
-        }
-        if (codePoint < MIN_SUPPLEMENTARY_CODE_POINT) {
-                return new char[] { (char) codePoint };
-        }
-        char[] result = new char[2];
-        toSurrogates(codePoint, result, 0);
-        return result;
-    }
-
-    static void toSurrogates(int codePoint, char[] dst, int index) {
-        int offset = codePoint - MIN_SUPPLEMENTARY_CODE_POINT;
-        dst[index+1] = (char)((offset & 0x3ff) + MIN_LOW_SURROGATE);
-        dst[index] = (char)((offset >>> 10) + MIN_HIGH_SURROGATE);
-    }
 
 } // class Character

@@ -81,22 +81,17 @@ public class Startup {
 			// mem(0) is the length of the application
 			// or in other words the heap start
 			val = Native.rdMem(1);		// pointer to 'special' pointers
-			
-			/* First initialize the GC with the address of static ref. fields. */
+			// first initialize the GC with the address of static ref. fields
 			GC.init(mem_size, val+4);
-			
 			// place for some initialization:
 			// could be placed in <clinit> in the future
-			// System.init();
+//			System.init();
 			version();
-			GC.log("------ VM boot start ------");
 			started = true;
 			clazzinit();
-			// not in <clinit> as first methods are special and placement
+			// not in <clinit> as first methods are special and palcement
 			// of <clinit> depends on compiler
 			JVMHelp.init();
-			
-			GC.log("------ VM boot end ------");
 		}
 		
 		// clear all pending interrupts (e.g. timer after reset)
@@ -151,28 +146,25 @@ public class Startup {
 		// change for DE2-70 VGA board
 		// int size = 0x0078500; // adresses for JOP - after this memory for vga
 		int size = 0;
-		int firstWord = Native.rd(offset + 0);
+		int firstWord = Native.rd(offset+0);
 		int val;
 		// increment in 512 Bytes
-		for (size = 0;; size += 128) {
-			val = Native.rd(offset + size);
-			Native.wr(0xaaaa5555, offset + size);
-			if (Native.rd(offset + size) != 0xaaaa5555)
-				break;
-			Native.wr(0x12345678, offset + size);
-			if (Native.rd(offset + size) != 0x12345678)
-				break;
-			if (size != 0) {
+		for (size=0; ; size+=128) {
+			val = Native.rd(offset+size);
+			Native.wr(0xaaaa5555, offset+size);
+			if (Native.rd(offset+size)!=0xaaaa5555) break;
+			Native.wr(0x12345678, offset+size);
+			if (Native.rd(offset+size)!=0x12345678) break;
+			if (size!=0) {
 				// invalidate cache
 				Native.invalidate();
-				if (Native.rd(offset + 0) != firstWord)
-					break;
+				if (Native.rd(offset+0)!=firstWord) break;				
 			}
 			// restore current word
-			Native.wr(val, offset + size);
+			Native.wr(val, offset+size);
 		}
 		// restore the first word
-		Native.wr(firstWord, offset + 0);
+		Native.wr(firstWord, offset+0);
 
 		return size;
 	}
@@ -270,8 +262,7 @@ public class Startup {
 //			System.out.println(var);
 //			System.out.println("len=");
 //			System.out.println(len);
-			// see JOPizer constant on max. method length
-			if (len<256 && len!=0) {
+			if (len<256 && len!=0) {	// see JOPizer constant on max. method length
 				Native.invoke(addr);
 			// len=0 means interpret it
 			} else {
