@@ -369,18 +369,23 @@ public class Memory {
 	}
 	
 	/**
-	 * Used resize only the mission memory
+	 * Used ONLY to resize the mission memory. Should be called by the
+	 * MissionSequencer before entering the mission memory.
 	 * 
 	 * @param size
 	 */
-	void setSize(int size){
-		
-		if(size <= 0){
-			
+	void setSize(int size) {
+
+		if (size <= 0) {
+			throw GC.OOMError;
 		}
-		
-		/* New size */
-		endLocalPtr = startPtr + size -1;
+
+		if((allocPtr-startPtr) > size)
+			throw GC.OOMError;
+
+		/* New size. The local allocation pointer is not changed. Should 
+		 * the memory be cleared? */
+		endLocalPtr = startPtr + size - 1;
 		allocBsPtr = endLocalPtr + 1;
 	}
 	

@@ -182,6 +182,7 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 
 		((Vector) Native.toObject(m.longEventHandlersRef)).addElement(this);
 		RtThreadImpl.register(rtt);
+		_sysHelper.setSchedulable(rtt, this);
 
 		/*
 		 * Change the processor where the RtThread will run in case its affinity

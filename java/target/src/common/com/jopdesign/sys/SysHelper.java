@@ -3,7 +3,9 @@ package com.jopdesign.sys;
 import javax.realtime.ImmortalMemory;
 import javax.realtime.Schedulable;
 import javax.safetycritical.AperiodicEventHandler;
+import javax.safetycritical.AperiodicLongEventHandler;
 import javax.safetycritical.ManagedMemory;
+import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.PrivateMemory;
 
@@ -19,6 +21,7 @@ public final class SysHelper {
 		ManagedMemory.setSysHelper(sysHelper);
 		PeriodicEventHandler.setSysHelper(sysHelper);
 		AperiodicEventHandler.setSysHelper(sysHelper);
+		AperiodicLongEventHandler.setSysHelper(sysHelper);
 		
 		javax.realtime.Scheduler.setSysHelper(sysHelper);
 	}

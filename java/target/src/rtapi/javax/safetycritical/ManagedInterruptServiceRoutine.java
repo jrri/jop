@@ -49,6 +49,8 @@ public abstract class ManagedInterruptServiceRoutine extends
 	private PrivateMemory privMem;
 
 	static {
+		
+		/*  Make sure the sys device is created in ImmortalMemory */
 		factory = IOFactory.getFactory();
 		system = factory.getSysDevice();
 	}

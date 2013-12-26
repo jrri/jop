@@ -20,14 +20,10 @@
 
 package javax.safetycritical;
 
-import static javax.safetycritical.annotate.Level.LEVEL_1;
 import static javax.safetycritical.annotate.Level.SUPPORT;
 
 import java.util.Vector;
 
-import javax.realtime.AsyncEventHandler;
-import javax.realtime.AsyncLongEventHandler;
-import javax.realtime.Scheduler;
 import javax.safetycritical.annotate.Allocate;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.Allocate.Area;
@@ -75,8 +71,7 @@ public abstract class Mission {
 	/* True only for subclasses of CyclicExecutive */
 	boolean isCyclicExecutive = false;
 
-	/* This works only on L0, L1 applications where there is only one sequencer */
-	static MissionSequencer currentSequencer = null;
+	MissionSequencer currentSequencer;
 
 	static Mission currentMission;
 
@@ -126,6 +121,20 @@ public abstract class Mission {
 	 */
 	@SCJAllowed
 	public static Mission getCurrentMission() {
+
+		/*
+		 * Who knows about the current mission? The current sequencer Who knows
+		 * about the current sequencer? The current mission The only additional
+		 * information here is the context from where the method is called.
+		 * 
+		 * 1. If it is called from Mission.initialize(), the current context is
+		 * either the top-most sequencer or a nested sequencer. In both cases
+		 * the returned object is the same as the one returned by
+		 * getNextMission() method (as that objt's initialize() method is
+		 * executing).
+		 */
+		
+		/* Works only on L0 or L1 where only one mission executes at a time */
 		return currentMission;
 	}
 
@@ -231,20 +240,22 @@ public abstract class Mission {
 		 */
 		terminationPending = true;
 		terminationHook();
-		
-//		/*
-//		 * The following code runs in the main thread, that is, the one with the
-//		 * lowest priority in a L0, L1 application. This will allow any currently
-//		 * executing handlers to finish before the terminate() method gets
-//		 * called.
-//		 * 
-//		 * For a L0 application, everything runs in the main thread so the
-//		 * terminate() method should be called after the currently executing
-//		 * handler finishes. That is done in the MissionSequencer.
-//		 */
-//		if (!isCyclicExecutive)
-//			terminate();
-		
+
+		// /*
+		// * The following code runs in the main thread, that is, the one with
+		// the
+		// * lowest priority in a L0, L1 application. This will allow any
+		// currently
+		// * executing handlers to finish before the terminate() method gets
+		// * called.
+		// *
+		// * For a L0 application, everything runs in the main thread so the
+		// * terminate() method should be called after the currently executing
+		// * handler finishes. That is done in the MissionSequencer.
+		// */
+		// if (!isCyclicExecutive)
+		// terminate();
+
 	}
 
 	/**
@@ -326,9 +337,10 @@ public abstract class Mission {
 	}
 
 	/**
-	 * This method shall be invoked by requestTermination(). Application-specific
-	 * subclasses of Mission may override the terminationHook method to supply
-	 * application-specific mission shutdown code.
+	 * This method shall be invoked by requestTermination().
+	 * Application-specific subclasses of Mission may override the
+	 * terminationHook method to supply application-specific mission shutdown
+	 * code.
 	 */
 	@SCJAllowed(javax.safetycritical.annotate.Level.SUPPORT)
 	protected void terminationHook() {
@@ -337,7 +349,7 @@ public abstract class Mission {
 	/**
 	 * Implementation specific
 	 */
-	
+
 	Vector getHandlers() {
 		return (Vector) Native.toObject(eventHandlersRef);
 	}

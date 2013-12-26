@@ -32,14 +32,20 @@ import javax.safetycritical.annotate.SCJRestricted;
 
 /**
  * An object that represents a time interval milliseconds/10^3 +
- * nanoseconds/10^9 seconds long that is divided into subintervals by some
- * frequency. This is generally used in periodic events, threads, and
- * feasibility analysis to specify periods where there is a basic period that
- * must be adhered to strictly (the interval), but within that interval the
- * periodic events are supposed to happen frequency times, as uniformly spaced
- * as possible, but clock and scheduling jitter is moderately acceptable.
+ * nanoseconds/10^9 seconds long. It generally is used to represent a time
+ * relative to now.
+ * 
+ * The time interval is kept in normalized form. The range goes from [(-2^63)
+ * milliseconds + (-10^6+1) nanoseconds] to [(2^63-1) milliseconds + (10^6-1)
+ * nanoseconds].
+ * 
+ * A negative interval relative to now represents time in the past. For add and
+ * subtract negative values behave as they do in arithmetic.
  * 
  * @version SCJ 0.93
+ * @note The definition was changed. SJC's spec provides a definition for
+ *       RationalTime instead of RelativeTime
+ * 
  * 
  */
 @SCJAllowed

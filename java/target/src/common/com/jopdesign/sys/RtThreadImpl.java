@@ -110,7 +110,10 @@ public class RtThreadImpl {
 	int state;
 
 	int cpuId;			// core that the thread is running on
-	// index in next, ref and event
+	
+	/**
+	 * Index for this thread in the next[], ref[] and event[] arrays
+	 */
 	int nr;
 	int[] stack;
 	int sp;
@@ -159,7 +162,6 @@ public class RtThreadImpl {
 		if (initDone==true) return;
 		initDone = true;
 		mission = false;
-		
 
 		head = null;
 
@@ -168,9 +170,12 @@ public class RtThreadImpl {
 
 	}
 	
-	// A method to de-initialize the mission mode. Used when changing mission in
-	// SCJ L1
+	/**
+	 * A method to de-initialize the mission mode. Used when changing mission in
+	 * SCJ L1. Should be called after all MEH have been registered in a mission.
+	 */
 	public static void reInitialize(){
+		
 		initDone = false;
 		mission = false;
 	}
@@ -262,9 +267,16 @@ public class RtThreadImpl {
 	}
 
 	private void startThread() {
-
-		if (state != CREATED)
+		
+		if (state != CREATED) {
+			/*
+			 * Need to assign the memory area for the main thread, otherwise we
+			 * can't use the ManagedMemory API for the MissionSequencer if it
+			 * runs on the main thread.
+			 */
+			currentArea = initArea;
 			return; // already called start
+		}
 
 		// if we have interrupts enabled we have to synchronize
 
@@ -365,11 +377,12 @@ public class RtThreadImpl {
 		
 		// Collect number of thread for each core
 		th = head;
-
+		
 		// Reset the number of threads in the scheduler to recreate the thread
 		// array when changing mission in SCJ L1. Does this also works for a
 		// multicore application??
 		Scheduler.sched[th.cpuId].cnt = 0;
+
 		for (c=0; th!=null; ++c) {
 			Scheduler.sched[th.cpuId].cnt++;
 			th = th.lower;
@@ -465,8 +478,8 @@ public class RtThreadImpl {
 
 		now = Native.rd(Const.IO_US_CNT);
 		if (nxt - now < 0) { // missed time!
-			s.next[nr] = now; // correct next
-			// next[nr] = nxt; // without correction!
+//			s.next[nr] = now; // correct next
+			 s.next[nr] = nxt; // without correction!
 			Native.wr(1, Const.IO_INT_ENA);
 			return false;
 		} else {

@@ -72,29 +72,37 @@ public class JopSystem {
 			return;
 		}
 
-		/* For L0 and L1, there is only one sequencer */
-		Mission.currentSequencer = missionSequencer;
-
 		missionSequencer.terminationHelper = terminationHelper;
 		sequencerHelper.sequencer = missionSequencer;
 
 		/*
 		 * Initial MissionMemory is sized according to the sequencer's storage
-		 * parameters. Before executing the missions's initialize() method, the
-		 * MissionMemory allocation space is resized according to the value
-		 * returned by the missionMemorySize() method. The remaining backing
-		 * store of the MissionMemory is equal to the remaining backing store of
-		 * the ImmortalMemory.
+		 * parameters. The space is taken from the remaining backing store of
+		 * the system, that is, the rest of the system's memory that is NOT part
+		 * of the ImmortalMemory.
 		 * 
-		 * For a L2 application, each MissionMemory created must also specify its
-		 * backing store requirements.
+		 * After the initial MissionMemory is created, the space for local
+		 * allocations is equal to the total backing store. 
+		 * 
+		 * 
+		 * Before executing the missions's initialize() method, this initial
+		 * MissionMemory is resized according to the value returned by the
+		 * missionMemorySize() method. The remaining backing store of the
+		 * MissionMemory is equal to the remaining backing store of the
+		 * ImmortalMemory.
+		 * 
+		 * For a L2 application, each MissionMemory created must also specify
+		 * its backing store requirements.
 		 */
+
+		System.out.println(ImmortalMemory.instance().xx());
+
 		int size = (int) missionSequencer.storage.getTotalBackingStoreSize();
 		MissionMemory missionMem = new MissionMemory(size);
 
 		while (terminationHelper.nextMission
 				&& !MissionSequencer.terminationRequest) {
-//			ManagedMemory.enterPrivateMemory(size, sequencerHelper);
+			// ManagedMemory.enterPrivateMemory(size, sequencerHelper);
 			missionMem.enter(sequencerHelper);
 			RtThreadImpl.reInitialize();
 		}

@@ -166,6 +166,7 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 		}
 
 		((Vector) Native.toObject(m.eventHandlersRef)).addElement(this);
+		RtThreadImpl.register(rtt);
 		_sysHelper.setSchedulable(rtt, this);
 
 		/*

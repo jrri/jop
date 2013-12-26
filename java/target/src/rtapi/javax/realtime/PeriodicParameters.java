@@ -35,7 +35,7 @@ import javax.safetycritical.annotate.SCJAllowed;
 @SCJAllowed
 public class PeriodicParameters extends ReleaseParameters {
 
-	RelativeTime start;
+	HighResolutionTime start;
 	RelativeTime period;
 	
 	/**
@@ -97,9 +97,9 @@ public class PeriodicParameters extends ReleaseParameters {
 		this.missHandler = handler;
 
 		if(start == null){
-			this.start =  new RelativeTime();
+			this.start =  new HighResolutionTime(0,0) {};
 		}else{
-			this.start = (RelativeTime) start;
+			this.start = start;
 		}
 		
 		if (period == null){

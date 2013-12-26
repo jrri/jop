@@ -79,6 +79,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 	StorageParameters storage;
 
 	TerminationHelper terminationHelper;
+	Mission currMission;
 
 	// why is this static?
 	// ok, in level 1 we have only one mission.
@@ -313,13 +314,17 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		Mission m = getNextMission();
 
 		if (m != null) {
+			
+			m.currentSequencer = this;
+			currMission = m;
+			myMission = m;
 
 			// ! @todo Illegal reference when the mission object is allocated in
 			// ! Immortal memory, e.g. with the Linear and Repeating sequencers
 			Mission.setCurrentMission(m);
 			m.terminationPending = false;
 
-			Terminal.getTerminal().writeln("[SYSTEM]: Got new mission");
+			Terminal.getTerminal().writeln("[SEQ]: Got new mission");
 			ManagedMemory.setSize((int) m.missionMemorySize());
 			m.initialize();
 			
@@ -334,7 +339,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 
 		} else {
 			Terminal.getTerminal().writeln(
-					"[SYSTEM]: No more missions to execute");
+					"[SEQ]: No more missions to execute");
 			terminationHelper.nextMission = false;
 		}
 	}
@@ -349,7 +354,8 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 	}
 
 	void executeMission(Mission m) {
-		Terminal.getTerminal().writeln("[SYSTEM]: SCJ Start L1 mission on JOP");
+		
+		Terminal.getTerminal().writeln("[SEQ]: SCJ Start L1 mission on JOP");
 		RtThread.startMission();
 
 		/*
@@ -363,7 +369,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 
 	void executeCycle(CyclicExecutive ce) {
 
-		Terminal.getTerminal().writeln("[SYSTEM]: SCJ Start L0 mission on JOP");
+		Terminal.getTerminal().writeln("[SEQ]: SCJ Start L0 mission on JOP");
 
 		/*
 		 * Upon return from initialize(), the infrastructure invokes the
@@ -437,7 +443,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 
 				if (Clock.getRealtimeClock().getTime(now).compareTo(next) > 0) {
 					/* Frame overrun */
-					Terminal.getTerminal().writeln("[SYSTEM]: Frame overrun");
+					Terminal.getTerminal().writeln("[SEQ]: Frame overrun");
 				}
 			}
 		}

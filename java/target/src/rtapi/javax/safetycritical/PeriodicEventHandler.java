@@ -29,7 +29,6 @@ import javax.realtime.AffinitySet;
 import javax.realtime.HighResolutionTime;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
-import javax.realtime.RelativeTime;
 import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
@@ -70,7 +69,7 @@ import joprt.RtThread;
 @SCJAllowed
 public abstract class PeriodicEventHandler extends ManagedEventHandler {
 
-	RelativeTime start, period;
+	HighResolutionTime start, period;
 	PrivateMemory privMem;
 	StorageParameters storage;
 	Mission m;
@@ -150,7 +149,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 
 		// start = (RelativeTime) release.getStart();
 		// period = release.getPeriod();
-		start = (RelativeTime) _rtsjHelper.getStart(release);
+		start =  _rtsjHelper.getStart(release);
 		period = _rtsjHelper.getPeriod(release);
 
 		// TODO scp
@@ -203,7 +202,8 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 					// while (!MissionSequencer.terminationRequest) {
 					while (!Mission.currentMission.terminationPending) {
 						privMem.enter(runner);
-						waitForNextPeriod();
+						if(!waitForNextPeriod())
+							System.out.println("Deadline missed");
 					}
 				}
 

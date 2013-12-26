@@ -9,6 +9,8 @@ import javax.realtime.RtsjHelper;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import com.jopdesign.sys.SysHelper;
+
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 import static javax.safetycritical.annotate.Level.SUPPORT;
 
@@ -43,8 +45,13 @@ public abstract class ManagedLongEventHandler extends
 	 */
 	private StringBuffer name;
 	
+	static SysHelper _sysHelper;
 	static RtsjHelper _rtsjHelper;
 
+	public static void setSysHelper(SysHelper sysHelper){
+		_sysHelper = sysHelper;
+		
+	}
 	public static void setRtsjHelper(RtsjHelper rtsjHelper) {
 		_rtsjHelper = rtsjHelper;
 	}

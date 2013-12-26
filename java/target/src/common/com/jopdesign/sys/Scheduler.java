@@ -13,36 +13,69 @@ import com.jopdesign.io.SysDevice;
 class Scheduler implements Runnable {
 	// allocated and set in startMission
 	// ordered by priority
-	int next[];					// next time to change to state running
-	RtThreadImpl[] ref;			// references to threads
 
+	/**
+	 * Array containing the next time to change to running state for thread "i",
+	 * where "i" represents the index in the array. The main thread (or idle
+	 * thread) is at index 0.
+	 */
+	int next[];
+
+	/**
+	 * References to threads dispatched by the scheduler. The main thread (or
+	 * idle thread) is at index 0.
+	 */
+	RtThreadImpl[] ref;
+
+	/**
+	 *  State of an event, it can be NO_EVENT, EV_FIRED, or EV_WAITING
+	 */
+	int event[];				
+	
 	final static int NO_EVENT = 0;
 	final static int EV_FIRED = 1;
 	final static int EV_WAITING = 2;
-	int event[];				// state of an event
 
-	int cnt;					// number of threads
-	int active;					// active thread number
+	/**
+	 * Number of threads in this scheduler (i.e. per core)
+	 */
+	int cnt;					
 	
-	int tmp;					// counter to build the thread list
+	/**
+	 * Active thread number
+	 */
+	int active;
+	
+	/**
+	 * Counter to build the thread list
+	 */
+	int tmp;					
 	
 	static SysDevice sys = IOFactory.getFactory().getSysDevice();
+	
+	/**
+	 * Array of schedulers, one per core. Allocated in ImmortalMemory.
+	 */
 	static Scheduler[] sched = new Scheduler[sys.nrCpu];
+	
 	static {
 		// create scheduler objects for all cores
 		for (int i=0; i<sys.nrCpu; ++i) {
 			new Scheduler(i);
-
 		}
 	}
 	
 	Scheduler(int core) {
-		active = 0;			// main thread (or idle thread) is first thread
-		cnt = 0;			// stays 0 till startMission
+		/*
+		 * When created, the scheduler's default active thread is the main
+		 * thread (or idle thread)
+		 */
+		active = 0;
+		cnt = 0; // stays 0 till startMission
 
-//		next = new int[1];
-//		ref = new RtThreadImpl[1];
-		
+		// next = new int[1];
+		// ref = new RtThreadImpl[1];
+
 		sched[core] = this;
 	}
 	
@@ -58,9 +91,10 @@ class Scheduler implements Runnable {
 	private final static int TIM_VAL_ADDR = 0x1e;
 	private final static int SP_VAL_ADDR = 0x1f;
 	
-	// timer offset to ensure that no timer interrupt happens just
-	// after monitorexit in this method and the new thread
-	// has a minimum time to run.
+	/**
+	 * Timer offset to ensure that no timer interrupt happens just after
+	 * monitorexit in this method and the new thread has a minimum time to run.
+	 */
 	private final static int TIM_OFF = 200;
 //	private final static int TIM_OFF = 20;
 //	private final static int TIM_OFF = 2; // for 100 MHz version 20 or even lower
@@ -79,7 +113,7 @@ class Scheduler implements Runnable {
 	 */
 	public void run() {
 		
-		int i, j, k;
+		int i, now, k;
 		int diff;
 		Scheduler s;
 		RtThreadImpl th;
@@ -104,14 +138,14 @@ class Scheduler implements Runnable {
 		k = IDL_TICK;
 
 		// this is now
-		j = Native.rd(Const.IO_US_CNT);
+		now = Native.rd(Const.IO_US_CNT);
 
 		for (i=cnt-1; i>0; --i) {
 
 			if (event[i] == EV_FIRED) {
 				break;						// a pending event found
 			} else if (event[i] == NO_EVENT) {
-				diff = next[i]-j;			// check only periodic
+				diff = next[i]-now;			// check only periodic
 				if (diff < TIM_OFF) {
 					break;					// found a ready task
 				} else if (diff < k) {
@@ -125,9 +159,8 @@ class Scheduler implements Runnable {
 
 		// set next interrupt time to now+(min(diff)) (j, k)
 		// use JVM locals to get time and sp over the stack exchange
-		Native.wrIntMem(j+k, TIM_VAL_ADDR);
+		Native.wrIntMem(now+k, TIM_VAL_ADDR);
 
-		
 		// restore stack
 		// We cannot use statics in a CMP setting!
 		Native.wrIntMem(ref[i].sp, SP_VAL_ADDR);
@@ -148,12 +181,12 @@ class Scheduler implements Runnable {
 		
 		Native.ext2intMem(th.stack, Const.STACK_OFF, i-Const.STACK_OFF+1);		// cnt is i-Const.STACK_OFF+1
 
-		j = Native.rd(Const.IO_US_CNT);
+		now = Native.rd(Const.IO_US_CNT);
 		// check if next timer value is too early (or already missed)
 		// ack timer interrupt and schedule timer
-		if (Native.rdIntMem(TIM_VAL_ADDR)-j<TIM_OFF) {
+		if (Native.rdIntMem(TIM_VAL_ADDR)-now<TIM_OFF) {
 			// set timer to now plus some short time
-			Native.wr(j+TIM_OFF, Const.IO_TIMER);
+			Native.wr(now+TIM_OFF, Const.IO_TIMER);
 		} else {
 			Native.wr(Native.rdIntMem(TIM_VAL_ADDR), Const.IO_TIMER);
 		}
