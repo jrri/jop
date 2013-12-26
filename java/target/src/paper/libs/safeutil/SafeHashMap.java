@@ -339,6 +339,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 				if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
 					return e.value;
 				e = e.next;
+			}else{
+				break;
 			}
 		}
 		
@@ -379,6 +381,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 					return e.value;
 
 				e = e.next;
+			}else{
+				break;
 			}
 		}
         
@@ -425,6 +429,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 					return e;
 				
 				e = e.next;
+			}else{
+				break;
 			}
 		}
 		
@@ -468,6 +474,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 				}
 
 				e = e.next;
+			}else{
+				break;
 			}
 		}
 
@@ -501,6 +509,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 					return oldValue;
 				}
 				e = e.next;
+			}else{
+				break;
 			}
 		}
         
@@ -638,6 +648,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 				}
 				prev = e;
 				e = next;
+			}else{
+				break;
 			}
 		}
 
@@ -713,6 +725,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 					Entry<K, V> next = e.next;
 					e.clear();
 					e = next;
+				}else{
+					break;
 				}
 			}
 		}
@@ -750,6 +764,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 					if (value.equals(e.value))
 						return true;
 					e = e.next;
+				}else{
+					break;
 				}
 			}
 		}
@@ -779,6 +795,8 @@ public class SafeHashMap<K, V> extends SafeAbstractMap<K, V> implements
 					if (e.value == null)
 						return true;
 					e = e.next;
+				}else{
+					break;
 				}
 			}
 		}
