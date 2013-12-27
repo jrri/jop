@@ -150,7 +150,7 @@ public abstract class MainSafelet implements Safelet {
 
 		@Override
 		public void handleAsyncEvent() {
-			Mission.getCurrentMission().requestSequenceTermination();
+			Mission.getCurrentMission().requestTermination();
 			teardown();
 			// getSequencer().requestSequenceTermination();
 			// ((ManagedMemory) RealtimeThread.getCurrentMemoryArea())

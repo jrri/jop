@@ -82,7 +82,7 @@ public class TestSchedule406 extends TestCase {
 						_preempted = true;
 						if (--_iter <= 0) {
 							_done = true;
-							requestSequenceTermination();
+							requestTermination();
 						}
 						// Terminal.getTerminal().writeln(
 						// _curRunner + " ------------- being preempted");

@@ -15,7 +15,7 @@ public final class Launcher {
 		s.initializeApplication();
 		System.out.println("Safelet created");
 		
-		JopSystem.startMission(s);
+		(new JopSystem()).startMission(s);
 		
 		System.out.println("Main method finished");
 	}

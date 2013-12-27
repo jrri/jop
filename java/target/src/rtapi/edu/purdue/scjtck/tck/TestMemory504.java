@@ -1,7 +1,9 @@
-package s3scj.tck;
+package edu.purdue.scjtck.tck;
 
 import javax.realtime.SizeEstimator;
 import javax.safetycritical.MissionSequencer;
+import javax.safetycritical.annotate.Level;
+import javax.safetycritical.annotate.SCJAllowed;
 
 /**
  * @author leizhao
@@ -29,18 +31,18 @@ public class TestMemory504 extends TestCase {
 			public void initialize() {
 				new GeneralPeriodicEventHandler() {
 					@Override
-					public void handleEvent() {
+					public void handleAsyncEvent() {
 						// use up all the mission memory
 						try {
 							for (int i = 0; i < _nObjects; i++) {
 								new Object();
 							}
 							if (_repeats-- == 0)
-								requestSequenceTermination();
+								requestTermination();
 						} catch (Throwable e) {
 							fail("Failure in resizing mission memory size. Msg: "
 									+ e.getMessage());
-							requestSequenceTermination();
+							requestTermination();
 						}
 					}
 				};
@@ -56,5 +58,18 @@ public class TestMemory504 extends TestCase {
 				return estimator.getEstimate() + _memBaseSize;
 			}
 		});
+	}
+
+	@Override
+	@SCJAllowed(Level.SUPPORT)
+	public long immortalMemorySize() {
+		// TODO Auto-generated method stub
+		return 10000;
+	}
+
+	@Override
+	protected String getArgs() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

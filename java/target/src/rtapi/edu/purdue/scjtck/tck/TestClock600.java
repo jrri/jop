@@ -47,7 +47,8 @@ public class TestClock600 extends TestCase {
 				@Override
 				public void handleAsyncEvent() {
 
-					AbsoluteTime preTime = new AbsoluteTime(0, 0), curTime;
+					AbsoluteTime preTime = new AbsoluteTime(0, 0);
+					AbsoluteTime curTime;
 					
 					for (int i = 0; i < _prop._iterations; i++) {
 						curTime = Clock.getRealtimeClock().getTime();
@@ -67,7 +68,7 @@ public class TestClock600 extends TestCase {
 //						if (getLevel() == Level.LEVEL_2)
 //							fail("HighResolutionTime.waitForObject() should be allowed on level 2");
 //					} finally {
-						requestSequenceTermination();
+						requestTermination();
 //					}
 				}
 			}
