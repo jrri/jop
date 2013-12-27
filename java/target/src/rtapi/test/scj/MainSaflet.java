@@ -19,7 +19,7 @@ public class MainSaflet implements Safelet{
 		
 		StorageParameters sp = new StorageParameters(1000000000, null);
 		MonitorMission m = new MonitorMission();
-		return new LinearMissionSequencer<Mission>(new PriorityParameters(13), sp, m); 
+		return new LinearMissionSequencer<Mission>(new PriorityParameters(13), sp, false, m); 
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class MainSaflet implements Safelet{
 	@Override
 	@SCJAllowed(Level.SUPPORT)
 	@SCJRestricted(phase = Phase.INITIALIZATION)
-	public void initialize() {
+	public void initializeApplication() {
 		// TODO Auto-generated method stub
 		
 	}

@@ -11,7 +11,8 @@ public class MyAppSCJ {
 		
 		System.out.println("safelet created");
 		
-		JopSystem.startMission(SS);
+		JopSystem js = new JopSystem();
+		js.startMission(SS);
 		
 	}
 

@@ -44,7 +44,7 @@ public class HelloSCJ extends Mission implements Safelet {
 	// Safelet methods
 	@Override
 	public long immortalMemorySize() {
-		return 1000;
+		return 10000;
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class HelloSCJ extends Mission implements Safelet {
 	@Override
 	public MissionSequencer<Mission> getSequencer() {
 		// we assume this method is invoked only once
-		StorageParameters sp = new StorageParameters(1000000, null);
+		StorageParameters sp = new StorageParameters(20000, null);
 		return new LinearMissionSequencer<Mission>(new PriorityParameters(13),
 				sp, false, this);
 	}
@@ -87,7 +87,7 @@ public class HelloSCJ extends Mission implements Safelet {
 				if (cnt > 5) {
 					// getCurrentMission is not yet working
 					// single.requestTermination();
-					Mission.getCurrentMission().requestSequenceTermination();
+					Mission.getCurrentMission().requestTermination();
 				}
 			}
 		};
@@ -105,7 +105,8 @@ public class HelloSCJ extends Mission implements Safelet {
 		// but for now it's nice for debugging
 		System.out.println("Hello");
 		HelloSCJ single = new HelloSCJ();
-		JopSystem.startMission(single);
+		JopSystem js = new JopSystem();
+		js.startMission(single);
 	}
 
 }

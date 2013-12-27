@@ -58,7 +58,8 @@ public class HelloSafelet implements Safelet {
 		// in SCJ we don't have System.out,
 		// but for now it's nice for debugging
 		System.out.println("Hello");
-		JopSystem.startMission(new HelloSafelet());
+		JopSystem js = new JopSystem();
+		js.startMission(new HelloSafelet());
 	}
 
 

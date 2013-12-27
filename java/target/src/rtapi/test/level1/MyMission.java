@@ -1,6 +1,6 @@
 package test.level1;
 
-import javax.realtime.AffinitySet;
+import javax.realtime.AbsoluteTime;
 import javax.realtime.AperiodicParameters;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
@@ -8,8 +8,12 @@ import javax.realtime.RelativeTime;
 import javax.safetycritical.Mission;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.Terminal;
+import javax.safetycritical.annotate.Level;
+import javax.safetycritical.annotate.SCJAllowed;
 
 public class MyMission extends Mission{
+	
+	private final boolean DBG_MODE = true; 
 	
 	int number;
 	int totalPeriodicHandlers = 1;
@@ -21,9 +25,26 @@ public class MyMission extends Mission{
 		this.number = number;
 		
 	}
-
+	
 	@Override
-	protected void initialize() {
+	protected void initialize(){
+		
+		if(DBG_MODE){
+			PriorityParameters dbgPrio = new PriorityParameters(14);
+			AbsoluteTime start = new AbsoluteTime(0,0);
+			RelativeTime period = new RelativeTime(1000, 0);
+			PeriodicParameters dbgPparams = new PeriodicParameters(start, period);
+			StorageParameters dbgStorage = new StorageParameters(1024, null, 0, 0);
+			DebugPEH dbgPeh = new DebugPEH(dbgPrio, dbgPparams, dbgStorage, 512, "DBG_PEH");
+			dbgPeh.register();
+		}else{
+			initialize0();
+		}
+		
+	}
+
+	
+	private void initialize0() {
 		
 		TestPEH peh;
 		TestAEH aeh;
@@ -63,7 +84,13 @@ public class MyMission extends Mission{
 
 	@Override
 	public long missionMemorySize() {
-		return 4800*number;
+		return 4800;
+	}
+	
+	@Override
+	@SCJAllowed(Level.SUPPORT)
+	protected void cleanUp() {
+		System.out.println("Custom clean");
 	}
 
 }

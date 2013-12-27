@@ -32,7 +32,7 @@ public class HelloSequencer extends MissionSequencer {
 	public HelloSequencer(Mission mission) {
 		
 		super(new PriorityParameters(13),
-				new StorageParameters(1000000, null));
+				new StorageParameters(20000, null));
 		m = mission;
 	}
 

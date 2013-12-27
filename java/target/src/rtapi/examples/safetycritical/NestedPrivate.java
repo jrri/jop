@@ -102,7 +102,7 @@ public class NestedPrivate extends Mission implements Safelet {
 	@Override
 	public MissionSequencer getSequencer() {
 		// we assume this method is invoked only once
-		StorageParameters sp = new StorageParameters(1000000, null);
+		StorageParameters sp = new StorageParameters(20000, null);
 		return new LinearMissionSequencer(new PriorityParameters(13), sp, false, this);
 	}
 
@@ -127,6 +127,7 @@ public class NestedPrivate extends Mission implements Safelet {
 		// but for now it's nice for debugging
 		System.out.println("Hello");
 		single = new NestedPrivate();
-		JopSystem.startMission(single);
+		JopSystem js = new JopSystem();
+		js.startMission(single);
 	}
 }
