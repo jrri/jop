@@ -317,7 +317,6 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 			
 			m.currentSequencer = this;
 			currMission = m;
-			myMission = m;
 
 			// ! @todo Illegal reference when the mission object is allocated in
 			// ! Immortal memory, e.g. with the Linear and Repeating sequencers
