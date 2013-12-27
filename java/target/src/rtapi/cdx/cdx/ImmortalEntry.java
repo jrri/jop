@@ -24,6 +24,11 @@ package cdx.cdx;
 
 import java.io.DataOutputStream;
 
+import javax.realtime.ImmortalMemory;
+import javax.safetycritical.ManagedMemory;
+import javax.safetycritical.MissionMemory;
+import javax.safetycritical.PrivateMemory;
+
 import com.jopdesign.sys.Memory;
 
 /**
@@ -35,7 +40,7 @@ import com.jopdesign.sys.Memory;
 public class ImmortalEntry implements Runnable {
 	
 	static public String MemArea = "";
-	static public Memory mem = null;
+	static public ManagedMemory mem = null;
 	static public DetectorStats DS = null;
 	static public DetectorReleaseStats DRS = null;
 
@@ -141,23 +146,14 @@ public class ImmortalEntry implements Runnable {
     
     public static void memStats() {
     	
-		mem = Memory.getCurrentMemory();
+		mem = ManagedMemory.getManagedMemory(new Object());
 
-		switch (mem.level) {
-
-		case 0:
-			MemArea = "Immortal";
-			break;
-		case 1:
+		if(mem instanceof MissionMemory){
 			MemArea = "Mission";
-			break;
-		case 2:
+		}
+		
+		if(mem instanceof PrivateMemory){
 			MemArea = "Private";
-			break;
-		default:
-			MemArea = "Nested private";
-			break;
-
 		}
     	
     	System.out.println("");
@@ -165,7 +161,7 @@ public class ImmortalEntry implements Runnable {
 		System.out.println("Mem. size: "+ mem.size());
 		System.out.println("Mem. remaining: "+ mem.memoryRemaining());
 		System.out.println("Mem. consumed: "+ mem.memoryConsumed());
-		System.out.println("Bs. remaining: "+ mem.bStoreRemaining());
+		System.out.println("Bs. remaining: "+ mem.getRemainingBackingStore());
 		System.out.println("============ "+MemArea+" memory stats ============");
 		System.out.println("");
     }

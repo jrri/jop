@@ -21,6 +21,7 @@
  *   See: http://sss.cs.purdue.edu/projects/oscj/
  */
 package cdx;
+
 import javax.safetycritical.CyclicExecutive;
 import javax.safetycritical.JopSystem;
 import javax.safetycritical.Safelet;
@@ -33,14 +34,20 @@ import cdx.cdx.Level0Safelet;
 //	STACK_SIZE = 512 in Const.java
 //	RAM_LEN = 512 in Jopa.java
 //	
+//	An OutOfMemory error may be produced if memories (particularly MissionMemory)
+//	are not sized correctly. The required memory is related to the following parameters
+//	in the constants file:
+//
+// 	Constants.NUMBER_OF_PLANES
+//	StateTable.MAX_AIRPLANES
+//	
 public class Launcher {
-    public static void main(final String[] args) {
-    	
-        Safelet<CyclicExecutive> safelet = new Level0Safelet();
+	public static void main(final String[] args) {
 
-        JopSystem js = new JopSystem();
+		Safelet<CyclicExecutive> safelet = new Level0Safelet();
 
-        js.startCycle(safelet);
-        
-    }
+		JopSystem js = new JopSystem();
+		js.startMission(safelet);
+
+	}
 }

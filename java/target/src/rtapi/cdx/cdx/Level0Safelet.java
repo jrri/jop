@@ -87,7 +87,7 @@ public class Level0Safelet implements Safelet<CyclicExecutive>{
 	@Override
 	public long immortalMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 10000;
 	}
 	
 //	   public void initialize() {

@@ -112,7 +112,7 @@ public class CollisionDetectorHandler extends PeriodicEventHandler {
                 ImmortalEntry.recordedDetectorReleaseTimes++;
                 runDetectorInScope(cd);
             } else {
-                Mission.getCurrentMission().requestSequenceTermination();
+                Mission.getCurrentMission().requestTermination();
             }
         } catch (Throwable e) {
             System.out.println("Exception thrown by runDetectorInScope: "

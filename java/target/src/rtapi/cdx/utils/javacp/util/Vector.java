@@ -59,12 +59,14 @@ exception statement from your version. */
 
 
 package cdx.utils.javacp.util;
-import java.io.IOException;
+//import java.io.IOException;
 //import java.io.ObjectOutputStream;
 import java.io.Serializable;
+
 //import java.lang.reflect.Array;
 
 import com.jopdesign.sys.GC;
+//import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
 
 /**
@@ -135,6 +137,8 @@ public class Vector extends AbstractList
    * @serial the amount to grow the vector by
    */
   protected int capacityIncrement;
+  
+//  protected Runnable auxRunnable;
 
   /**
    * Constructs an empty vector with an initial size of 10, and
@@ -168,13 +172,12 @@ public class Vector extends AbstractList
    *        increased by when necessary, 0 to double the size
    * @throws IllegalArgumentException if initialCapacity &lt; 0
    */
-  public Vector(int initialCapacity, int capacityIncrement)
-  {
-    if (initialCapacity < 0)
-      throw new IllegalArgumentException();
-    elementData = new Object[initialCapacity];
-    this.capacityIncrement = capacityIncrement;
-  }
+	public Vector(int initialCapacity, int capacityIncrement) {
+		if (initialCapacity < 0)
+			throw new IllegalArgumentException();
+		elementData = new Object[initialCapacity];
+		this.capacityIncrement = capacityIncrement;
+	}
 
   /**
    * Constructs a Vector with the initial capacity specified, and a capacity

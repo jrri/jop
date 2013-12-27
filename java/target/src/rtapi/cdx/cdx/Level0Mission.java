@@ -4,9 +4,10 @@ import javax.realtime.AbsoluteTime;
 import javax.realtime.Clock;
 import javax.realtime.PeriodicParameters;
 import javax.realtime.RelativeTime;
-import javax.safetycritical.CyclicExecutive; 
+import javax.safetycritical.CyclicExecutive;
 import javax.safetycritical.CyclicSchedule;
 import javax.safetycritical.Frame;
+import javax.safetycritical.ManagedMemory;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.annotate.Level;
@@ -29,10 +30,15 @@ public class Level0Mission extends CyclicExecutive {
 					.roundUp(Clock.getRealtimeClock().getTime()
 							.add(Constants.DETECTOR_STARTUP_OFFSET_MILLIS, 0));
 			ImmortalEntry.detectorFirstRelease = NanoClock.convert(releaseAt);
-			CollisionDetectorHandler cdh = new CollisionDetectorHandler(null,
-					new PeriodicParameters(null, new RelativeTime(10, 0)),
-					new StorageParameters(Constants.PERSISTENT_DETECTOR_BS_SIZE, null), Constants.PERSISTENT_DETECTOR_SCOPE_SIZE);
 
+
+			RelativeTime rt = new RelativeTime(10, 0);
+			PeriodicParameters pp = new PeriodicParameters(null, rt);
+			StorageParameters sp = new StorageParameters(
+					Constants.PERSISTENT_DETECTOR_BS_SIZE, null);
+			
+			CollisionDetectorHandler cdh = new CollisionDetectorHandler(null,
+					pp, sp, Constants.PERSISTENT_DETECTOR_SCOPE_SIZE);
 			cdh.register();
 
 			if (Constants.DEBUG_DETECTOR) {
@@ -90,8 +96,7 @@ public class Level0Mission extends CyclicExecutive {
 		System.out.println("=====DETECTOR-STATS-START-BELOW====");
 		for (int i = 0; i < ImmortalEntry.recordedRuns; i++) {
 			ImmortalEntry.DS.index = i;
-			Memory.getCurrentMemory()
-					.enterPrivateMemory(1280, ImmortalEntry.DS);
+			ManagedMemory.enterPrivateMemory(1280, ImmortalEntry.DS);
 
 			// System.out.print(ImmortalEntry.timesBefore[i]);
 			// System.out.print(space);
@@ -130,8 +135,7 @@ public class Level0Mission extends CyclicExecutive {
 			System.out.println("=====DETECTOR-RELEASE-STATS-START-BELOW====");
 			for (int i = 0; i < ImmortalEntry.recordedDetectorReleaseTimes; i++) {
 				ImmortalEntry.DRS.index = i;
-				Memory.getCurrentMemory().enterPrivateMemory(1280,
-						ImmortalEntry.DRS);
+				ManagedMemory.enterPrivateMemory(1280, ImmortalEntry.DRS);
 
 				// System.out.print(ImmortalEntry.detectorReleaseTimes[i]);
 				// System.out.print(space);
