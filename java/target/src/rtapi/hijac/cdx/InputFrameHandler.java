@@ -10,6 +10,7 @@ import javax.realtime.RelativeTime;
 
 //import javax.safetycritical.AperiodicEvent;
 import javax.safetycritical.AperiodicEventHandler;
+import javax.safetycritical.ManagedMemory;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 
@@ -55,10 +56,21 @@ public class InputFrameHandler extends PeriodicEventHandler {
 
 	@Override
 	public void handleAsyncEvent() {
-		CDxSafelet.terminal.writeln("[InputHandler] called");
+		
+		final int  frames = (mission.simulator.framesProcessed + mission.simulator.droppedFrames);
+		
+//		ManagedMemory.enterPrivateMemory(300, new Runnable() {
+//			
+//			@Override
+//			public void run() {
+				// TODO Auto-generated method stub
+				CDxSafelet.terminal.writeln("[InputHandler] called "+frames);
+//			}
+//		});
+		
 
 		/* Terminate mission when enough frames have been processes. */
-		if ((mission.simulator.framesProcessed + mission.simulator.droppedFrames) == Constants.MAX_FRAMES) {
+		if (frames == Constants.MAX_FRAMES) {
 			mission.requestTermination();
 			mission.dumpResults();
 			return;
@@ -79,6 +91,7 @@ public class InputFrameHandler extends PeriodicEventHandler {
 			/* Release ReducerHandler to perform the voxel hashing. */
 			// reduce.fire();
 			reduceHandler.release();
+			
 		} else {
 			/* If the detector is not ready, read the next frame and drop it. */
 			RawFrame drop = mission.simulator.frameBuffer.getFrame();

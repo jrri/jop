@@ -50,13 +50,13 @@ public final class Constants {
 	// public static int SIMULATOR_FPS = 50;
 	// public static int DETECTOR_STARTUP_PRIORITY = 9;
 	public static int DETECTOR_PRIORITY = 9; // DETECTOR_STARTUP_PRIORITY + 1;
-	public static long PERSISTENT_DETECTOR_SCOPE_SIZE = 25000;//5 * 100 * 1000;
-	public static long DETECTOR_PERIOD = 50;
+	public static long PERSISTENT_DETECTOR_SCOPE_SIZE = 30000;//5 * 100 * 1000;
+	public static long DETECTOR_PERIOD = 500;
 	public static long TRANSIENT_DETECTOR_SCOPE_SIZE = 2048;// 5*100*1000;
 	public static long TRANSIENT_DETECTOR_BS_SIZE = 4096;// 5*100*1000;
 
-	public static long INPUT_FRAME_HANDLER_BS_SIZE = 600;
-	public static long INPUT_FRAME_HANDLER_SCOPE_SIZE = 600;
+	public static long INPUT_FRAME_HANDLER_BS_SIZE = 800;
+	public static long INPUT_FRAME_HANDLER_SCOPE_SIZE = 800;
 
 	public static long REDUCER_HANDLER_BS_SIZE = 6000;
 	public static long REDUCER_HANDLER_SCOPE_SIZE = 6000;
