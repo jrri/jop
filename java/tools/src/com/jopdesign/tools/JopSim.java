@@ -234,13 +234,6 @@ public class JopSim {
 			System.out.println(heap + " words mem read ("+(heap*4/1024)+" KB)");
 			empty_heap = heap;
 			
-//			// FIXME: timing should be configurable
-//			if(nrCpus == 1) {
-//				timing = new WCETInstruction(WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
-//			} else {
-//				timing = new WCETInstruction(nrCpus, WCETInstruction.DEFAULT_TIMESLOT, WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
-//			}
-			
 			for (int i=0; i<256; ++i) {
 				int j = timing.getCycles(i, false, 0);
 				if (j==-1) j = 80; // rough estimate for invokation of Java implementation
@@ -602,9 +595,6 @@ System.out.println(mp+" "+pc);
 	}
 	
 	void waitCache(int hiddenCycles) {
-//		System.out.println("wcache");
-//		if(timing == null)
-//			System.out.println("wtf");
 		
 		int penalty = timing.calculateB(cache.lastAccessWasHit(),cache.wordsLastRead);
 		penalty = Math.max(0, penalty-hiddenCycles);
@@ -712,9 +702,6 @@ System.out.println(mp+" "+pc);
 */
 	void interpret(int pp) {
 		
-		if(pp == 1)
-			System.out.println("------ core 1");
-		
 		int new_pc;		// for cond. branches
 		int ref, val, idx, val2;
 		int a, b, c, d;
@@ -768,7 +755,6 @@ System.out.println(mp+" "+pc);
 			dump();
 		}
 		try {
-//			System.out.println(instr);
 			switch (instr) {
 
 				case 0 :		// nop
