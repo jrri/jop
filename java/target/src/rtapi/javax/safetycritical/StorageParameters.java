@@ -30,11 +30,16 @@ import javax.safetycritical.annotate.SCJAllowed;
  * 
  * This class might get renamed to MemoryParameters (back again).
  * 
+ * @author Martin Schoeberl, Juan Rios
+ * @version SCJ 0.94
+ * 
  */
 @SCJAllowed
 public final class StorageParameters {
 
 	private long totalBackingStore;
+	private long maxMemoryArea;
+	private long maxImmortal;
 
 	/**
 	 * This is the primary constructor for a StorageParameters object,
@@ -76,28 +81,27 @@ public final class StorageParameters {
 			int messageLength, int stackTraceLength, long maxMemoryArea,
 			long maxImmortal, long maxMissionMemory) {
 
+		this.totalBackingStore = totalBackingStore;
+		this.maxMemoryArea = maxMemoryArea;
+		this.maxImmortal = maxImmortal;
+
 	}
 
 	@SCJAllowed
 	public StorageParameters(long totalBackingStore, long[] sizes,
 			long maxMemoryArea, long maxImmortal, long maxMissionMemory) {
+		this(totalBackingStore, sizes, 0, 0, maxMemoryArea, maxImmortal,
+				maxMissionMemory);
 
 	}
 
-	@SCJAllowed
-	public StorageParameters(long totalBackingStore, long[] sizes,
-			int messageLength, int stackTraceLength)
-
-	{
-		this.totalBackingStore = totalBackingStore;
-	}
-
-	@SCJAllowed
-	public StorageParameters(long totalBackingStore, long[] sizes) {
-		this(totalBackingStore, sizes, 0, 0);
-	}
-
+	/* Implementation specific */
 	long getTotalBackingStoreSize() {
 		return totalBackingStore;
 	}
+	
+	long getMaxMemoryArea(){
+		return maxMemoryArea;
+	}
+
 }

@@ -27,12 +27,18 @@ import static javax.safetycritical.annotate.Level.INFRASTRUCTURE;
 import java.util.Vector;
 
 import javax.realtime.AbsoluteTime;
+import javax.realtime.AperiodicParameters;
 import javax.realtime.Clock;
 import javax.realtime.PriorityParameters;
 import javax.safetycritical.JopSystem.TerminationHelper;
 import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
+
+import com.jopdesign.io.IOFactory;
+import com.jopdesign.sys.Const;
+import com.jopdesign.sys.JVMHelp;
+import com.jopdesign.sys.Native;
 
 import joprt.RtThread;
 import joprt.SwEvent;
@@ -140,7 +146,10 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		// really extend the handler.... We want to run in the
 		// plain Java thread!
 		// in Level 1 we can simply ignore the priority
-		super(priority, null, null, storage);
+		// L0 and L1 can run the sequencer code in the main thread,
+		// L2 applications need a proper implementation of the sequencer
+		// as a MEH with a bounded RtThread
+		super(priority, new AperiodicParameters(), storage, "");
 
 		this.storage = storage;
 
@@ -311,7 +320,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 	@SCJAllowed(INFRASTRUCTURE)
 	public final void handleAsyncEvent() {
 
-		Mission m = getNextMission();
+		m = getNextMission();
 
 		if (m != null) {
 			
@@ -327,15 +336,15 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 			ManagedMemory.setSize((int) m.missionMemorySize());
 			m.initialize();
 			
-			if (!m.isCyclicExecutive) {
-				executeMission(m);
-			} else {
+			if (m instanceof CyclicExecutive) {
 				executeCycle((CyclicExecutive) m);
+			} else {
+				executeMission(m);
 			}
 
 			m.terminate();
 			m.cleanUp();
-
+			
 		} else {
 			Terminal.getTerminal().writeln(
 					"[SEQ]: No more missions to execute");
@@ -363,6 +372,39 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		 */
 		while (!m.terminationPending) {
 		}
+		
+		/*
+		 * Wait for all of the ManagedSchedulable objects associated with the
+		 * current mission to terminate their execution. "m" is the currently
+		 * executing mission.
+		 */
+//		boolean mehFinished = false;
+//		boolean mlehFinished = false;
+//		boolean missionFinished = false;
+//
+//		ManagedEventHandler[] mehArray;
+//		ManagedLongEventHandler[] mlehArray;
+//
+//		if (m.hasEventHandlers) {
+//			Vector eventHandlers = m.getHandlers();
+//			while (!mehFinished) {
+//				for (int i = 0; i < eventHandlers.size(); i++) {
+//					mehFinished = mehFinished
+//							& ((ManagedEventHandler) eventHandlers.elementAt(i)).finished;
+//				}
+//			}
+//		}
+//
+//		if (m.hasLongEventHandlers) {
+//			Vector longEventHandlers = m.getLongHandlers();
+//			while (!mlehFinished) {
+//				for (int i = 0; i < longEventHandlers.size(); i++) {
+//					mlehFinished = mlehFinished
+//							& ((ManagedLongEventHandler) longEventHandlers
+//									.elementAt(i)).finished;
+//				}
+//			}
+//		}
 
 	}
 
@@ -397,10 +439,8 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 				long k = frames[i].handlers_[j].getScopeSize();
 				long l = frames[i].handlers_[j].storage
 						.getTotalBackingStoreSize();
-
 				maxScopeSize = (k > maxScopeSize) ? k : maxScopeSize;
 				maxBsSize = (l > maxBsSize) ? l : maxBsSize;
-
 			}
 		}
 

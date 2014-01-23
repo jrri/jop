@@ -89,9 +89,8 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(phase = INITIALIZATION)
 	public AperiodicEventHandler(PriorityParameters priority,
-			AperiodicParameters release, StorageParameters storage,
-			long scopeSize) {
-		this(priority, release, storage, scopeSize, "");
+			AperiodicParameters release, StorageParameters storage) {
+		this(priority, release, storage, "");
 	}
 
 	/**
@@ -121,15 +120,19 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 	@SCJRestricted(phase = INITIALIZATION)
 	public AperiodicEventHandler(PriorityParameters priority,
 			AperiodicParameters release, StorageParameters storage,
-			long scopeSize, String name) {
-		super(priority, null, release, storage, name);
+			String name) {
+		super(priority, release, storage, name);
 
-		if (storage != null) {
-			// privMem = new Memory((int) scopeSize, (int)
-			// storage.getTotalBackingStoreSize());
-			privMem = new PrivateMemory((int) scopeSize,
-					(int) storage.getTotalBackingStoreSize());
+		m = Mission.getCurrentMission();
+		
+		if(m instanceof CyclicExecutive){
+			throw new IllegalStateException();
 		}
+
+		// privMem = new Memory((int) scopeSize, (int)
+		// storage.getTotalBackingStoreSize());
+		privMem = new PrivateMemory((int) storage.getMaxMemoryArea(),
+				(int) storage.getTotalBackingStoreSize());
 
 		final Runnable runner = new Runnable() {
 			@Override
@@ -138,12 +141,13 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 			}
 		};
 
-		// Aperiodic = Sporadic with minimum inter-arrival time set to zero
+		// Aperiodic = Sporadic with minimum inter-arrival time (MIT) set to zero
+		// There is however no enforcement for MIT violations
 		event = new SwEvent(priority.getPriority(), 0) {
 
 			@Override
 			public void handle() {
-				if (!Mission.currentMission.terminationPending)
+				if (!m.terminationPending)
 					privMem.enter(runner);
 			}
 
@@ -175,6 +179,7 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 		 * affinity after the register method has been called has no effect.
 		 */
 		AffinitySet set = AffinitySet.getAffinitySet(this);
+		
 		event.setProcessor(_rtsjHelper.getAffinitySetProcessor(set));
 
 	}

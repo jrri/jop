@@ -22,7 +22,6 @@ public abstract class CyclicExecutive extends Mission {
 	@SCJAllowed
 	@MemoryAreaEncloses(inner = { "this" }, outer = { "sequencer" })
 	public CyclicExecutive() {
-		isCyclicExecutive = true;
 	}
 
 	/**

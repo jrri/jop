@@ -22,7 +22,6 @@ package javax.safetycritical;
 
 import javax.realtime.AffinitySet;
 import javax.realtime.BoundAsyncEventHandler;
-import javax.realtime.HighResolutionTime;
 import javax.realtime.PriorityParameters;
 import javax.realtime.ReleaseParameters;
 import javax.realtime.RtsjHelper;
@@ -47,7 +46,7 @@ import static javax.safetycritical.annotate.Level.INFRASTRUCTURE;
  * construction will have no impact on the created event handler.
  * 
  * @author Martin Schoeberl, Juan Rios
- * @version SCJ 0.93
+ * @version SCJ 0.94
  * @note An almost empty class, just to add two methods.
  * 
  */
@@ -57,6 +56,8 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 	
 	static SysHelper _sysHelper;
 	static RtsjHelper _rtsjHelper;
+	
+	Mission m;
 
 	public static void setSysHelper(SysHelper sysHelper){
 		_sysHelper = sysHelper;
@@ -74,19 +75,18 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 
 	@SCJAllowed(INFRASTRUCTURE)
 	@SCJRestricted(phase = INITIALIZATION)
-	ManagedEventHandler(PriorityParameters priority, HighResolutionTime time,
-			ReleaseParameters release, StorageParameters scp, String name) {
+	ManagedEventHandler(PriorityParameters priority, ReleaseParameters release, 
+			StorageParameters scp, String name) {
+		
+		if ((priority == null) | (release == null) | (scp == null))
+			throw new IllegalArgumentException();
+		
 		this.name = new StringBuffer(name);
 
 		/* Default affinity set, can be overridden only at initialization phase */
 		AffinitySet defaultAffinity = Services.getSchedulingAllocationDoamins()[0];
 		AffinitySet.setProcessorAffinity(defaultAffinity, this);
 
-	}
-
-	ManagedEventHandler(PriorityParameters priority, HighResolutionTime time,
-			ReleaseParameters release, StorageParameters storage) {
-		this(priority, time, release, storage, "");
 	}
 
 	/**

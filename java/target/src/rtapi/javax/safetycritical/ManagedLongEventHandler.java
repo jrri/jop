@@ -39,6 +39,9 @@ import static javax.safetycritical.annotate.Level.SUPPORT;
 public abstract class ManagedLongEventHandler extends
 		BoundAsyncLongEventHandler implements ManagedSchedulable {
 
+	protected Mission m;
+	boolean finished = false;
+	
 	/*
 	 * Workaround to avoid illegal assignments when referring to constant
 	 * strings. Constant strings in JOP have no associated memory area

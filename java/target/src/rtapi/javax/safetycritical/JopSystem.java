@@ -95,8 +95,6 @@ public class JopSystem {
 		 * its backing store requirements.
 		 */
 
-		System.out.println(ImmortalMemory.instance().xx());
-
 		int size = (int) missionSequencer.storage.getTotalBackingStoreSize();
 		MissionMemory missionMem = new MissionMemory(size);
 

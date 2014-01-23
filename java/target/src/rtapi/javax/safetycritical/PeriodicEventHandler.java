@@ -72,12 +72,9 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	HighResolutionTime start, period;
 	PrivateMemory privMem;
 	StorageParameters storage;
-	Mission m;
 
 	RtThread thread;
 	RtThreadImpl rtt;
-
-	long scopeSize;
 
 	/**
 	 * Constructs a periodic event handler.
@@ -106,9 +103,8 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION)
 	public PeriodicEventHandler(PriorityParameters priority,
-			PeriodicParameters release, StorageParameters storage,
-			long scopeSize) {
-		this(priority, release, storage, scopeSize, "");
+			PeriodicParameters release, StorageParameters storage) {
+		this(priority, release, storage, "");
 	}
 
 	/**
@@ -134,23 +130,26 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 *            the handler
 	 * @param name
 	 *            A string representing the name of the handler
+	 * 
+	 * @hrows IllegalArgumentException if priority, release, or scp is null
 	 */
 	@MemoryAreaEncloses(inner = { "this", "this", "this", "this" }, outer = {
 			"priority", "parameters", "scp", "name" })
 	@SCJAllowed(LEVEL_1)
 	public PeriodicEventHandler(PriorityParameters priority,
-			PeriodicParameters release, StorageParameters storage,
-			long scopeSize, String name) {
+			PeriodicParameters release, StorageParameters storage, String name) {
+		
 		// TODO: what are we doing with this Managed thing?
-		super(priority, null, release, storage, name);
+		// For now, the MEH super class holds a reference to the mission to which
+		// the handler belongs and performs the checks for null arguments.
+		super(priority, release, storage, name);
 
-		this.scopeSize = scopeSize;
 		this.storage = storage;
 
 		// start = (RelativeTime) release.getStart();
 		// period = release.getPeriod();
-		start =  _rtsjHelper.getStart(release);
-		period = _rtsjHelper.getPeriod(release);
+		this.start = _rtsjHelper.getStart(release);
+		this.period = _rtsjHelper.getPeriod(release);
 
 		// TODO scp
 
@@ -165,30 +164,27 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 			off = Integer.MAX_VALUE;
 		}
 
+		/*
+		 * Mission should not be null at this point, as PEH's are created at
+		 * mission initialization.
+		 * FIXME
+		 */
 		m = Mission.getCurrentMission();
 
-		if (storage != null) {
-			/*
-			 * Create handler's private memory, except for cyclic executives,
-			 * where a single private memory is reused for all handlers. Mission
-			 * should not be null at this point, as PEH's are created at mission
-			 * initialization.
-			 */
-			if (!m.isCyclicExecutive) {
-
-				// privMem = new Memory((int) scopeSize, (int)
-				// storage.getTotalBackingStoreSize());
-				privMem = new PrivateMemory((int) scopeSize,
-						(int) storage.getTotalBackingStoreSize());
-
-			}
-		}
-
 		/*
-		 * No need to create runnables or RT threads for cyclic executives where
-		 * handler's handleAsyncEvent method is called directly.
+		 * No need to create runnables, RT threads, or handler's private
+		 * memories. For cyclic executives handler's handleAsyncEvent method is
+		 * called directly by the main thread (i.e. it does not go into the
+		 * scheduler).
+		 * 
+		 * For cyclic executives a single private memory is reused for all
+		 * handlers.
 		 */
-		if (!m.isCyclicExecutive) {
+		if (!(m instanceof CyclicExecutive)) {
+
+			privMem = new PrivateMemory((int) storage.getMaxMemoryArea(),
+					(int) storage.getTotalBackingStoreSize());
+
 			final Runnable runner = new Runnable() {
 				@Override
 				public void run() {
@@ -200,10 +196,12 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 
 				public void run() {
 					// while (!MissionSequencer.terminationRequest) {
-					while (!Mission.currentMission.terminationPending) {
+					while (!m.terminationPending) {
 						privMem.enter(runner);
-						if(!waitForNextPeriod())
+						if (!waitForNextPeriod()) {
 							System.out.println("Deadline missed");
+							deadlineMissHandler();
+						}
 					}
 				}
 
@@ -231,7 +229,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		((Vector) Native.toObject(m.eventHandlersRef)).addElement(this);
 
 		/* L0 applications do not schedule event handlers */
-		if (!m.isCyclicExecutive) {
+		if (!(m instanceof CyclicExecutive)) {
 			RtThreadImpl.register(rtt);
 			_sysHelper.setSchedulable(rtt, this);
 
@@ -374,7 +372,11 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	/**
 	 * Not on spec, implementation specific
 	 */
-	long getScopeSize() {
-		return this.scopeSize;
+	protected long getScopeSize() {
+		return this.storage.getMaxMemoryArea();
+	}
+
+	protected void deadlineMissHandler() {
+
 	}
 }

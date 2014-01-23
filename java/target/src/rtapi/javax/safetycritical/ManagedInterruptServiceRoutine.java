@@ -6,12 +6,8 @@ import javax.realtime.InterruptServiceRoutine;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-import joprt.HwEvent;
-import joprt.SwEvent;
-
 import com.jopdesign.io.IOFactory;
 import com.jopdesign.io.SysDevice;
-import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
 
 import static javax.safetycritical.annotate.Level.LEVEL_1;
@@ -28,33 +24,26 @@ public abstract class ManagedInterruptServiceRoutine extends
 
 	static IOFactory factory;
 	static SysDevice system;
-	
+
+	static {
+		/* Make sure the sys device is created in ImmortalMemory */
+		factory = IOFactory.getFactory();
+		system = factory.getSysDevice();
+	}
+
 	/**
 	 * Runnable to be registered as first level interrupt handler
 	 */
 	final Runnable firstLevelHandler;
-	/**
-	 * Software event representing the second level interrupt handler for
-	 * interrupts that should be handled under the control of the scheduler
-	 */
-	SwEvent secondLevelHandler;
+
 	/**
 	 * Implementation dependent interrupt ID
 	 */
 	int interrupt;
-	
-	StorageParameters storage;
-	long scopeSize;
-	// private Memory privMem;
+
+	StorageParameters _storage;
 	private PrivateMemory privMem;
 
-	static {
-		
-		/*  Make sure the sys device is created in ImmortalMemory */
-		factory = IOFactory.getFactory();
-		system = factory.getSysDevice();
-	}
-	
 	/**
 	 * Creates an interrupt service routine with the given name and associated
 	 * with a given interrupt.
@@ -69,57 +58,37 @@ public abstract class ManagedInterruptServiceRoutine extends
 	 *            Defines the memory space required by the handle method.
 	 */
 	@SCJAllowed(LEVEL_1)
-	public ManagedInterruptServiceRoutine(StorageParameters storage, long scopeSize, String name) {
-		
-		this.storage = storage;
-		this.scopeSize = scopeSize;
-		super.name = new StringBuffer(name);
-		
-//		privMem = new Memory((int) scopeSize, (int) storage.getTotalBackingStoreSize());
-		privMem = new PrivateMemory((int) scopeSize, (int) storage.getTotalBackingStoreSize());
+	public ManagedInterruptServiceRoutine(StorageParameters storage, String name) {
 
-		firstLevelHandler = new Runnable() {
+		_storage = storage;
+		_name = new StringBuffer(name);
 
-			@Override
-			public void run() {
-				secondLevelHandler.fire();
-			}
-		};
-		
+		privMem = new PrivateMemory((int) _storage.getMaxMemoryArea(),
+				(int) _storage.getTotalBackingStoreSize());
+
 		final Runnable isr = new Runnable() {
 			@Override
 			public void run() {
-				handle();
+				try {
+					handle();
+				} catch (Exception e) {
+					unhandledException(e);
+				}
 			}
 		};
-		
-		//TODO: priority and minTime
-		secondLevelHandler = new SwEvent(1, 1){
+
+		firstLevelHandler = new Runnable() {
 			@Override
-			public void handle() {
+			public void run() {
 				privMem.enter(isr);
 			}
 		};
-		
-//		runner = new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				
-//				privMem.enter(new Runnable() {
-//					
-//					@Override
-//					public void run() {
-//						handle();
-//					}
-//				});
-//			}
-//		};
+
 	}
-	
+
 	@SCJAllowed(LEVEL_1)
-	public ManagedInterruptServiceRoutine(StorageParameters storage, long scopeSize) {
-		 this(storage, scopeSize, "");
+	public ManagedInterruptServiceRoutine(StorageParameters storage) {
+		this(storage, "");
 	}
 
 	/**
@@ -154,7 +123,7 @@ public abstract class ManagedInterruptServiceRoutine extends
 																// RegistrationException
 																// {
 		this.interrupt = interrupt;
-		
+
 		// TODO Illegal array reference.
 		// The array that holds the references to the interrupt handlers is a
 		// static field in JVMHelp.java
@@ -196,21 +165,24 @@ public abstract class ManagedInterruptServiceRoutine extends
 	}
 
 	// ========== Implementation specific ============= //
-	
+
 	public int getInterrupt() {
 		return interrupt;
 	}
-	
-	public static InterruptServiceRoutine getInterruptServiceRoutine(int interrupt){
+
+	public static InterruptServiceRoutine getInterruptServiceRoutine(
+			int interrupt) {
 		Mission m = Mission.getCurrentMission();
 		Vector managedInterrupt = m.getInterrupts();
 		ManagedInterruptServiceRoutine misr;
 		InterruptServiceRoutine isr = null;
-		
-		if(managedInterrupt != null){
+
+		if (managedInterrupt != null) {
 			for (int i = 0; i < managedInterrupt.size(); i++) {
-				misr = ((ManagedInterruptServiceRoutine) managedInterrupt.elementAt(i));
-				if (interrupt == misr.getInterrupt()) isr = misr;
+				misr = ((ManagedInterruptServiceRoutine) managedInterrupt
+						.elementAt(i));
+				if (interrupt == misr.getInterrupt())
+					isr = misr;
 			}
 		}
 		return isr;

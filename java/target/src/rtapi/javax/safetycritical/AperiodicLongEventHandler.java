@@ -85,9 +85,8 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(phase = INITIALIZATION)
 	public AperiodicLongEventHandler(PriorityParameters priority,
-			AperiodicParameters release, StorageParameters storage,
-			long scopeSize) {
-		this(priority, release, storage, scopeSize, "");
+			AperiodicParameters release, StorageParameters storage) {
+		this(priority, release, storage, "");
 	}
 
 	/**
@@ -130,17 +129,23 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(phase = INITIALIZATION)
 	public AperiodicLongEventHandler(PriorityParameters priority,
-			AperiodicParameters release, StorageParameters storage,
-			long scopeSize, String name) {
+			AperiodicParameters release, StorageParameters storage, String name) {
 		super(priority, release, storage, name);
 
-		if (storage != null) {
-			// Create private memory
-			// privMem = new Memory((int) scopeSize, (int)
-			// storage.getTotalBackingStoreSize());
-			privMem = new PrivateMemory((int) scopeSize,
-					(int) storage.getTotalBackingStoreSize());
+		if ((priority == null) | (release == null) | (storage == null))
+			throw new IllegalArgumentException();
+
+		m = Mission.getCurrentMission();
+
+		if (m instanceof CyclicExecutive) {
+			throw new IllegalStateException();
 		}
+
+		// Create private memory
+		// privMem = new Memory((int) scopeSize, (int)
+		// storage.getTotalBackingStoreSize());
+		privMem = new PrivateMemory((int) storage.getMaxMemoryArea(),
+				(int) storage.getTotalBackingStoreSize());
 
 		final Runnable runner = new Runnable() {
 			@Override
@@ -156,7 +161,7 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 
 			@Override
 			public void handle() {
-				if (!Mission.currentMission.terminationPending)
+				if (!m.terminationPending)
 					privMem.enter(runner);
 			}
 		};

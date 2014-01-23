@@ -329,6 +329,7 @@ public final class RawMemory {
 			throw new IllegalArgumentException();
 		}
 
+		/* The position is obtained according to the type of raw memory */
 		int position = getPosition(factory);
 
 		if (RawFactoryRegister[position] == null) {
