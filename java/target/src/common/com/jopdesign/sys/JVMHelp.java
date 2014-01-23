@@ -32,6 +32,11 @@ public class JVMHelp {
 
 	// don't use static initializers <clinit> in this class as some
 	// methods depend on the order.
+	
+	/**
+	 * Interrupt handlers. Element ih[i][j] is attached to core "i" interrupt
+	 * "j". Interrupt j = 0 is the timer interrupt.
+	 */
 	static Runnable ih[][];
 	static Runnable dh;
 	

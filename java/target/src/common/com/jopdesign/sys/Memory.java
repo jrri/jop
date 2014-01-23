@@ -20,10 +20,7 @@
 
 package com.jopdesign.sys;
 
-import javax.realtime.ImmortalMemory;
 import javax.safetycritical.ManagedMemory;
-import javax.safetycritical.PrivateMemory;
-import javax.safetycritical.MissionMemory;
 
 /**
  * JOP's implementation of scoped memory.
