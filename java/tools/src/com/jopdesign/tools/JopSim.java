@@ -192,9 +192,15 @@ public class JopSim {
 	int cacheCost;
 
 	public JopSim(String binaryFile, IOSimMin ioSim, int maxInstructions) {
-		
 		ioSim.setJopSimRef(this);		
 		maxInstr = maxInstructions;
+		
+		// FIXME: timing should be configurable
+		if(nrCpus == 1) {
+			timing = new WCETInstruction(WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
+		} else {
+			timing = new WCETInstruction(nrCpus, WCETInstruction.DEFAULT_TIMESLOT, WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
+		}
 		
 		// only first simulation object loads the memory
 		if (ioSim.cpuId==0) {
@@ -228,12 +234,12 @@ public class JopSim {
 			System.out.println(heap + " words mem read ("+(heap*4/1024)+" KB)");
 			empty_heap = heap;
 			
-			// FIXME: timing should be configurable
-			if(nrCpus == 1) {
-				timing = new WCETInstruction(WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
-			} else {
-				timing = new WCETInstruction(nrCpus, WCETInstruction.DEFAULT_TIMESLOT, WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
-			}
+//			// FIXME: timing should be configurable
+//			if(nrCpus == 1) {
+//				timing = new WCETInstruction(WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
+//			} else {
+//				timing = new WCETInstruction(nrCpus, WCETInstruction.DEFAULT_TIMESLOT, WCETInstruction.DEFAULT_R, WCETInstruction.DEFAULT_W);
+//			}
 			
 			for (int i=0; i<256; ++i) {
 				int j = timing.getCycles(i, false, 0);
@@ -596,6 +602,9 @@ System.out.println(mp+" "+pc);
 	}
 	
 	void waitCache(int hiddenCycles) {
+//		System.out.println("wcache");
+//		if(timing == null)
+//			System.out.println("wtf");
 		
 		int penalty = timing.calculateB(cache.lastAccessWasHit(),cache.wordsLastRead);
 		penalty = Math.max(0, penalty-hiddenCycles);
@@ -701,8 +710,11 @@ System.out.println(mp+" "+pc);
 *
 *	sp points to TOS
 */
-	void interpret() {
-
+	void interpret(int pp) {
+		
+		if(pp == 1)
+			System.out.println("------ core 1");
+		
 		int new_pc;		// for cond. branches
 		int ref, val, idx, val2;
 		int a, b, c, d;
@@ -756,6 +768,7 @@ System.out.println(mp+" "+pc);
 			dump();
 		}
 		try {
+//			System.out.println(instr);
 			switch (instr) {
 
 				case 0 :		// nop
@@ -1896,7 +1909,7 @@ System.out.println("new heap: "+heap);
 	public void runSim() {
 		cache.use(0);
 		start();
-		while(! exit) { interpret(); }
+		while(! exit) { interpret(0); }
 		if (stopped) {
 			System.out.println();
 			System.out.println("JopSim stopped");
@@ -1916,10 +1929,10 @@ System.out.println("new heap: "+heap);
 				js[j].start();				
 			}
 			while (!exit) {
-				js[0].interpret();
+				js[0].interpret(0);
 				if (nrCpus != 1 && IOSimMin.startCMP) {
 					for (int j = 1; j < nrCpus; ++j) {
-						js[j].interpret();
+						js[j].interpret(i);
 					}
 				}
 			}
