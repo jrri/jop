@@ -32,8 +32,19 @@ class Scheduler implements Runnable {
 	 */
 	int event[];				
 	
+	/**
+	 * A periodic thread
+	 */
 	final static int NO_EVENT = 0;
+	
+	/**
+	 * An event has been fired. Set in RtThreadImpl.fire() 
+	 */
 	final static int EV_FIRED = 1;
+	
+	/**
+	 * An event has been blocked. Set in RtThreadImpl.blockEvent() 
+	 */
 	final static int EV_WAITING = 2;
 
 	/**
@@ -58,12 +69,12 @@ class Scheduler implements Runnable {
 	 */
 	static Scheduler[] sched = new Scheduler[sys.nrCpu];
 	
-	static {
-		// create scheduler objects for all cores
-		for (int i=0; i<sys.nrCpu; ++i) {
-			new Scheduler(i);
-		}
-	}
+//	static {
+//		// create scheduler objects for all cores
+//		for (int i=0; i<sys.nrCpu; ++i) {
+//			new Scheduler(i);
+//		}
+//	}
 	
 	Scheduler(int core) {
 		/*
@@ -76,7 +87,7 @@ class Scheduler implements Runnable {
 		// next = new int[1];
 		// ref = new RtThreadImpl[1];
 
-		sched[core] = this;
+//		sched[core] = this;
 	}
 	
 	/**
@@ -249,6 +260,12 @@ class Scheduler implements Runnable {
 		ref[0].state = RtThreadImpl.READY;		// main thread is READY
 		next[0] = 0;
 		ref[0].nr = 0;
+	}
+	
+	static void createSchedulers(){
+		for (int i=0; i<sys.nrCpu; ++i) {
+			sched[i] = new Scheduler(i);
+		}
 	}
 	
 }

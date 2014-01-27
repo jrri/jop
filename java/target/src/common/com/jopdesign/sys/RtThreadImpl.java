@@ -39,6 +39,16 @@ import joprt.RtThread;
  */
 public class RtThreadImpl {
 	
+	static volatile boolean reStartCmpMission;
+	
+	static CMPStart[] cmps = new CMPStart[IOFactory.getFactory().getSysDevice().nrCpu - 1];
+	static {
+		for (int i = 0; i < IOFactory.getFactory().getSysDevice().nrCpu - 1; ++i) {
+			cmps[i] = new RtThreadImpl.CMPStart();
+			Startup.setRunnable(cmps[i], i);
+		}
+	}
+	
 	/**
 	 * Helper class to start the other CPUs in a CMP system
 	 * @author martin
@@ -48,10 +58,23 @@ public class RtThreadImpl {
 
 		volatile boolean started;
 		
+		public void run(){
+			
+			while(true){
+				cmpStartMission();
+				
+				// nothing to do in the main thread for the CMP cores 1 .. n-1
+				while (!reStartCmpMission) {
+					;
+				}
+				started = false;
+			}
+		}
+		
 		/* (non-Javadoc)
 		 * @see java.lang.Runnable#run()
 		 */
-		public void run() {
+		public void cmpStartMission() {
 			
 			// Disable all interrupts globally and local - for sure
 			Native.wr(0, Const.IO_INT_ENA);
@@ -63,10 +86,11 @@ public class RtThreadImpl {
 			for (int i=0; i<s.cnt; ++i) {
 				s.ref[i].startThread();
 			}
-			// add scheduler for the core s
+			// add scheduler for the cores
 			JVMHelp.addInterruptHandler(sys.cpuId, 0, s);
 
 			started = true;
+			reStartCmpMission = false;
 
 			// clear all pending interrupts (e.g. timer after reset)
 			Native.wr(1, Const.IO_INTCLEARALL);
@@ -78,10 +102,6 @@ public class RtThreadImpl {
 			Native.wr(-1, Const.IO_INTMASK);		
 			Native.wr(1, Const.IO_INT_ENA);
 
-			// nothing to do in the main thread for the CMP cores 1 .. n-1
-			for (;;) {
-				;
-			}
 		}
 	}
 
@@ -162,6 +182,7 @@ public class RtThreadImpl {
 		if (initDone==true) return;
 		initDone = true;
 		mission = false;
+		Scheduler.createSchedulers();
 
 		head = null;
 
@@ -175,7 +196,6 @@ public class RtThreadImpl {
 	 * SCJ L1. Should be called after all MEH have been registered in a mission.
 	 */
 	public static void reInitialize(){
-		
 		initDone = false;
 		mission = false;
 	}
@@ -354,6 +374,7 @@ public class RtThreadImpl {
 	 */
 	static int startTime;
 
+	// this method is executed in mission memory
 	public static void startMission() {
 
 		int i, j, c;
@@ -379,9 +400,10 @@ public class RtThreadImpl {
 		th = head;
 		
 		// Reset the number of threads in the scheduler to recreate the thread
-		// array when changing mission in SCJ L1. Does this also works for a
-		// multicore application??
-		Scheduler.sched[th.cpuId].cnt = 0;
+		// array when changing mission in SCJ L1.
+		for (i=0; i<sys.nrCpu; ++i) {
+			Scheduler.sched[i].cnt = 0;
+		}
 
 		for (c=0; th!=null; ++c) {
 			Scheduler.sched[th.cpuId].cnt++;
@@ -420,7 +442,7 @@ public class RtThreadImpl {
 		}
 
 		// wait 10 ms for the real start if the mission
-		startTime = Native.rd(Const.IO_US_CNT)+10000;		
+		startTime = Native.rd(Const.IO_US_CNT)+10000;
 		for (i=0; i<sys.nrCpu; ++i) {
 			s = Scheduler.sched[i];
 			for (j=0; j<s.cnt; ++j) {
@@ -432,16 +454,17 @@ public class RtThreadImpl {
 		JVMHelp.addInterruptHandler(0, 0, Scheduler.sched[0]);
 
 
-		CMPStart cmps[] = new CMPStart[sys.nrCpu-1];
+//		CMPStart cmps[] = new CMPStart[sys.nrCpu-1];
 		// add the Runnables to start the other CPUs
-		for (i=0; i<sys.nrCpu-1; ++i) {
-			cmps[i] = new RtThreadImpl.CMPStart();
-			Startup.setRunnable(cmps[i], i);
+//		for (i=0; i<sys.nrCpu-1; ++i) {
+//			cmps[i] = new RtThreadImpl.CMPStart();
+//			Startup.setRunnable(cmps[i], i);
 			
-		}
+//		}
 		
 		// start the other CPUs
 		sys.signal = 1;
+		reStartCmpMission = true;
 
 		// busy wait for start threads of other cores
 		for (;;) {
@@ -458,7 +481,7 @@ public class RtThreadImpl {
 
 		// clear all pending interrupts (e.g. timer after reset)
 		Native.wr(1, Const.IO_INTCLEARALL);
-		// schedule timer in 10 ms
+		// Schedule first timer interrupt in 10 ms
 		Native.wr(startTime, Const.IO_TIMER);
 
 		// enable all interrupts
@@ -474,12 +497,13 @@ public class RtThreadImpl {
 
 		Native.wr(0, Const.IO_INT_ENA);
 
+//		Mission.getCurrentMission().requestTermination();
 		nxt = s.next[nr] + period;
 
 		now = Native.rd(Const.IO_US_CNT);
 		if (nxt - now < 0) { // missed time!
 //			s.next[nr] = now; // correct next
-			 s.next[nr] = nxt; // without correction!
+			s.next[nr] = nxt; // without correction!
 			Native.wr(1, Const.IO_INT_ENA);
 			return false;
 		} else {
@@ -488,8 +512,8 @@ public class RtThreadImpl {
 		// state is not used in scheduling!
 		// state = WAITING;
 
-		// just schedule an interrupt
-		// schedule() gets called.
+		// Schedule a sw interrupt to trigger interrupt handler at position 0
+		// (i.e. the scheduler's run() method). Similar to use sys.intNr = 0;
 		Native.wr(0, Const.IO_SWINT);
 		// will arrive before return statement,
 		// just after interrupt enable
@@ -510,7 +534,7 @@ public class RtThreadImpl {
 	public void fire() {
 		Scheduler.sched[this.cpuId].event[this.nr] = Scheduler.EV_FIRED;
 		// if prio higher...
-// should not be allowed befor startMission
+		// should not be allowed befor startMission
 		// TODO: for cross CPU event fire we need to generate the interrupt
 		// for the other core!
 		genInt();
