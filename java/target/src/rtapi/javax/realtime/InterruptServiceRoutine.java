@@ -2,10 +2,7 @@ package javax.realtime;
 
 import static javax.safetycritical.annotate.Level.LEVEL_1;
 
-import java.util.Vector;
-
 import javax.safetycritical.ManagedInterruptServiceRoutine;
-import javax.safetycritical.Mission;
 import javax.safetycritical.annotate.SCJAllowed;
 
 /**

@@ -2,7 +2,9 @@ package javax.safetycritical;
 
 import java.util.Vector;
 
+import javax.realtime.AffinitySet;
 import javax.realtime.InterruptServiceRoutine;
+import javax.realtime.RtsjHelper;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
@@ -24,11 +26,36 @@ public abstract class ManagedInterruptServiceRoutine extends
 
 	static IOFactory factory;
 	static SysDevice system;
+	static RtsjHelper _rtsjHelper;
+	
+	public static void setRtsjHelper(RtsjHelper rtsjHelper) {
+		_rtsjHelper = rtsjHelper;
+	}
 
 	static {
 		/* Make sure the sys device is created in ImmortalMemory */
-		factory = IOFactory.getFactory();
+		factory = IOFactory.getFactory(); 
 		system = factory.getSysDevice();
+	}
+	
+	/* Not in spec but probably needed */
+	private AffinitySet affinitySet;
+	
+	/*
+	 * Not in spec but probably needed. The affinity of each interrupt should be
+	 * fixed, however, that is not flexible for testing purposes. Maybe should
+	 * be moved to AffinitySet.java.
+	 */
+	public void setProcessorAffinity(AffinitySet set){
+		this.affinitySet = set;
+	}
+	
+	/*
+	 * Not in spec but probably needed. Maybe should be moved to
+	 * AffinitySet.java.
+	 */
+	public AffinitySet getAffinitySet(){
+		return this.affinitySet;
 	}
 
 	/**
@@ -65,6 +92,9 @@ public abstract class ManagedInterruptServiceRoutine extends
 
 		privMem = new PrivateMemory((int) _storage.getMaxMemoryArea(),
 				(int) _storage.getTotalBackingStoreSize());
+		
+		/* Default affinity set, can be overridden only at initialization phase */
+		affinitySet = Services.getSchedulingAllocationDoamins()[0];
 
 		final Runnable isr = new Runnable() {
 			@Override
@@ -122,14 +152,10 @@ public abstract class ManagedInterruptServiceRoutine extends
 	public final void register(int interrupt, int ceiling) { // throws
 																// RegistrationException
 																// {
+		
+		//TODO ceiling stuff
+		
 		this.interrupt = interrupt;
-
-		// TODO Illegal array reference.
-		// The array that holds the references to the interrupt handlers is a
-		// static field in JVMHelp.java
-		factory.registerInterruptHandler(interrupt, firstLevelHandler);
-
-		// factory.registerInterruptHandler(interrupt, sw);
 
 		final Mission m = Mission.getCurrentMission();
 
@@ -166,7 +192,11 @@ public abstract class ManagedInterruptServiceRoutine extends
 
 	// ========== Implementation specific ============= //
 
-	public int getInterrupt() {
+	Runnable getInterruptHandler(){
+		return firstLevelHandler;
+	}
+	
+	int getInterrupt() {
 		return interrupt;
 	}
 

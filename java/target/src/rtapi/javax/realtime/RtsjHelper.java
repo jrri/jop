@@ -1,6 +1,7 @@
 package javax.realtime;
 
 import javax.safetycritical.ManagedEventHandler;
+import javax.safetycritical.ManagedInterruptServiceRoutine;
 import javax.safetycritical.ManagedLongEventHandler;
 
 /**
@@ -21,6 +22,7 @@ public final class RtsjHelper {
 		RtsjHelper rtsjHelper = new RtsjHelper();
 		ManagedEventHandler.setRtsjHelper(rtsjHelper);
 		ManagedLongEventHandler.setRtsjHelper(rtsjHelper);
+		ManagedInterruptServiceRoutine.setRtsjHelper(rtsjHelper);
 	}
 	
 	private RtsjHelper(){

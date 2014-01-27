@@ -27,6 +27,7 @@ import static javax.safetycritical.annotate.Level.INFRASTRUCTURE;
 import java.util.Vector;
 
 import javax.realtime.AbsoluteTime;
+import javax.realtime.AffinitySet;
 import javax.realtime.AperiodicParameters;
 import javax.realtime.Clock;
 import javax.realtime.PriorityParameters;
@@ -35,13 +36,10 @@ import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-import com.jopdesign.io.IOFactory;
-import com.jopdesign.sys.Const;
 import com.jopdesign.sys.JVMHelp;
-import com.jopdesign.sys.Native;
 
 import joprt.RtThread;
-import joprt.SwEvent;
+//import joprt.SwEvent;
 
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 
@@ -79,13 +77,13 @@ import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		ManagedEventHandler {
 
-	private SwEvent clean;
+	// private SwEvent clean;
 	// private boolean cleanupDidRun;
 	// public static boolean cleanupDidRun;
 	StorageParameters storage;
 
 	TerminationHelper terminationHelper;
-	Mission currMission;
+//	Mission currMission;
 
 	// why is this static?
 	// ok, in level 1 we have only one mission.
@@ -323,9 +321,9 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		m = getNextMission();
 
 		if (m != null) {
-			
+
 			m.currentSequencer = this;
-			currMission = m;
+//			currMission = m;
 
 			// ! @todo Illegal reference when the mission object is allocated in
 			// ! Immortal memory, e.g. with the Linear and Repeating sequencers
@@ -335,7 +333,10 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 			Terminal.getTerminal().writeln("[SEQ]: Got new mission");
 			ManagedMemory.setSize((int) m.missionMemorySize());
 			m.initialize();
-			
+
+			/* Fill the interrupt array */
+			registerInterrupts();
+
 			if (m instanceof CyclicExecutive) {
 				executeCycle((CyclicExecutive) m);
 			} else {
@@ -344,11 +345,36 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 
 			m.terminate();
 			m.cleanUp();
-			
+
 		} else {
-			Terminal.getTerminal().writeln(
-					"[SEQ]: No more missions to execute");
+			Terminal.getTerminal()
+					.writeln("[SEQ]: No more missions to execute");
 			terminationHelper.nextMission = false;
+		}
+	}
+
+	private void registerInterrupts() {
+
+		ManagedInterruptServiceRoutine misr;
+		int intNr, core = 0;
+		AffinitySet affinitySet;
+
+		Vector managedInterrupt = m.getInterrupts();
+
+		if (managedInterrupt != null) {
+			for (int i = 0; i < managedInterrupt.size(); i++) {
+				misr = (ManagedInterruptServiceRoutine) managedInterrupt
+						.elementAt(i);
+				intNr = misr.getInterrupt();
+				affinitySet = misr.getAffinitySet();
+				core = _rtsjHelper.getAffinitySetProcessor(affinitySet);
+		
+				// TODO Illegal array reference.
+				// The array that holds the references to the interrupt handlers
+				// is a static field in JVMHelp.java
+				JVMHelp.addInterruptHandler(core, intNr,
+						misr.getInterruptHandler());
+			}
 		}
 	}
 
@@ -362,7 +388,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 	}
 
 	void executeMission(Mission m) {
-		
+
 		Terminal.getTerminal().writeln("[SEQ]: SCJ Start L1 mission on JOP");
 		RtThread.startMission();
 
@@ -372,39 +398,6 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		 */
 		while (!m.terminationPending) {
 		}
-		
-		/*
-		 * Wait for all of the ManagedSchedulable objects associated with the
-		 * current mission to terminate their execution. "m" is the currently
-		 * executing mission.
-		 */
-//		boolean mehFinished = false;
-//		boolean mlehFinished = false;
-//		boolean missionFinished = false;
-//
-//		ManagedEventHandler[] mehArray;
-//		ManagedLongEventHandler[] mlehArray;
-//
-//		if (m.hasEventHandlers) {
-//			Vector eventHandlers = m.getHandlers();
-//			while (!mehFinished) {
-//				for (int i = 0; i < eventHandlers.size(); i++) {
-//					mehFinished = mehFinished
-//							& ((ManagedEventHandler) eventHandlers.elementAt(i)).finished;
-//				}
-//			}
-//		}
-//
-//		if (m.hasLongEventHandlers) {
-//			Vector longEventHandlers = m.getLongHandlers();
-//			while (!mlehFinished) {
-//				for (int i = 0; i < longEventHandlers.size(); i++) {
-//					mlehFinished = mlehFinished
-//							& ((ManagedLongEventHandler) longEventHandlers
-//									.elementAt(i)).finished;
-//				}
-//			}
-//		}
 
 	}
 

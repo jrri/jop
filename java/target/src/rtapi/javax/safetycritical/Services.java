@@ -67,6 +67,40 @@ public class Services {
 	public static javax.safetycritical.ManagedSchedulable currentManagedSchedulable() {
 		return (ManagedSchedulable) Scheduler.getCurrentSO();
 	}
+	
+	/**
+	 * This is like sleep except that it is not interruptible and it uses
+	 * nanoseconds instead of milliseconds.
+	 * 
+	 * @param delay
+	 *            is the number of nanoseconds to suspend
+	 * 
+	 *            TBD: should this be called suspend or deepSleep to no have a
+	 *            ridiculously long name?
+	 * 
+	 *            TBD: should not be a long nanoseconds?
+	 */
+	@SCJAllowed(LEVEL_2)
+	@SCJRestricted(maySelfSuspend = true)
+	public static void delay(int ns_delay) {
+	}
+	
+	/**
+	 * This is like sleep except that it is not interruptible and it uses
+	 * nanoseconds instead of milliseconds.
+	 * 
+	 * @param delay
+	 *            is the number of nanoseconds to suspend
+	 * 
+	 *            TBD: should this be called suspend or deepSleep to no have a
+	 *            ridiculously long name?
+	 * 
+	 *            TBD: should not be a long nanoseconds?
+	 */
+	@SCJAllowed(LEVEL_2)
+	@SCJRestricted(maySelfSuspend = true)
+	public static void delay(HighResolutionTime delay) {
+	}
 
 	/**
 	 * @return the default ceiling priority The value is the highest software
@@ -89,80 +123,46 @@ public class Services {
 	public static void setCeiling(Object O, int pri) {
 	}
 
-	/**
-	 * This method is invoked by infrastructure to change the association for
-	 * the thread-local stack back trace buffer to the Class that represents a
-	 * Throwable that has crossed its scope boundary, at the time that Throwable
-	 * is replaced with a ThrowBoundaryError.
-	 */
-	static void overwriteBackTraceAssociation(Class _class) {
-	}
-
-	/**
-	 * Every interrupt has an implementation-defined integer id.
-	 * 
-	 * @return The priority of the code that the first-level interrupts code
-	 *         executes. The returned value is always greater than
-	 *         PriorityScheduler.getMaxPriority().
-	 * @throws IllegalArgument
-	 *             if unsupported InterruptId
-	 */
-	@SCJAllowed(LEVEL_1)
-	public static int getInterruptPriority(int InterruptId) {
-		return 33;
-	}
-
-	/**
-	 * Registers an interrupt handler.
-	 * 
-	 * @throws IllegalArgument
-	 *             if unsupported InterruptId IllegalStateException if handler
-	 *             already registered
-	 */
-	@SCJAllowed(LEVEL_1)
-	public static void registerInterruptHandler(int InterruptId,
-			InterruptHandler IH) {
-	}
+//	/**
+//	 * This method is invoked by infrastructure to change the association for
+//	 * the thread-local stack back trace buffer to the Class that represents a
+//	 * Throwable that has crossed its scope boundary, at the time that Throwable
+//	 * is replaced with a ThrowBoundaryError.
+//	 */
+//	static void overwriteBackTraceAssociation(Class _class) {
+//	}
+//
+//	/**
+//	 * Every interrupt has an implementation-defined integer id.
+//	 * 
+//	 * @return The priority of the code that the first-level interrupts code
+//	 *         executes. The returned value is always greater than
+//	 *         PriorityScheduler.getMaxPriority().
+//	 * @throws IllegalArgument
+//	 *             if unsupported InterruptId
+//	 */
+//	@SCJAllowed(LEVEL_1)
+//	public static int getInterruptPriority(int InterruptId) {
+//		return 33;
+//	}
+//
+//	/**
+//	 * Registers an interrupt handler.
+//	 * 
+//	 * @throws IllegalArgument
+//	 *             if unsupported InterruptId IllegalStateException if handler
+//	 *             already registered
+//	 */
+//	@SCJAllowed(LEVEL_1)
+//	public static void registerInterruptHandler(int InterruptId,
+//			InterruptHandler IH) {
+//	}
 
 	/*
 	 * The deployment level
 	 */
 	// @SCJAllowed
 	// public static Level getDeploymentLevel() { return LEVEL_0; }
-
-	/**
-	 * This is like sleep except that it is not interruptible and it uses
-	 * nanoseconds instead of milliseconds.
-	 * 
-	 * @param delay
-	 *            is the number of nanoseconds to suspend
-	 * 
-	 *            TBD: should this be called suspend or deepSleep to no have a
-	 *            ridiculously long name?
-	 * 
-	 *            TBD: should not be a long nanoseconds?
-	 */
-	@SCJAllowed(LEVEL_2)
-	@SCJRestricted(maySelfSuspend = true)
-	public static void delay(HighResolutionTime delay) {
-	}
-
-	/**
-	 * This is like sleep except that it is not interruptible and it uses
-	 * nanoseconds instead of milliseconds.
-	 * 
-	 * @param delay
-	 *            is the number of nanoseconds to suspend
-	 * 
-	 *            TBD: should this be called suspend or deepSleep to no have a
-	 *            ridiculously long name?
-	 * 
-	 *            TBD: should not be a long nanoseconds?
-	 */
-	@SCJAllowed(LEVEL_2)
-	@SCJRestricted(maySelfSuspend = true)
-	public static void delay(int ns_delay) {
-	}
 
 	/**
 	 * Busy wait spinning loop (now plus delay).

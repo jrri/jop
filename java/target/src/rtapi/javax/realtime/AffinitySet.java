@@ -1,6 +1,5 @@
 package javax.realtime;
 
-import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.annotate.SCJAllowed;
 
 import static javax.safetycritical.annotate.Level.LEVEL_1;
