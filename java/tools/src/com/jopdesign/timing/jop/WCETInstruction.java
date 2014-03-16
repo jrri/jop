@@ -169,6 +169,7 @@ public class WCETInstruction {
 	private static final int JOPSYS_PUTFIELD = 234;
 	private static final int JOPSYS_GETSTATIC = 238;
 	private static final int JOPSYS_PUTSTATIC = 239;
+	private static final int LDC_W_REF = 242;
 	private static String ILLEGAL_OPCODE = "ILLEGAL_OPCODE";
 
 	/**
@@ -1480,6 +1481,9 @@ public class WCETInstruction {
 		case JOPSYS_INVAL:
 			wcet = 4;
 			break;
+			
+		case LDC_W_REF:
+			wcet = 7 + r; 
 
 		default:
 			wcet = -1;

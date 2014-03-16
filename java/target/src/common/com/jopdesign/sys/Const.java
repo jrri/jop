@@ -39,7 +39,7 @@ public class Const {
 	 * Size of class header part.
 	 * Difference between class struct and method table.
 	 */
-	public static final int CLASS_HEADR = 7;
+	public static final int CLASS_HEADR = 6;
 	/**
 	 * Size of instance relative to class struct.
 	 */
@@ -59,36 +59,20 @@ public class Const {
 	public static final int CLASS_OBJECT = 5;
 	
 	/**
-	 * Pointer to table with pointers to all class info structures. Offset from
-	 * beginning of special pointers table.
-	 */
-	public static int CLASS_TABLE_OFFSET = 6;
-	
-	/**
-	 * Pointer to java.lang.Class class info structure. Offset from
-	 * beginning of special pointers table.
-	 */
-	public static int CLASS_CLASS_OFFSET = 7;
-
-	/**
-	 * Pointer to no argument constructor <init> method, relative to class struct. 
-	 * Zero if the class does not have no argument constructor.
-	 */
-	public static int INIT_METH = 6;
-	
-	/**
 	 * Pointer to class object, relative to start of MTAB
 	 */
-	public static final int MTAB2CLASS_OBJ = -2;
+	public static final int MTAB2CLASS_OBJ = -1;
+	
+	public static final int CLASS_INST_SIZE = 5;
 
 	/**
 	 * Class info start relative to start of MTAB.
 	 */
-	public static final int MTAB2CLINFO = -7;
+	public static final int MTAB2CLINFO = -6;
 	/**
 	 * GC_INFO field relative to start of MTAB.
 	 */
-	static final int MTAB2GC_INFO = -5;
+	static final int MTAB2GC_INFO = -4;
 	
 	/**
 	 * Size of the on-chip stack cache including the area

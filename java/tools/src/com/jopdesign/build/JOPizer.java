@@ -27,8 +27,6 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author flavius, martin
@@ -50,7 +48,7 @@ public class JOPizer extends OldAppInfo implements Serializable {
 	public final static String stringClass = "java.lang.String";
 	public final static String objectClass = "java.lang.Object";
 
-	public static final int PTRS = 8; //<====
+	public static final int PTRS = 6;
 
 	public static final int IMPORTANT_PTRS = 12;
 	public static final int GCINFO_NONREFARRY = 6; // gci is at -1 from classinfo
@@ -96,8 +94,6 @@ public class JOPizer extends OldAppInfo implements Serializable {
 	 */
 	int clinfoAddr;
 	
-	int classTableAddress; //<===
-
 	// Added to implement the symbol manager
 	public static JOPizer jz;
 
@@ -222,43 +218,22 @@ public class JOPizer extends OldAppInfo implements Serializable {
 			jz.length = cla.getAddress();
 			
 			
-			//************************************************
-			JopClassInfo.classTableRef = jz.length; //<===
-			jz.length += jz.cliMap.size();//<===
-			
-			Iterator<? extends OldClassInfo> it = jz.cliMap.values().iterator();
-			while (it.hasNext()) {
-				JopClassInfo cli = (JopClassInfo) it.next();
-				if(cli.clazz.getClassName().toString().equalsIgnoreCase("java.lang.Class")){
-					JopClassInfo.classClassRef = cli.classRefAddress;
-					
-				}
-				
-				// How many primitive types are already in the table?
-				String value = cli.clazz.getClassName();
-				
-				if (value.equals("java.lang.Boolean")	||
-					value.equals("Java.lang.Character") ||
-					value.equals("java.lang.Byte") 		||
-					value.equals("java.lang.Short") 	||
-					value.equals("java.lang.Integer")	|| 
-					value.equals("java.lang.Long")		||
-					value.equals("java.lang.Float")		||
-					value.equals("java.lang.Double")	||
-					value.equals("java.lang.Void")) {
-					
-					jz.length--;
-				}
-
-			}
-			
-			jz.length = jz.length+9;
-			
-			//************************************************
-
 			// As all addresses are now known we can
 			// resolve the constants.
 			jz.iterate(new ResolveCPool(jz));
+
+			
+			/* Collect information about classes to generate Class objects */
+			 ClassObjectInfo.address = jz.length;
+			 ClassObjectInfo.objAddress = jz.length - ClassObjectInfo.SIZE;
+			 jz.length += jz.cliMap.size()*ClassObjectInfo.SIZE+9*ClassObjectInfo.SIZE;
+			 
+			Iterator<? extends OldClassInfo> it1 = jz.cliMap.values()
+					.iterator();
+			while (it1.hasNext()) {
+				JopClassInfo cli = (JopClassInfo) it1.next();
+				ClassObjectInfo.work(cli);
+			}
 
 			// Finally we can write the .jop file....
 			new JopWriter(jz).write();

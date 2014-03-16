@@ -38,10 +38,7 @@ exception statement from your version. */
 
 package java.lang;
 
-import com.jopdesign.sys.GC;
-import com.jopdesign.sys.JVMHelp;
 import com.jopdesign.sys.Native;
-import com.jopdesign.sys.Startup;
 
 
 /**
@@ -104,7 +101,8 @@ public final class Double extends Number implements Comparable
    * @since 1.1
    */
 //  public static final Class TYPE = VMClassLoader.getPrimitiveClass('D');
-  public static final Class<Double> TYPE = (Class<Double>) GC.initializeClassObjects(8);
+  public static final Class<Double> TYPE = (Class<Double>) Class.getPrimitiveClass('D');
+
 
   /**
    * The immutable value of this Double.

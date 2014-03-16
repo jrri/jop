@@ -37,9 +37,7 @@
 
 package java.lang;
 
-import com.jopdesign.sys.GC;
-import com.jopdesign.sys.JVMHelp;
-import com.jopdesign.sys.Startup;
+//import com.jopdesign.sys.GC;
 
 /**
  * Instances of class <code>Long</code> represent primitive <code>long</code>
@@ -79,7 +77,9 @@ public final class Long {
 	 * 
 	 * @since 1.1
 	 */
-    public static final Class<Long>  TYPE = (Class<Long>) GC.initializeClassObjects(6);//Startup.getPrimitiveClass(6);
+//    public static final Class<Long>  TYPE = (Class<Long>) GC.initializeClassObjects(6);
+	public static final Class<Long>  TYPE = (Class<Long>) Class.getPrimitiveClass('J');
+    
 	
 	/**
 	 * The number of bits needed to represent a <code>long</code>.

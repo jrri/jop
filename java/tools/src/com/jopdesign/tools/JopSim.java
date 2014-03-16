@@ -32,7 +32,6 @@
 
 package com.jopdesign.tools;
 
-import com.jopdesign.common.ClassInfo;
 import com.jopdesign.sys.Const;
 import com.jopdesign.timing.jop.WCETInstruction;
 
@@ -464,9 +463,9 @@ System.out.println(mp+" "+pc);
 		// pointer to super class at offset 3
 		// == Const.CLASS_SUPER
 		int sup = readMem(vt+3, Access.CLINFO);
-		// the real VT is located at offset 7
+		// the real VT is located at offset 6
 		// == Const.CLASS_HEADR
-		vt = sup+7;//<===========================
+		vt = sup+6;
 
 // System.err.println("invsuper: cp: "+cp+" off: "+off+" args: "+args+" ref: "+ref+" vt: "+vt+" addr: "+(vt+off));
 		invoke(vt+off);
@@ -501,8 +500,7 @@ System.out.println(mp+" "+pc);
 		
 		// pointer to method table in handle at offset 1
 		int vt = readMem(ref+1, Access.MVB);	// pointer to virtual table in obj-1
-//		int it = readMem(vt-1, Access.CLINFO);	// pointer to interface table one befor vt
-		int it = readMem(vt-3, Access.CLINFO);	// pointer to interface table three befor vt <=======
+		int it = readMem(vt-2, Access.CLINFO);	// pointer to interface table, two befor vt
 
 		int mp = readMem(it+off, Access.IFTAB);
 // System.out.println("invint: off: "+off+" args: "+args+" ref: "+ref+" vt: "+vt+" mp: "+(mp));
@@ -693,6 +691,11 @@ System.out.println(mp+" "+pc);
 		ref = readMem(ref, Access.HANDLE);
 		stack[sp] = readMem(ref+off, Access.FIELD);
 		stack[++sp] = readMem(ref+off+1, Access.FIELD);
+	}
+	
+	void ldc_w_ref() {
+		int ref = readMem(cp+readOpd16u(), Access.CONST);
+		stack[++sp] = readMem(ref+Const.CLASS_OBJECT, Access.CLINFO);
 	}
 
 /**
@@ -1721,7 +1724,7 @@ System.out.println("new heap: "+heap);
 					invoke(jjhp+6);	// exception() is at offset 3*2
 					break;
 				case 242 :		// resF2
-					noim(242);
+					ldc_w_ref();
 					break;
 				case 243 :		// resF3
 					noim(243);

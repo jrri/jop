@@ -29,8 +29,6 @@ package com.jopdesign.build;
 
 import java.io.*;
 import java.util.*;
-import java.util.Map.Entry;
-
 
 /**
  * @author Falvius, Martin
@@ -41,10 +39,6 @@ public class JopWriter {
 	private PrintWriter out;
 	private PrintWriter outLinkInfo;
 	
-	// Table with the addresses of the Class objects
-	private TreeMap<Integer,String> classTable = new TreeMap<Integer,String>(); //<=====
-
-
 	public JopWriter(JOPizer jz) {
 		this.jz = jz;
 		out = jz.out;
@@ -80,8 +74,6 @@ public class JopWriter {
 		out.println("\t\t"+JopClassInfo.mainAddress+",\t// pointer to main method struct");
 		out.println("\t\t"+JopClassInfo.addrRefStatic+",\t// pointer to static reference fields");
 		out.println("\t\t"+JopClassInfo.cntRefStatic+",\t// number of static reference fields");
-		out.println("\t\t"+JopClassInfo.classTableRef+",\t// reference to class table addresses"); //<==
-		out.println("\t\t"+JopClassInfo.classClassRef+",\t// reference to Class class"); //<==
 
 		if (JopClassInfo.mainAddress==0 || JopClassInfo.mainAddress==-1) {
 			System.out.println("Error: no main() method found");
@@ -96,7 +88,7 @@ public class JopWriter {
 
 		dumpClassInfo();
 		
-		dumpClassTable(); //<====
+		ClassObjectInfo.dump(out);
 
 		out.close();
 
@@ -119,16 +111,8 @@ public class JopWriter {
 				  // GCRT: dump the words before the method bytecode
 				  GCRTMethodInfo.dumpMethodGcis(((OldMethodInfo) methods.get(i)), out);
 				}
+				
 				JopMethodInfo jopMethodInfo = (JopMethodInfo) methods.get(i);
-				
-				if(jopMethodInfo.getMethod().getName().equals("<init>")){
-					if(jopMethodInfo.getMethod().getSignature().startsWith("()")){
-						//System.out.println("<init> in: "+jopMethodInfo.codeAddress);
-						cli.initMethodRef = jopMethodInfo.structAddress;
-					}
-					
-				}
-				
 				jopMethodInfo.dumpByteCode(out, outLinkInfo);
 				
 //				((JopMethodInfo) methods.get(i)).dumpByteCode(out, outLinkInfo);
@@ -159,7 +143,6 @@ public class JopWriter {
 		Iterator<? extends OldClassInfo> it = jz.cliMap.values().iterator();
 		while (it.hasNext()) {
 			JopClassInfo cli = (JopClassInfo) it.next();
-			classTable.put(cli.classRefAddress, cli.clazz.getClassName()); //<======
 			cli.dump(out, outLinkInfo);
 		}
 
@@ -178,108 +161,6 @@ public class JopWriter {
 		}
 	}
 	
-	//<====
-	private void dumpClassTable(){
-		
-		Set<Entry<Integer, String>> set = classTable.entrySet();
-		Iterator<Entry<Integer, String>> iter = set.iterator();
-		
-		int[] addresses = new int[9];
-		String[] classes = new String[9];
-		
-		for(int i = 0; i<9; i++){
-			addresses[i] =  0;
-		}
-		
-		classes[0] = "java.lang.Boolean";
-		classes[1] = "java.lang.Character";
-		classes[2] = "java.lang.Byte";
-		classes[3] = "java.lang.Short";
-		classes[4] = "java.lang.Integer";
-		classes[5] = "java.lang.Long";
-		classes[6] = "java.lang.Float";
-		classes[7] = "java.lang.Double";
-		classes[8] = "java.lang.Void";
-		
-		// Look for primitive types
-		while (iter.hasNext()) {
-			
-			Map.Entry me = (Map.Entry) iter.next();
-			
-			String value = (String) me.getValue();
-			int address = (Integer) me.getKey();
-			boolean primFound = false;
-			
-			if (value.equals("java.lang.Boolean")) {
-				addresses[0] = address;
-				primFound = true;
-			}
-
-			if (value.equals("java.lang.Character")) {
-				addresses[1] = address;
-				primFound = true;
-			}
-			
-			if (value.equals("java.lang.Byte")) {
-				addresses[2] = address;
-				primFound = true;
-			}
-
-			if (value.equals("java.lang.Short")) {
-				addresses[3] = address;
-				primFound = true;
-			}
-
-			if (value.equals("java.lang.Integer")) {
-				addresses[4] = address;
-				primFound = true;
-			}
-
-			if (value.equals("java.lang.Long")) {
-				addresses[5] = address;
-				primFound = true;
-			}
-
-			if (value.equals("java.lang.Float")) {
-				addresses[6] = address;
-				primFound = true;
-			}
-
-			if (value.equals("java.lang.Double")) {
-				addresses[7] = address;
-				primFound = true;
-			}
-
-			if (value.equals("java.lang.Void")) {
-				addresses[8] = address;
-				primFound = true;
-			}
-			
-			if (primFound){
-				iter.remove();
-				primFound = false;
-			}
-		}
-		
-		out.println("//");
-		out.println("//\t pointer to class reference adresses");
-		out.println("//");
-//		out.println("\t\t"+classTable.size() +",\t//\tnumber of classes");
-		out.println("\t\t"+(set.size()+9) +",\t//\tnumber of classes");
-
-		
-		for(int i = 0; i<9; i++){
-			out.println("\t\t" + addresses[i] + ",\t//\t" + classes[i]);
-		}
-
-		iter = set.iterator();
-		while (iter.hasNext()) {
-			Map.Entry me = (Map.Entry) iter.next();
-			out.println("\t\t" + me.getKey() + ",\t//\t" + me.getValue());
-		}
-
-	}
-
 	private void dumpStrings() {
 		// find the string class
 		JopClassInfo strcli = StringInfo.cli;

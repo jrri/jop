@@ -33,10 +33,7 @@ package com.jopdesign.sys;
  */
 public class GC {
 	
-	/* Reserved memory */ 
-	static int resMemPtr;
-	
-	/* First usable memory position (Native.rdMem(0) + resMem) */
+	/* First usable memory position (Native.rdMem(0)) */
 	static int mem_start;
 	
 	// get a effective heap size with fixed handle count
@@ -152,19 +149,13 @@ public class GC {
 	static int allocationPointer;
 	
 	static void init(int mem_size, int addr) {
-		
-	}
-
-	static void init(int mem_size, int resMem, int addr) {
 		addrStaticRefs = addr;
-		resMemPtr = Native.rdMem(0);
-		mem_start = Native.rdMem(0) + resMem;
+		mem_start = Native.rdMem(0);
 		// align mem_start to 8 word boundary for the
 		// conservative handle check
 		
 		// mem_start = 261300;
 		mem_start = (mem_start + 7) & 0xfffffff8;
-		GC.log("mem_start", mem_start);
 		// mem_size = mem_start + 2000;
 		if(Config.USE_SCOPES) {
 			allocationPointer = mem_start;
@@ -961,64 +952,4 @@ public class GC {
 	public int newObj2(int ref){
 		return newObject(ref);
 	}
-	
-	/**
-	 * Initialize Class objects when the application starts. This method is
-	 * called in Startup.boot method.
-	 * 
-	 * @param offset
-	 *            the index of the class info structure pointer in the class
-	 *            info table (See JopWriter.java)
-	 * @return a Class object representing a specific type
-	 */
-	public static Class initializeClassObjects(int offset) {
-
-		// pointer to 'special' pointers
-		int specialPointers = Native.rdMem(1);
-
-		// pointer to table with references to class info table
-		int classObjectsTable = Native.rdMem(specialPointers + Const.CLASS_TABLE_OFFSET);
-
-		// pointer to java.lang.Class class info
-		int classClassInfo = Native.rdMem(specialPointers + Const.CLASS_CLASS_OFFSET);
-		
-		// Pointer to <init> method
-		int initPtr = Native.rdMem(classClassInfo + Const.INIT_METH);
-		
-		int classInfoStruct = Native.rdMem(classObjectsTable + offset);
-		
-		// Create the Class object
-		
-		//TODO: Creates "cyclic indirect <clinit> dependency" error when scopes are not used
-		// int classObject = GC.newObject(classClassInfo);
-		
-		int size = Native.rdMem(classClassInfo);
-		int classObject  = resMemPtr;
-		resMemPtr =  resMemPtr + size + HEADER_SIZE;
-		Native.wrMem(classObject + HEADER_SIZE, classObject + OFF_PTR);
-		Native.wrMem(classClassInfo + Const.CLASS_HEADR, classObject + OFF_MTAB_ALEN);
-		Native.wrMem(0, classObject + GC.OFF_TYPE);
-
-		// Call <init> method
-		Native.invoke(classObject, initPtr);
-		
-		// Write reference to newly created object to the class info structure it represents
-		Native.wrMem(classObject, classInfoStruct + Const.CLASS_OBJECT);
-		Class clazz = (Class) Native.toObject(classObject);
-		
-		// Set common attributes
-		clazz.classRefAddress = classInfoStruct;
-		int ifNo = Native.rdMem(classInfoStruct + 3);
-		clazz._interfaceNumber = ifNo;
-		clazz._isInterface = ( ifNo < 0);
-		clazz._isArray = false;
-		
-		// Primitive type attributes
-		if (offset < 10) {
-			clazz._isPrimitive = true;
-			clazz.primitiveType = offset;
-		}
-		return clazz;
-	}
-	
 }

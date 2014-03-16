@@ -411,13 +411,6 @@ synchronized (o) {
 //		}
 //	}
 	
-	public static Class getClassHelper(Class clazz) {
-
-		int j = Native.toInt(clazz);
-		return (Class) Native.toObject((Native.rdMem(j + Const.CLASS_OBJECT)));
-
-	}
-
 }
 
 class DummyHandler implements Runnable {

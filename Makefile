@@ -157,7 +157,9 @@ P3=Launcher
 
 P1=test
 P2=test
-P3=TestClass
+#P3=TestClass
+P3=NewTest
+
 
 #P1=paper
 #P2=scjlibs

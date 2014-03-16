@@ -42,6 +42,8 @@ import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
 import org.apache.bcel.generic.InvokeInstruction;
+import org.apache.bcel.generic.LDC;
+import org.apache.bcel.generic.LDC_W;
 import org.apache.bcel.generic.MONITORENTER;
 import org.apache.bcel.generic.MONITOREXIT;
 import org.apache.bcel.generic.MethodGen;
@@ -50,6 +52,7 @@ import org.apache.bcel.generic.PUTFIELD;
 import org.apache.bcel.generic.PUTSTATIC;
 import org.apache.bcel.generic.ReferenceType;
 import org.apache.bcel.generic.Type;
+import org.apache.bcel.generic.Visitor;
 import org.apache.bcel.util.InstructionFinder;
 
 import java.util.Iterator;
@@ -132,35 +135,39 @@ public class ReplaceNativeAndCPIdx extends JOPizerVisitor {
 				}
 			}
 
- 			if (ii instanceof INVOKESPECIAL) {			    
- 				// not an initializer
- 				if (!ii.getMethodName(cpoolgen).equals("<init>")) {
-                                     // check if this is a super invoke
-                                     // TODO this is just a hack, use InvokeSite.isInvokeSuper() when this is ported to the new framework!
-                                     boolean isSuper = false;
+			if (ii instanceof INVOKESPECIAL) {
+				// not an initializer
+				if (!ii.getMethodName(cpoolgen).equals("<init>")) {
+					// check if this is a super invoke
+					// TODO this is just a hack, use InvokeSite.isInvokeSuper()
+					// when this is ported to the new framework!
+					boolean isSuper = false;
 
-                                     String declaredType = ii.getClassName(cpoolgen);
-                                     JopClassInfo cls = getCli();
-                                     OldClassInfo superClass = cls.superClass;
-                                     while (superClass != null) {
-                                         if (superClass.clazz.getClassName().equals(declaredType)) {
-                                             isSuper = true;
-                                             break;
-                                         }
-                                         if ("java.lang.Object".equals(superClass.clazz.getClassName())) {
-                                             break;
-                                         }
-                                         superClass = superClass.superClass;
-                                     }
+					String declaredType = ii.getClassName(cpoolgen);
+					JopClassInfo cls = getCli();
+					OldClassInfo superClass = cls.superClass;
+					while (superClass != null) {
+						if (superClass.clazz.getClassName()
+								.equals(declaredType)) {
+							isSuper = true;
+							break;
+						}
+						if ("java.lang.Object".equals(superClass.clazz
+								.getClassName())) {
+							break;
+						}
+						superClass = superClass.superClass;
+					}
 
-                                     if (isSuper) {
-                                            Integer idx = ii.getIndex();
-                                            int new_index = getCli().cpoolUsed.indexOf(idx) + 1;
-                                            first.setInstruction(new JOPSYS_INVOKESUPER((short)new_index));
-                                            // System.err.println("invokesuper "+ii.getClassName(cpoolgen)+"."+ii.getMethodName(cpoolgen));
-                                     }
+					if (isSuper) {
+						Integer idx = ii.getIndex();
+						int new_index = getCli().cpoolUsed.indexOf(idx) + 1;
+						first.setInstruction(new JOPSYS_INVOKESUPER(
+								(short) new_index));
+						// System.err.println("invokesuper "+ii.getClassName(cpoolgen)+"."+ii.getMethodName(cpoolgen));
+					}
 				}
- 			}
+			}
 
 		}
 
@@ -240,6 +247,12 @@ public class ReplaceNativeAndCPIdx extends JOPizerVisitor {
 			// idx is the position in the 'original' unresolved cpool
 			int pos = getCli().cpoolUsed.indexOf(idx);
 			int new_index = pos + 1;
+			
+			if (((cpii instanceof LDC_W) || (cpii instanceof LDC))
+					& (cpoolgen.getConstant(cpii.getIndex()).getTag() == 7)) {
+				ih.setInstruction(new LDC_W_REF(new_index));
+			}else{
+			
 			// replace index by the offset for getfield
 			// and putfield and by address for getstatic and putstatic
 			if (cpii instanceof GETFIELD || cpii instanceof PUTFIELD ||
@@ -300,6 +313,7 @@ public class ReplaceNativeAndCPIdx extends JOPizerVisitor {
 					}
 				}
 			}
+		}
 		}
 
 		Method m = mg.getMethod();
@@ -459,6 +473,21 @@ public class ReplaceNativeAndCPIdx extends JOPizerVisitor {
 
 		public void accept(org.apache.bcel.generic.Visitor v) {
 		}
+	}
+	
+	class LDC_W_REF extends CPInstruction {
+
+		protected LDC_W_REF(int index) {
+			super((short) JopInstr.getNative("ldc_w_ref"), index);
+		}
+
+		@Override
+		public void accept(Visitor v) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		
 	}
 
 }

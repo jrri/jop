@@ -37,11 +37,6 @@
 
 package java.lang;
 
-import com.jopdesign.sys.GC;
-import com.jopdesign.sys.JVMHelp;
-import com.jopdesign.sys.Startup;
-
-
 public final class Character {
 
 	//	TODO: NOTE:  works only for ASCII encoding
@@ -68,7 +63,7 @@ public final class Character {
 	 * 
 	 * @since 1.1
 	 */
-	public static final Class<Character> TYPE = (Class<Character>) GC.initializeClassObjects(2);
+	public static final Class<Character> TYPE = (Class<Character>) Class.getPrimitiveClass('C');
 
 	/**
 	 * Smallest value allowed for radix arguments in Java. This value is 2.

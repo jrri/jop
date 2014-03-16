@@ -39,8 +39,7 @@ exception statement from your version. */
 
 package java.lang;
 
-import com.jopdesign.sys.GC;
-import com.jopdesign.sys.Startup;
+//import com.jopdesign.sys.GC;
 
 /**
  * Instances of class <code>Integer</code> represent primitive
@@ -88,7 +87,9 @@ public final class Integer
 	 *  
 	 * @since 1.1
 	 */
-	public static final Class<Integer> TYPE = (Class<Integer>) GC.initializeClassObjects(5); 
+//	public static final Class<Integer> TYPE = (Class<Integer>) GC.initializeClassObjects(5); 
+	public static final Class<Integer> TYPE = (Class<Integer>) Class.getPrimitiveClass('I'); 
+
 			
   /**
    * The number of bits needed to represent an <code>int</code>.

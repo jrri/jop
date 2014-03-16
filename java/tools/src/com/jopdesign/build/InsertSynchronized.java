@@ -24,10 +24,12 @@ import com.jopdesign.common.ClassInfo;
 import com.jopdesign.common.MethodCode;
 import com.jopdesign.common.MethodInfo;
 import com.jopdesign.common.graphutils.ClassVisitor;
-import com.jopdesign.common.misc.JavaClassFormatError;
+
 import org.apache.bcel.generic.ALOAD;
+import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.LDC;
 import org.apache.bcel.generic.MONITORENTER;
 import org.apache.bcel.generic.MONITOREXIT;
 import org.apache.bcel.util.InstructionFinder;
@@ -46,7 +48,7 @@ public class InsertSynchronized implements ClassVisitor {
 
     @Override
     public boolean visitClass(ClassInfo classInfo) {
-
+    	
         for (MethodInfo method : classInfo.getMethods()) {
             if (!(method.isAbstract() || method.isNative())
                     && method.isSynchronized()) {
@@ -67,18 +69,26 @@ public class InsertSynchronized implements ClassVisitor {
         MethodCode mc = method.getCode();
         InstructionList il = mc.getInstructionList();
         InstructionFinder f;
-
+        
+        /* Insert an entry into the constant pool. The entry points to
+         * the class being processed. The addClass method adds the entry
+         * only if the entry does not exist. */
+        ConstantPoolGen cpg = method.getConstantPoolGen();
+    	int index = cpg.addClass(method.getClassName());
+        
         // prepend monitorenter (reversed order of opcodes)
         il.insert(new MONITORENTER());
+        
         if (method.isStatic()) {
-            // il.insert(new GET_CURRENT_CLASS());
-            throw new JavaClassFormatError("synchronized on static methods not yet supported");
+        	il.insert(new LDC(index));
         } else {
             il.insert(new ALOAD(0));
         }
+        
         il.setPositions();
 
         f = new InstructionFinder(il);
+        
         // find return instructions and insert monitorexit
         String retInstr = "ReturnInstruction";
 
@@ -88,8 +98,7 @@ public class InsertSynchronized implements ClassVisitor {
             InstructionHandle newh; // handle for inserted sequence
 
             if (method.isStatic()) {
-                // il.insert(ih, new GET_CURRENT_CLASS());
-                throw new JavaClassFormatError("synchronized on static methods not yet supported");
+            	newh = il.insert(ih, new LDC(index));
             } else {
                 // TODO this could become a bug if JCopter ever reassigns local variable slots, then
                 // we could not be sure that slot 0 holds the this reference anymore.. To be on the safe side
