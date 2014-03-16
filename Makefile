@@ -132,12 +132,16 @@ USE_SCOPES=true
 USE_SCOPECHECKS=true
 ADD_REF_INFO=false
 MEASURE=true
+CLASS_OBJECTS=true
 IMM_MEM_SIZE=90000
-JOP_CONF_STR=USE_SCOPES=$(USE_SCOPES) USE_SCOPECHECKS=$(USE_SCOPECHECKS) ADD_REF_INFO=$(ADD_REF_INFO) MEASURE=$(MEASURE) IMM_MEM_SIZE=$(IMM_MEM_SIZE)
 
-P1=paper
-P2=libs/check/scj
-P3=Launcher
+
+JOP_CONF_STR=USE_SCOPES=$(USE_SCOPES) USE_SCOPECHECKS=$(USE_SCOPECHECKS) \
+ADD_REF_INFO=$(ADD_REF_INFO) MEASURE=$(MEASURE) CLASS_OBJECTS=$(CLASS_OBJECTS) IMM_MEM_SIZE=$(IMM_MEM_SIZE)
+
+#P1=paper
+#P2=libs/check/scj
+#P3=Launcher
 
 #P1=paper
 #P2=libs/check/scj
@@ -157,8 +161,7 @@ P3=Launcher
 
 P1=test
 P2=test
-#P3=TestClass
-P3=NewTest
+P3=TestClass
 
 
 #P1=paper
@@ -580,7 +583,7 @@ endif
 	cd $(TARGET)/dist/classes && jar cf ../lib/classes.jar *
 # use SymbolManager for Paulo's version of JOPizer instead
 	java $(DEBUG_JOPIZER) $(TOOLS_CP) -Dmgci=false com.jopdesign.build.JOPizer \
-		-cp $(TARGET)/dist/lib/classes.jar -o $(TARGET)/dist/bin/$(JOPBIN) $(MAIN_CLASS)
+		-cp $(TARGET)/dist/lib/classes.jar -o $(TARGET)/dist/bin/$(JOPBIN) $(MAIN_CLASS) -cl $(CLASS_OBJECTS)
 #	java $(DEBUG_JOPIZER) $(TOOLS_CP) -Dmgci=false com.jopdesign.debug.jdwp.jop.JopSymbolManager \
 #		-cp $(TARGET)/dist/lib/classes.jar -o $(TARGET)/dist/bin/$(JOPBIN) $(MAIN_CLASS)
 	java $(TOOLS_CP) com.jopdesign.tools.jop2dat $(TARGET)/dist/bin/$(JOPBIN)

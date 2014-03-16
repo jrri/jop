@@ -29,6 +29,7 @@ package com.jopdesign.build;
 
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * @author Falvius, Martin
@@ -74,7 +75,12 @@ public class JopWriter {
 		out.println("\t\t"+JopClassInfo.mainAddress+",\t// pointer to main method struct");
 		out.println("\t\t"+JopClassInfo.addrRefStatic+",\t// pointer to static reference fields");
 		out.println("\t\t"+JopClassInfo.cntRefStatic+",\t// number of static reference fields");
-
+		
+		if (jz.useClassObjects) {
+			JopClassInfo.cntClassObjects = ClassObjectInfo.classObjectsTableAddress;
+			out.println("\t\t" + JopClassInfo.cntClassObjects + ",\t// number of Class objects");
+		}
+		
 		if (JopClassInfo.mainAddress==0 || JopClassInfo.mainAddress==-1) {
 			System.out.println("Error: no main() method found");
 			System.exit(-1);
@@ -86,10 +92,12 @@ public class JopWriter {
 
 		dumpStrings();
 
+		if (jz.useClassObjects) {
+			dumpClassObjects();
+		}
+		
 		dumpClassInfo();
 		
-		ClassObjectInfo.dump(out);
-
 		out.close();
 
 	}
@@ -140,6 +148,7 @@ public class JopWriter {
 
 	private void dumpClassInfo() {
 
+		out.println("//\t -------- Start of class info table  -------- ");
 		Iterator<? extends OldClassInfo> it = jz.cliMap.values().iterator();
 		while (it.hasNext()) {
 			JopClassInfo cli = (JopClassInfo) it.next();
@@ -176,6 +185,42 @@ public class JopWriter {
 		while(i.hasNext()) {
 			StringInfo si = (StringInfo)i.next();
 			si.dump(out, strcli, StringInfo.stringTableAddress+JOPizer.CLASSINFO_NONREFARRY);
+		}
+	}
+	
+	private void dumpClassObjects() {
+		
+//		int address = ClassObjectInfo.classObjectsTableAddress + 1;
+		
+//		Entry<String, ClassObjectInfo> e;
+//		ClassObjectInfo value;
+		
+		/* Find the Class class */
+		JopClassInfo classCli = ClassObjectInfo.cli;
+		
+		out.println("//\t -------- Start of class objects table  -------- ");
+		out.println("\t\t" + ClassObjectInfo.usedClasses.size()+",\t//\t number of Class objects ");
+		out.println("\t//");
+		
+//		Iterator<Entry<String, ClassObjectInfo>> iter = ClassObjectInfo.usedClasses
+//				.entrySet().iterator();
+		
+		Iterator<ClassObjectInfo> iter = ClassObjectInfo.list.iterator();
+		
+		while(iter.hasNext()){
+//			e = iter.next();
+//			value = e.getValue();
+//			value.dump(out, classCli, address);
+//			address += ClassObjectInfo.SIZE;
+			iter.next().dump(out, classCli);
+		}
+		
+		int address = ClassObjectInfo.lastAddress;
+		
+		/* Create primitive type classes */
+		for(int i = 1; i < 10; i++){
+			ClassObjectInfo.dumpPrimitive(out, classCli, address, i);
+			address += ClassObjectInfo.SIZE;
 		}
 	}
 	

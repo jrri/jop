@@ -250,8 +250,13 @@ public class Startup {
 	static void clazzinit() {
 
 		stack = new int[MAX_STACK];
+		
+		int offset = 6;
+		if(Config.CLASS_OBJECTS){
+			offset = 7;
+		}
 
-		int table = Native.rdMem(1)+6;		// start of clinit table
+		int table = Native.rdMem(1) + offset;		// start of clinit table
 		int cnt = Native.rdMem(table);		// number of methods
 		++table;
 		for (int i=0; i<cnt; ++i) {

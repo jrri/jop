@@ -1,11 +1,12 @@
 package test;
 
+import com.jopdesign.sys.Config;
 import com.jopdesign.sys.JVMHelp;
 
 public class TestClass {
 
-//	 Vector<VectorElement> vector;
-	
+	// Vector<VectorElement> vector;
+
 	public TestClass() {
 		// this.vector = new Vector<VectorElement>();
 	}
@@ -16,51 +17,58 @@ public class TestClass {
 	 * @throws InstantiationException
 	 */
 	public static void main(String[] args) {
-		
-//		Class klazz;
-//		
-//		klazz = Boolean.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		klazz = Character.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		klazz = Byte.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		klazz = Short.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		klazz = Integer.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		klazz = Long.TYPE;
-//		System.out.println(klazz.classRefAddress);
-//		
-//		klazz = Float.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		klazz = Double.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		klazz = Void.TYPE;
-//		System.out.println(Native.toInt(klazz));
-//		
-//		System.out.println(Native.toInt(Runnable.class));
-//		Class<Runnable> klazz = JVMHelp.getClassHelper(Runnable.class);
-//		System.out.println(klazz.clCassRefAddress);
-//
-//		
-//		try {
-//			Runnable newRunnable = (Runnable) klazz.newInstance();
-//		} catch (InstantiationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
+		if (!Config.CLASS_OBJECTS) {
+			System.out.println();
+			System.out.println("Cannot run Class class tests. Try");
+			System.out.println("setting the \"CLASS_OBJECTS\" option");
+			System.out.println("to \"true\" in the makefile");
+			return;
+		}
+
+		// Class klazz;
+		//
+		// klazz = Boolean.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// klazz = Character.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// klazz = Byte.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// klazz = Short.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// klazz = Integer.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// klazz = Long.TYPE;
+		// System.out.println(klazz.classRefAddress);
+		//
+		// klazz = Float.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// klazz = Double.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// klazz = Void.TYPE;
+		// System.out.println(Native.toInt(klazz));
+		//
+		// System.out.println(Native.toInt(Runnable.class));
+		// Class<Runnable> klazz = JVMHelp.getClassHelper(Runnable.class);
+		// System.out.println(klazz.clCassRefAddress);
+		//
+		//
+		// try {
+		// Runnable newRunnable = (Runnable) klazz.newInstance();
+		// } catch (InstantiationException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IllegalAccessException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+
 		boolean ok = true;
 
 		// Obtain class objects for primitive wrapper types
@@ -68,38 +76,37 @@ public class TestClass {
 
 		// Use .class notation for for interfaces
 		ok = ok & testForInterface();
-		
+
 		// Use .class notation for non interfaces
 		ok = ok & testForNonInterface();
-		
+
 		// Use Objet.getClass()
 		ok = ok & testGetClass();
-		
+
 		// Misc tests
 		ok = ok & miscTests();
-		
+
 		System.out.println("----------------------");
-		System.out.println("Global test ok: "+ok);
+		System.out.println("Global test ok: " + ok);
 		System.out.println("----------------------");
 
-		
 	}
 
 	private static boolean miscTests() {
-		
+
 		boolean ok = true;
-		
+
 		Class klass = Object.class.getSuperclass();
-		
+
 		/*
 		 * Should not be able to return the superclass of a Class object
 		 * representing java.lang.Object
 		 */
-		if(klass != null){
+		if (klass != null) {
 			System.out.println("Error! Object does not have super class!");
 			ok = false;
 		}
-		
+
 		/*
 		 * Should not be able to create Class objects from an object
 		 * representing java.lang.Class
@@ -115,13 +122,14 @@ public class TestClass {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		
+
 		/* Check that <init> method is called correctly */
 		ClassWithEmptyConstructor cwec = new ClassWithEmptyConstructor();
 		klass = cwec.getClass();
 
 		try {
-			ClassWithEmptyConstructor newCwec =  (ClassWithEmptyConstructor) klass.newInstance();
+			ClassWithEmptyConstructor newCwec = (ClassWithEmptyConstructor) klass
+					.newInstance();
 			ok = ok & newCwec.surname.equals("Johnsson");
 			ok = ok & newCwec.name.equals("John");
 		} catch (InstantiationException e) {
@@ -133,13 +141,15 @@ public class TestClass {
 			e.printStackTrace();
 			ok = false;
 		}
-		
+
 		/* Check that objects with non-empty constructor cannot be created */
-		ClassWithNonEmptyConstructor cwnec = new ClassWithNonEmptyConstructor("Alice");
+		ClassWithNonEmptyConstructor cwnec = new ClassWithNonEmptyConstructor(
+				"Alice");
 		klass = cwnec.getClass();
 
 		try {
-			ClassWithNonEmptyConstructor newCwnec =  (ClassWithNonEmptyConstructor) klass.newInstance();
+			ClassWithNonEmptyConstructor newCwnec = (ClassWithNonEmptyConstructor) klass
+					.newInstance();
 			ok = false;
 		} catch (InstantiationException e) {
 			System.out.println(e.getMessage());
@@ -148,24 +158,25 @@ public class TestClass {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		
-		System.out.println("Misc test ok: "+ok);
+
+		System.out.println("Misc test ok: " + ok);
 		return ok;
 	}
 
 	private static boolean testGetClass() {
-		
+
 		VectorElementExtended vee = new VectorElementExtended();
 		VectorElement ve = new VectorElement();
-		
-		Class<VectorElementExtended> klazz = (Class<VectorElementExtended>) vee.getClass();
+
+		Class<VectorElementExtended> klazz = (Class<VectorElementExtended>) vee
+				.getClass();
 		Class<VectorElement> superClass = (Class<VectorElement>) ve.getClass();
-		
+
 		boolean ok = true;
-		
+
 		ok = ok & (klazz.isPrimitive() == false);
-//		ok = ok & (klazz.primitiveType == 0);
-//		ok = ok & (klazz.getType() == 'L');
+		// ok = ok & (klazz.primitiveType == 0);
+		// ok = ok & (klazz.getType() == 'L');
 		ok = ok & (klazz.getSuperclass() == superClass);
 		ok = ok & (klazz.isArray() == false);
 		ok = ok & (superClass.isInstance(vee));
@@ -178,7 +189,7 @@ public class TestClass {
 			newVee = (VectorElementExtended) klazz.newInstance();
 			ok = ok & (newVee instanceof VectorElement);
 			ok = ok & (newVee instanceof VectorElementExtended);
-			
+
 			newVee.name = "Bob";
 			ok = ok & (newVee.getName().equals("Bob"));
 		} catch (InstantiationException e) {
@@ -190,25 +201,24 @@ public class TestClass {
 		}
 
 		System.out.println("Get class ok : " + ok);
-		
+
 		return ok;
-		
-		
+
 	}
 
 	private static boolean testForNonInterface() {
-		
+
 		Class<String> klazz = String.class;
 		String testString = "Hello";
-		
+
 		// Get a Class object for java.lang.Object
 		Class objClass = Object.class;
-		
+
 		boolean ok = true;
-		
+
 		ok = ok & (klazz.isPrimitive() == false);
-//		ok = ok & (klazz.primitiveType == 0);
-//		ok = ok & (klazz.getType() == 'L');
+		// ok = ok & (klazz.primitiveType == 0);
+		// ok = ok & (klazz.getType() == 'L');
 		ok = ok & (klazz.getSuperclass() == objClass);
 		ok = ok & (klazz.isArray() == false);
 		ok = ok & (klazz.isInstance(testString));
@@ -231,50 +241,48 @@ public class TestClass {
 		}
 
 		System.out.println("String ok : " + ok);
-		
+
 		return ok;
-		
-		
+
 	}
 
 	private static boolean testForInterface() {
-		
-		
+
 		Class<Runnable> klazz = Runnable.class;
-		
+
 		boolean ok = true;
-		
+
 		// These objects implement Runnable
 		MyClass myClass = new MyClass();
 		Implementer myImplemener = new Implementer();
 
-			ok = ok & (klazz.isPrimitive() == false);
-//			ok = ok & (klazz.primitiveType == 0);
-//			ok = ok & (klazz.getType() == 'L');
-			ok = ok & (klazz.getSuperclass() == null);
-			ok = ok & (klazz.isArray() == false);
-			ok = ok & (klazz.isInstance(myClass));
-			ok = ok & (klazz.isInstance(myImplemener));
-			
-			ok = ok & (klazz.isInterface());
-			ok = ok & (klazz.isPrimitive() == false);
+		ok = ok & (klazz.isPrimitive() == false);
+		// ok = ok & (klazz.primitiveType == 0);
+		// ok = ok & (klazz.getType() == 'L');
+		ok = ok & (klazz.getSuperclass() == null);
+		ok = ok & (klazz.isArray() == false);
+		ok = ok & (klazz.isInstance(myClass));
+		ok = ok & (klazz.isInstance(myImplemener));
 
-			Runnable newRunnable;
+		ok = ok & (klazz.isInterface());
+		ok = ok & (klazz.isPrimitive() == false);
 
-			try {
-				newRunnable = (Runnable) klazz.newInstance();
-				ok = false;
-			} catch (InstantiationException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			}
+		Runnable newRunnable;
 
-			System.out.println("Interface ok : " + ok);
-			
-			return ok;
+		try {
+			newRunnable = (Runnable) klazz.newInstance();
+			ok = false;
+		} catch (InstantiationException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+
+		System.out.println("Interface ok : " + ok);
+
+		return ok;
 	}
 
 	private static boolean testPrimitives() {
@@ -507,7 +515,7 @@ public class TestClass {
 			System.out.println("Void ok, pass " + i + " : " + ok);
 			klazz = void.class;
 		}
-		
+
 		return ok;
 
 	}
@@ -533,10 +541,10 @@ public class TestClass {
 	}
 
 	static class VectorElementExtended extends VectorElement {
-		
+
 		public String name;
-		
-		public String getName(){
+
+		public String getName() {
 			return name;
 		}
 
@@ -555,64 +563,64 @@ public class TestClass {
 		public void anotherRun();
 
 	}
-	
+
 	static public class MyClass implements Runnable {
 
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			
+
 		}
 	}
-	
-	static public class Implementer implements MyInterface{
+
+	static public class Implementer implements MyInterface {
 
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void anotherRun() {
 			// TODO Auto-generated method stub
-			
+
 		}
-		
+
 	}
-	
+
 	static public class ClassWithNonEmptyConstructor {
-		
+
 		public String name;
 		public String surname = "Johnsson";
-		
+
 		public ClassWithNonEmptyConstructor(String name) {
 			this.name = name;
 		}
-		
+
 	}
-	
+
 	static public class ClassWithEmptyConstructor {
-		
+
 		public String name;
 		public String surname = "Johnsson";
-		
+
 		public ClassWithEmptyConstructor() {
 			this.name = "John";
 		}
-		
+
 	}
-	
-	static public abstract class MyAbstractClass{
-		
+
+	static public abstract class MyAbstractClass {
+
 		public String aString;
-		
-		public void foo(){
+
+		public void foo() {
 			System.out.println("My abstract class: foo");
 		}
-		
+
 		public abstract void bar();
-		
+
 	}
 
 }

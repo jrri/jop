@@ -90,7 +90,11 @@ public class OldAppInfo implements Serializable {
 
 	public final static String clinitSig = "<clinit>()V";
 	
-
+	/**
+	 * If set to true, then Class objects will be generated.
+	 */
+	protected boolean useClassObjects = false;
+	
 	/**
 	 * 
 	 * @param cliTemplate a template to create the correct ClassInfo type
@@ -129,6 +133,12 @@ public class OldAppInfo implements Serializable {
 				if (args[i].equals("-mm")) {
 					i++;
 					mainMethodName = args[i];
+					continue;
+				}
+				/* Choose if Class objects will be generated */
+				if (args[i].equals("-cl")) {
+					i++;
+					useClassObjects = Boolean.parseBoolean(args[i]);
 					continue;
 				}
 				
