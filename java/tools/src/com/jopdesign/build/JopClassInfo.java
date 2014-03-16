@@ -77,6 +77,9 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 				cli.interfaceList
 						.add(cli.interfaceID - 1, clazz.getClassName());
 			}
+			
+			ClassObjectInfo.addClass(clazz);
+			
 		}
 
 		public void visitMethod(Method method) {
@@ -115,11 +118,17 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 	static ArrayList<String> interfaceList = new ArrayList<String>();
 
 	static int nrObjMethods;
-	static int bootAddress;
-	static int jvmAddress;
-	static int jvmHelpAddress;
-	static int mainAddress;
-	static int interfaceCnt;
+	
+	/* Special pointers */
+	static int bootAddress;		// 0
+	static int jvmAddress;			// 1
+	static int jvmHelpAddress;		// 2
+	static int mainAddress; 		// 3
+	static int addrRefStatic; 		// 4
+	static int cntRefStatic;		// 5
+	static int cntClassObjects;	// 6
+	
+	static boolean useClassObjects = false;
 
 	// virtual method table
 	class ClVT implements Serializable {
@@ -161,9 +170,8 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 	}
 
 	static int cntValueStatic = 0;
-	static int cntRefStatic = 0;
 	static int addrValueStatic = 0;
-	static int addrRefStatic = 0;
+	static int interfaceCnt;
 
 	public ClVT clvt;
 
@@ -239,6 +247,9 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 			}
 			if (clazz.getClassName().equals(JOPizer.objectClass)) {
 				nrObjMethods = clazz.getMethods().length;
+			}
+			if (clazz.getClassName().equals(JOPizer.classClass)) {
+				ClassObjectInfo.cli = this;
 			}
 		}
 	}
@@ -814,9 +825,15 @@ public class JopClassInfo extends OldClassInfo implements Serializable {
 		out.println("\t\t" + iftableAddress
 				+ ",\t//\tpointer to interface table");
 
-		/* Pointer to Class object */
-		out.println("\t\t" + classObjectRef + ",\t//\tpointer to Class object");
-
+		if (useClassObjects) {
+			/* Pointer to Class object */
+			out.println("\t\t" + ClassObjectInfo.getClass(clazz).getAddress()
+					+ ",\t//\tpointer to Class object");
+		}else{
+			/* Pointer to Class object */
+			out.println("\t\t" + 0 + ",\t//\tpointer to Class object");
+		}
+		
 		if (!clazz.isInterface()) {
 			out.println("//");
 			out.println("//\t" + methodsAddress + ": " + clazz.getClassName()

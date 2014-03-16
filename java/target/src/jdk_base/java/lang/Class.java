@@ -30,6 +30,7 @@ import static javax.safetycritical.annotate.Phase.ALL;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import com.jopdesign.sys.Config;
 import com.jopdesign.sys.Const;
 import com.jopdesign.sys.GC;
 import com.jopdesign.sys.Native;
@@ -455,8 +456,18 @@ public final class Class<T> {
     
     static Class<?> getPrimitiveClass(char c){
     	
-    	/* Primitive objects are the last Class objects */
-    	int p = Native.rdMem(0) - 9*Const.CLASS_INST_SIZE;
+    	if(!Config.CLASS_OBJECTS)
+    		return null;
+    	
+		/*
+		 * Primitive objects are the last Class objects in the Class objects
+		 * table
+		 */
+    	int p = Native.rdMem(1) + 6;
+    	int classCntAdd = Native.rdMem(p);
+    	
+    	p = classCntAdd + Native.rdMem(classCntAdd) * Const.CLASS_INST_SIZE + 1;
+    	
     	int offset = 0;
     	
     	switch (c) {

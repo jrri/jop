@@ -47,6 +47,7 @@ public class JOPizer extends OldAppInfo implements Serializable {
 
 	public final static String stringClass = "java.lang.String";
 	public final static String objectClass = "java.lang.Object";
+	public final static String classClass = "java.lang.Class";
 
 	public static final int PTRS = 6;
 
@@ -111,15 +112,19 @@ public class JOPizer extends OldAppInfo implements Serializable {
 		}
 
 
-    // TODO: small change to implement quickly the symbol manager
-//		JOPizer jz = new JOPizer();
+		// TODO: small change to implement quickly the symbol manager
+		// JOPizer jz = new JOPizer();
 		jz = new JOPizer(JopClassInfo.getTemplate());
 
 		if(args.length < 3) {
 			System.err.println("JOPizer arguments: [-cp classpath] -o file class [class]*");
 			System.exit(-1);
 		};
+		
 		jz.parseOptions(args);
+		
+		JopClassInfo.useClassObjects = jz.useClassObjects;
+		
 		if(jz.outFile == null) {
 			System.err.println("JOPizer: Missing argument: '-o file'");
 			System.exit(-1);
@@ -205,36 +210,45 @@ public class JOPizer extends OldAppInfo implements Serializable {
 
 			// How long is the <clinit> List?
 			int cntClinit = JopMethodInfo.clinitList.size();
-			// How long is the string table?
-			StringInfo.stringTableAddress = jz.pointerAddr+PTRS+cntClinit+1;
+			
+			if(jz.useClassObjects){
+				
+				/* How long is the string table? */
+				StringInfo.stringTableAddress = jz.pointerAddr+(PTRS+1)+cntClinit+1;
+				
+				/* Start of class objects table */
+				ClassObjectInfo.classObjectsTableAddress = StringInfo.stringTableAddress
+						+ StringInfo.length;
+				
+				/* Start of class info table */
+				jz.clinfoAddr = ClassObjectInfo.classObjectsTableAddress
+						+ ClassObjectInfo.length + 1;
+				
+			}else{
+				
+				/* How long is the string table? */
+				StringInfo.stringTableAddress = jz.pointerAddr+PTRS+cntClinit+1;
+				
+				/* Start of class info table */
+				jz.clinfoAddr = StringInfo.stringTableAddress + StringInfo.length;
 
-			// Start of class info
-			jz.clinfoAddr = StringInfo.stringTableAddress + StringInfo.length;
-
-			// Calculate class info addresses
+			}
+			
+			/* Calculate class info table addresses */
 			ClassAddress cla = new ClassAddress(jz, jz.clinfoAddr);
 			jz.iterate(cla);
+			
 			// Now all sizes are known
 			jz.length = cla.getAddress();
 			
+			if (jz.useClassObjects)
+				ClassObjectInfo.setAddresses(jz);
 			
 			// As all addresses are now known we can
 			// resolve the constants.
 			jz.iterate(new ResolveCPool(jz));
 
 			
-			/* Collect information about classes to generate Class objects */
-			 ClassObjectInfo.address = jz.length;
-			 ClassObjectInfo.objAddress = jz.length - ClassObjectInfo.SIZE;
-			 jz.length += jz.cliMap.size()*ClassObjectInfo.SIZE+9*ClassObjectInfo.SIZE;
-			 
-			Iterator<? extends OldClassInfo> it1 = jz.cliMap.values()
-					.iterator();
-			while (it1.hasNext()) {
-				JopClassInfo cli = (JopClassInfo) it1.next();
-				ClassObjectInfo.work(cli);
-			}
-
 			// Finally we can write the .jop file....
 			new JopWriter(jz).write();
 
