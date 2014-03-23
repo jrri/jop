@@ -91,12 +91,15 @@ class Scheduler implements Runnable {
 	}
 	
 	/**
-	 * If no thread gets ready within some time the scheduler is
-	 * still invoked after IDL_TICK.
-	 * TODO: a cross-core SW event is only detected at a scheduler
-	 * invocation due to a thread on this core or at idle tick. 
+	 * If no thread is ready within the current execution of the scheduler
+	 * algorithm (the run() method), the scheduler is still invoked after
+	 * IDL_TICK. The programmable timer interrupt is set to fire at a time
+	 * t = now + IDL_TICK.
+	 * 
+	 * TODO: a cross-core SW event is only detected at a scheduler invocation
+	 * due to a thread on this core or at idle tick.
 	 */
-	final static int IDL_TICK = 1000000;
+	final static int IDL_TICK = 1000000;  // 1 s
 
 	// use local memory for two values
 	private final static int TIM_VAL_ADDR = 0x1e;
@@ -150,7 +153,8 @@ class Scheduler implements Runnable {
 
 		// this is now
 		now = Native.rd(Const.IO_US_CNT);
-
+		
+		/* Higher indexes have higher priority, i.e. index 0 = lowest priority */
 		for (i=cnt-1; i>0; --i) {
 
 			if (event[i] == EV_FIRED) {

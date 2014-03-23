@@ -8,7 +8,6 @@ import com.jopdesign.sys.Const;
 import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
 import com.jopdesign.sys.RtThreadImpl;
-import com.jopdesign.sys.Scheduler;
 
 public class LTMemoryTest extends GenericPEH {
 	

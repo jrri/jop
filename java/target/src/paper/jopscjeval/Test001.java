@@ -15,7 +15,6 @@ import com.jopdesign.sys.GC;
 import com.jopdesign.sys.Memory;
 import com.jopdesign.sys.Native;
 import com.jopdesign.sys.RtThreadImpl;
-import com.jopdesign.sys.Scheduler;
 
 /**
  * Test that allocations in scoped memory is of linear time, that is, the time

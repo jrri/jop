@@ -24,7 +24,10 @@
 
 package com.jopdesign.sys;
 
+import javax.realtime.AbsoluteTime;
+import javax.realtime.RealtimeClock;
 import javax.realtime.Schedulable;
+import javax.safetycritical.Mission;
 
 import com.jopdesign.io.IOFactory;
 import com.jopdesign.io.SysDevice;
@@ -372,7 +375,8 @@ public class RtThreadImpl {
 	/**
 	 * Static start time of scheduling used by all cores
 	 */
-	static int startTime;
+	public static int startTime;
+	static AbsoluteTime missStart = new AbsoluteTime();
 
 	// this method is executed in mission memory
 	public static void startMission() {
@@ -443,6 +447,9 @@ public class RtThreadImpl {
 
 		// wait 10 ms for the real start if the mission
 		startTime = Native.rd(Const.IO_US_CNT)+10000;
+		AbsoluteTime now = RealtimeClock.getRealtimeClock().getTime();
+		missStart.set(now.getMilliseconds()+10, now.getNanoseconds());
+		
 		for (i=0; i<sys.nrCpu; ++i) {
 			s = Scheduler.sched[i];
 			for (j=0; j<s.cnt; ++j) {
@@ -497,12 +504,11 @@ public class RtThreadImpl {
 
 		Native.wr(0, Const.IO_INT_ENA);
 
-//		Mission.getCurrentMission().requestTermination();
 		nxt = s.next[nr] + period;
 
 		now = Native.rd(Const.IO_US_CNT);
 		if (nxt - now < 0) { // missed time!
-//			s.next[nr] = now; // correct next
+			// s.next[nr] = now; // correct next
 			s.next[nr] = nxt; // without correction!
 			Native.wr(1, Const.IO_INT_ENA);
 			return false;
@@ -691,6 +697,10 @@ static void trace(int[] stack, int sp) {
 	Schedulable getSchedOblect() {
 		return schedOblect;
 
+	}
+	
+	public static AbsoluteTime getStartMissionTime(){
+		return missStart;
 	}
 
 

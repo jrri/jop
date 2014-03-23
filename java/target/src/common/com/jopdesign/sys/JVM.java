@@ -20,6 +20,8 @@
 
 package com.jopdesign.sys;
 
+import javax.realtime.IllegalAssignmentError;
+
 import util.Timer;
 
 class JVM {
@@ -132,14 +134,16 @@ class JVM {
 					val_level = Native.rdMem(value + GC.OFF_SPACE);
 					
 					/*
-					 * Objects located before mem_start are in ImmortalMemory.
+					 * FIXME Objects located before mem_start are in ImmortalMemory.
 					 * They are either constant strings or class objects
 					 */
 					if (value > GC.mem_start) {
 						if (val_level > ref_level){
-							int fp = Native.getSP()-4;
-							int mp = Native.rdIntMem(fp+4);
-							GC.log("Illegal array reference, mp: ",mp);
+							throw iae;
+							// debug
+							// int fp = Native.getSP()-4;
+							// int mp = Native.rdIntMem(fp+4);
+							// GC.log("Illegal array reference, mp: ",mp);
 						};
 					}
 					
@@ -990,6 +994,7 @@ class JVM {
 
 
 	private static int enterCnt;
+	private static IllegalAssignmentError iae = new IllegalAssignmentError();
 
 	private static void f_monitorenter(int objAddr) {
 
@@ -1129,14 +1134,17 @@ class JVM {
 					val_level = Native.rdMem(val + GC.OFF_SPACE);
 
 					/*
-					 * Objects located before mem_start are in ImmortalMemory.
+					 * FIXME Objects located before mem_start are in ImmortalMemory.
 					 * They are either constant strings or class objects
 					 */
 					if (val > GC.mem_start) {
 						if (val_level != 0) {
-							int fp = Native.getSP()-4;
-							int mp = Native.rdIntMem(fp+4);
-							GC.log("Illegal static reference, mp: ",mp);
+							throw iae;
+							// int fp = Native.getSP()-4;
+							// int mp = Native.rdIntMem(fp+4);
+							// int pc = Native.rdIntMem(fp+1);
+							// GC.log("Illegal static reference, mp: ",mp);
+							// GC.log(" pc: ", pc);
 						}
 					}
 
@@ -1181,14 +1189,18 @@ class JVM {
 					val_level = Native.rdMem(value + GC.OFF_SPACE);
 
 					/*
-					 * Objects located before mem_start are in ImmortalMemory.
+					 * FIXME Objects located before mem_start are in ImmortalMemory.
 					 * They are either constant strings or class objects
 					 */
 					if (value > GC.mem_start) {
 						if (val_level > ref_level) {
-							int fp = Native.getSP()-4;
-							int mp = Native.rdIntMem(fp+4);
-							GC.log("Illegal field reference, mp: ",mp);
+							throw iae;
+							// debug 
+							// int fp = Native.getSP()-4;
+							// int mp = Native.rdIntMem(fp+4);
+							// int pc = Native.rdIntMem(fp+1);
+							// GC.log("Illegal field reference, mp: ",mp);
+							// GC.log(" pc: ", pc);
 						}
 					}
 				}

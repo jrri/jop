@@ -385,5 +385,14 @@ public class Memory {
 		endLocalPtr = startPtr + size - 1;
 		allocBsPtr = endLocalPtr + 1;
 	}
+
+	/* Dump memory pointers, for debug only */
+	public void dumpPointers(){
+		System.out.println("s : "+ startPtr);
+		System.out.println("a : "+ allocPtr);
+		System.out.println("e : "+ endLocalPtr);
+		System.out.println("ab: "+ allocBsPtr);
+		System.out.println("eb: "+ endBsPtr);
+	}
 	
 }
