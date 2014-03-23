@@ -62,31 +62,31 @@ public class TestSchedule404 extends TestCase {
 				 */
 				new PeriodicEventHandler(low, new PeriodicParameters(null,
 						new RelativeTime(Long.MAX_VALUE, 0)),
-						new StorageParameters(256, new long[] { 100 }), 100) {
+						new StorageParameters(256, null, 100 , 0, 0)) {
 					public void handleAsyncEvent() {
 						lock.doLow();
 					}
-				};
+				}.register();
 
 				new PeriodicEventHandler(high, new PeriodicParameters(
 						new RelativeTime(5, 0), new RelativeTime(
 								Long.MAX_VALUE, 0)), new StorageParameters(256,
-						new long[] { 100 }), 100) {
+						null, 100, 0, 0)) {
 					public void handleAsyncEvent() {
 						lock.doHigh();
 					}
-				};
+				}.register();
 
 				new PeriodicEventHandler(median, new PeriodicParameters(
 						new RelativeTime(10, 0), new RelativeTime(
 								Long.MAX_VALUE, 0)), new StorageParameters(256,
-						new long[] { 100 }), 100) {
+						null, 100, 0, 0)) {
 					public void handleAsyncEvent() {
 						freelock.doMedian();
 					}
-				};
+				}.register();
 
-				new Terminator();
+				new Terminator().register();
 			}
 
 			private long getCurrentTimeInNano() {
@@ -145,6 +145,6 @@ public class TestSchedule404 extends TestCase {
 	@Override
 	public long immortalMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 3 * 1024;
 	}
 }

@@ -9,7 +9,9 @@ import javax.safetycritical.PeriodicEventHandler;
 //import javax.safetycritical.StorageConfigurationParameters;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.annotate.Level;
+import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
+import javax.safetycritical.annotate.SCJRestricted;
 
 /**
  * Level 1
@@ -50,7 +52,7 @@ public class TestSchedule406 extends TestCase {
 					new PeriodicEventHandler(low, new PeriodicParameters(null,
 							new RelativeTime(Long.MAX_VALUE, 0)),
 							new StorageParameters(_prop._schedObjBackStoreSize,
-									null), _prop._schedObjScopeSize) {
+									null, _prop._schedObjScopeSize,0,0)) {
 
 						@Override
 						public void handleAsyncEvent() {
@@ -69,13 +71,13 @@ public class TestSchedule406 extends TestCase {
 									_curRunner = index;
 							}
 						}
-					};
+					}.register();
 				}
 
 				new PeriodicEventHandler(high, new PeriodicParameters(
 						new RelativeTime(20, 0), new RelativeTime(100, 0)),
 						new StorageParameters(_prop._schedObjBackStoreSize,
-								null), _prop._schedObjScopeSize) {
+								null, _prop._schedObjScopeSize,0,0)) {
 					
 					@Override
 					public void handleAsyncEvent() {
@@ -87,7 +89,15 @@ public class TestSchedule406 extends TestCase {
 						// Terminal.getTerminal().writeln(
 						// _curRunner + " ------------- being preempted");
 					}
-				};
+					
+					@Override
+					@SCJAllowed(Level.SUPPORT)
+					@SCJRestricted(phase = Phase.CLEANUP)
+					public void cleanUp() {
+						teardown();
+					}
+					
+				}.register();
 			}
 		});
 	}

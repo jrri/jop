@@ -18,6 +18,7 @@ import javax.safetycritical.MissionSequencer;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.Services;
 import javax.safetycritical.StorageParameters;
+import javax.safetycritical.Terminal;
 
 /**
  * 
@@ -69,17 +70,21 @@ public class TestSchedule402 extends TestCase {
 						_AEHCounter++;
 					}
 				};
+				
+				aeh.register();
 
-				new PeriodicEventHandler(
+				final PeriodicEventHandler peh = new PeriodicEventHandler(
 						new PriorityParameters(_prop._priority),
 						new PeriodicParameters(null, new RelativeTime(200, 0)),
-						new StorageParameters(256, new long[] { 100 }), 100) {
+						new StorageParameters(256, null, 100,0,0)) {
 					public void handleAsyncEvent() {
 						System.out.println("TEST1P");
 						aeh.release();
 						_PEHCounter++;
 					}
 				};
+				
+				peh.register();
 
 				/*
 				 * == Test 2 ==
@@ -95,7 +100,7 @@ public class TestSchedule402 extends TestCase {
 							func1();
 							_counter_expected++;
 						}
-					};
+					}.register();
 
 				/* == Test 3 == */
 				new GeneralPeriodicEventHandler() {
@@ -113,13 +118,14 @@ public class TestSchedule402 extends TestCase {
 						Object obj = new Object();
 						Services.setCeiling(obj, 20);
 					}
-				};
+				}.register();
 
-				new Terminator();
+				new Terminator().register();
 			}
 
 			@Override
 			protected void cleanUp() {
+				Terminal.getTerminal().writeln(report());
 				if (_AEHCounter != _PEHCounter)
 					fail("Error occurred in AEH or PEH");
 				if (_counter != _counter_expected)

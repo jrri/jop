@@ -16,7 +16,10 @@ import javax.safetycritical.PrivateMemory;
  * 
  *         - A given scoped memory can only be entered by a single thread at any
  *         given time;
+ *         
  */
+// NOTE: This test cannot be executed, it requires the creation of a
+// PrivateMemory object which does not have a public constructor
 public class TestMemory502 extends TestCase {
 
 	public MissionSequencer getSequencer() {

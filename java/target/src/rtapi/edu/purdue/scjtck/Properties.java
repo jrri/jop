@@ -10,12 +10,12 @@ public class Properties {
     public long _duration = 300;
     public long _period = 50;
     public long _iDelay = 0;
-    public long _missionMemSize = 5000;
+    public long _missionMemSize = 35000;
     public long _schedObjBackStoreSize = 5000;
     public long _schedObjScopeSize = 2500;
     public int _threads = 1;
     public int _priority = PriorityScheduler.instance().getNormPriority();
-    public int _iterations = 100;
+    public int _iterations = 10;
     public int _dropFirstN = 5;
 
     public long _bgPeriod = 250;
@@ -37,6 +37,7 @@ public class Properties {
 	}
 
 	public void parseArgs(CharSequence args) {
+		
 		int start = -1;
 		char option = ' ';
 

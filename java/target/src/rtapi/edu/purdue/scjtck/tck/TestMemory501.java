@@ -8,6 +8,8 @@ import javax.realtime.ScopedMemory;
 import javax.safetycritical.MissionSequencer;
 import javax.safetycritical.PrivateMemory;
 
+import com.jopdesign.sys.JVMHelp;
+
 /**
  * @author leizhao
  * 
@@ -62,10 +64,11 @@ public class TestMemory501 extends TestCase {
 
 		return new GeneralSingleMissionSequencer(new GeneralMission() {
 
-			private int _depth;
+//			private int _depth;
 
 			@Override
 			public void initialize() {
+				
 				final MemoryArea missionMem = RealtimeThread
 						.getCurrentMemoryArea();
 
@@ -78,36 +81,37 @@ public class TestMemory501 extends TestCase {
 					public void handleAsyncEvent() {
 						MemoryArea privateMem = RealtimeThread
 								.getCurrentMemoryArea();
+						
 						if (!(privateMem instanceof PrivateMemory))
 							fail("Schedulable objects not run in private memory");
 						if (!(privateMem instanceof ScopedMemory))
 							fail("Private memory is not instance of ScopedMemory");
 						if (!(privateMem instanceof LTMemory))
 							fail("Private memory is not instance of LTMemory");
-
-						_depth = 0;
-
-						new PrivateMemory(5000).enter(new Runnable() {
-							public void run() {
-								final MissionManager mngrL1 = ((PrivateMemory) RealtimeThread
-										.getCurrentMemoryArea()).getManager();
-								new PrivateMemory(5000).enter(new Runnable() {
-									public void run() {
-										MissionManager mngrL2 = ((PrivateMemory) RealtimeThread
-												.getCurrentMemoryArea())
-												.getManager();
-										if (!mngrL1.equals(mngrL2))
-											fail("Error occured in PrivateMemory.getManager()");
-										_depth++;
-									}
-								});
-								_depth++;
-								if (_depth != 2)
-									fail("Unable to enter nested private memory");
-							}
-						});
+						
+//						_depth = 0;
+//						
+//						new PrivateMemory(5000).enter(new Runnable() {
+//							public void run() {
+//								final MissionManager mngrL1 = ((PrivateMemory) RealtimeThread
+//										.getCurrentMemoryArea()).getManager();
+//								new PrivateMemory(5000).enter(new Runnable() {
+//									public void run() {
+//										MissionManager mngrL2 = ((PrivateMemory) RealtimeThread
+//												.getCurrentMemoryArea())
+//												.getManager();
+//										if (!mngrL1.equals(mngrL2))
+//											fail("Error occured in PrivateMemory.getManager()");
+//										_depth++;
+//									}
+//								});
+//								_depth++;
+//								if (_depth != 2)
+//									fail("Unable to enter nested private memory");
+//							}
+//						});
 					}
-				};
+				}.register();
 
 				/*
 				 * Object creation in mission scoped memory or immortal memory
@@ -116,6 +120,7 @@ public class TestMemory501 extends TestCase {
 				new GeneralPeriodicEventHandler() {
 					@Override
 					public void handleAsyncEvent() {
+
 						try {
 							missionMem.newInstance(Object.class);
 						} catch (Throwable e) {
@@ -126,38 +131,39 @@ public class TestMemory501 extends TestCase {
 						} catch (Throwable e) {
 							fail("Error occured during object creation in immortal memory during mission phase");
 						}
+						
 					}
-				};
+				}.register();
 
 				/*
 				 * A scope may only be entered from the memory area in which it
 				 * is created
 				 */
-				final PrivateMemory scopeL1 = new PrivateMemory(5000);
-				final PrivateMemory scopeL2 = new PrivateMemory(5000);
-
-				new GeneralPeriodicEventHandler() {
-					@Override
-					public void handleAsyncEvent() {
-						scopeL1.enter(new Runnable() {
-							public void run() {
-								try {
-									scopeL2.enter(new Runnable() {
-										public void run() {
-											fail("Private memory not entered from its parent scope");
-										}
-									});
-								} catch (Throwable t) {
-									/*
-									 * scopeL2 is not allowed to be entered in
-									 * scopeL1; there should be some exceptions
-									 * thrown here
-									 */
-								}
-							}
-						});
-					}
-				};
+//				final PrivateMemory scopeL1 = new PrivateMemory(5000);
+//				final PrivateMemory scopeL2 = new PrivateMemory(5000);
+//
+//				new GeneralPeriodicEventHandler() {
+//					@Override
+//					public void handleAsyncEvent() {
+//						scopeL1.enter(new Runnable() {
+//							public void run() {
+//								try {
+//									scopeL2.enter(new Runnable() {
+//										public void run() {
+//											fail("Private memory not entered from its parent scope");
+//										}
+//									});
+//								} catch (Throwable t) {
+//									/*
+//									 * scopeL2 is not allowed to be entered in
+//									 * scopeL1; there should be some exceptions
+//									 * thrown here
+//									 */
+//								}
+//							}
+//						});
+//					}
+//				};
 
 				/*
 				 * A mission global object, which should be able to be touched
@@ -171,13 +177,15 @@ public class TestMemory501 extends TestCase {
 					new GeneralPeriodicEventHandler() {
 						@Override
 						public void handleAsyncEvent() {
+
 							if (missionGlobalNum.intValue() != value) {
 								fail("Mission global object inaccessible or incorrect");
 							}
-						}
-					};
 
-				new Terminator();
+						}
+					}.register();
+
+				new Terminator().register();
 			}
 		});
 	}
@@ -190,7 +198,6 @@ public class TestMemory501 extends TestCase {
 
 	@Override
 	protected String getArgs() {
-		// TODO Auto-generated method stub
-		return null;
+		return "-L 1";
 	}
 }

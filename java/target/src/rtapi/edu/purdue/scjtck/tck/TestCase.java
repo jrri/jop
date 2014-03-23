@@ -28,7 +28,7 @@ public abstract class TestCase extends MainSafelet {
 
     protected String report() {
     	
-        String result = "";
+        String result = "Result report:\n";
        
         if (!_passed) {
             result += "Failed:\n";

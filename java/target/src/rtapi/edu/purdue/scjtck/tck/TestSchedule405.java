@@ -59,7 +59,7 @@ public class TestSchedule405 extends TestCase {
 				new PeriodicEventHandler(low, new PeriodicParameters(null,
 						new RelativeTime(Long.MAX_VALUE, 0)),
 						new StorageParameters(_prop._schedObjBackStoreSize,
-								null), _prop._schedObjScopeSize) {
+								null, _prop._schedObjScopeSize,0,0)) {
 
 					@Override
 					public void handleAsyncEvent() {
@@ -69,13 +69,13 @@ public class TestSchedule405 extends TestCase {
 						_timeRecord[5] = getCurrentTimeInNano();
 						// Terminal.getTerminal().writeln("low finishes");
 					}
-				};
+				}.register();
 
 				new PeriodicEventHandler(high, new PeriodicParameters(
 						new RelativeTime(5, 0), new RelativeTime(
 								Long.MAX_VALUE, 0)), new StorageParameters(
-						_prop._schedObjBackStoreSize, null),
-						_prop._schedObjScopeSize) {
+						_prop._schedObjBackStoreSize, null,
+						_prop._schedObjScopeSize,0,0)) {
 
 					@Override
 					public void handleAsyncEvent() {
@@ -85,13 +85,13 @@ public class TestSchedule405 extends TestCase {
 						_timeRecord[2] = getCurrentTimeInNano();
 						// Terminal.getTerminal().writeln("high finishes");
 					}
-				};
+				}.register();
 
 				new PeriodicEventHandler(median, new PeriodicParameters(
 						new RelativeTime(10, 0), new RelativeTime(
 								Long.MAX_VALUE, 0)), new StorageParameters(
-						_prop._schedObjBackStoreSize, null),
-						_prop._schedObjScopeSize) {
+						_prop._schedObjBackStoreSize, null,
+						_prop._schedObjScopeSize,0,0)) {
 
 					@Override
 					public void handleAsyncEvent() {
@@ -101,9 +101,9 @@ public class TestSchedule405 extends TestCase {
 						_timeRecord[4] = getCurrentTimeInNano();
 						// Terminal.getTerminal().writeln("median finishes");
 					}
-				};
+				}.register();
 
-				new Terminator();
+				new Terminator().register();
 			}
 
 			// take around ? ms
@@ -139,6 +139,6 @@ public class TestSchedule405 extends TestCase {
 	@SCJAllowed(Level.SUPPORT)
 	public long immortalMemorySize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 3*1024;
 	}
 }

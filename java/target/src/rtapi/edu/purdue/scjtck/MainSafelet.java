@@ -44,7 +44,7 @@ public abstract class MainSafelet implements Safelet {
 		_aperiodicParam = new AperiodicParameters(null, null);
 		// _storageParam = new StorageConfigurationParameters(0, 0, 0);
 		// _storageParam = new StorageParameters(0, 0, 0);
-		_storageParam = new StorageParameters(0, null);
+		_storageParam = new StorageParameters(0, null, 0, 0, 0);
 
 		Terminal.getTerminal().writeln(getInfo());
 	}
@@ -54,9 +54,9 @@ public abstract class MainSafelet implements Safelet {
 		Terminal.getTerminal().writeln(report());
 	}
 
-//	public Level getLevel() {
-//		return _prop._level;
-//	}
+	// public Level getLevel() {
+	// return _prop._level;
+	// }
 
 	protected abstract String getInfo();
 
@@ -69,34 +69,44 @@ public abstract class MainSafelet implements Safelet {
 			return _prop._missionMemSize;
 		}
 
-		@Override
-		protected void cleanUp() {
-			super.cleanUp();
-			// _launcher.interrupt();
-		}
+		// @Override
+		// protected void cleanUp() {
+		// super.cleanUp();
+		// Terminal.getTerminal().writeln(report());
+		// _launcher.interrupt();
+		// }
 	}
 
 	// public class GeneralSingleMissionSequencer extends SingleMissionSequencer
 	// {
 	public class GeneralSingleMissionSequencer extends MissionSequencer {
 		private Mission mission;
+		private boolean served = false;
 
 		public GeneralSingleMissionSequencer(Mission mission) {
 			super(new PriorityParameters(_prop._priority),
-					new StorageParameters(_prop._schedObjBackStoreSize, null));
+					new StorageParameters(_prop._schedObjBackStoreSize, null,
+							_prop._schedObjScopeSize, 0, 0));
 			this.mission = mission;
 		}
 
 		@Override
 		protected Mission getNextMission() {
-			return mission;
+			if (!served) {
+				served = true;
+				return mission;
+			} else {
+				return null;
+			}
+
 		}
 	}
 
 	public abstract class GeneralMissionSequencer extends MissionSequencer {
 		public GeneralMissionSequencer() {
 			super(new PriorityParameters(_prop._priority),
-					new StorageParameters(_prop._schedObjBackStoreSize, null));
+					new StorageParameters(_prop._schedObjBackStoreSize, null,
+							_prop._schedObjScopeSize, 0, 0));
 		}
 	}
 
@@ -107,7 +117,8 @@ public abstract class MainSafelet implements Safelet {
 			super(new PriorityParameters(_prop._priority),
 					new PeriodicParameters(new RelativeTime(_prop._iDelay, 0),
 							new RelativeTime(_prop._period, 0)),
-					new StorageParameters(_prop._schedObjBackStoreSize, null), _prop._schedObjScopeSize);
+					new StorageParameters(_prop._schedObjBackStoreSize, null,
+							_prop._schedObjScopeSize, 0, 0));
 		}
 
 	}
@@ -118,13 +129,15 @@ public abstract class MainSafelet implements Safelet {
 		public GeneralAperiodicEventHandler() {
 			super(new PriorityParameters(_prop._priority),
 					new AperiodicParameters(null, null), new StorageParameters(
-							_prop._schedObjBackStoreSize, null) , _prop._schedObjScopeSize );
+							_prop._schedObjBackStoreSize, null,
+							_prop._schedObjScopeSize, 0, 0));
 		}
 
 		public GeneralAperiodicEventHandler(String name) {
 			super(new PriorityParameters(_prop._priority),
 					new AperiodicParameters(null, null), new StorageParameters(
-							_prop._schedObjBackStoreSize, null), _prop._schedObjScopeSize, name);
+							_prop._schedObjBackStoreSize, null,
+							_prop._schedObjScopeSize, 0, 0), name);
 		}
 	}
 
@@ -144,12 +157,14 @@ public abstract class MainSafelet implements Safelet {
 			super(new PriorityParameters(PriorityScheduler.instance()
 					.getMaxPriority()), new PeriodicParameters(
 					new RelativeTime(_prop._duration, 0), new RelativeTime(
-							Long.MAX_VALUE, 0)), new StorageParameters(_prop._schedObjBackStoreSize,
-					null), _prop._schedObjScopeSize);
+							Long.MAX_VALUE, 0)), new StorageParameters(
+					_prop._schedObjBackStoreSize, null,
+					_prop._schedObjScopeSize, 0, 0));
 		}
 
 		@Override
 		public void handleAsyncEvent() {
+			
 			Mission.getCurrentMission().requestTermination();
 			teardown();
 			// getSequencer().requestSequenceTermination();
