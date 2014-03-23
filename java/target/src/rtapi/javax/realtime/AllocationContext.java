@@ -68,37 +68,37 @@ public interface AllocationContext {
 //	public Object newArray(Class type, int number)
 //			throws IllegalArgumentException;
 //
-//	/**
-//	 * Create a new instance of a class in this memory area using its default
-//	 * constructor.
-//	 * 
-//	 * @param type
-//	 *            is the class of the object to be created
-//	 * 
-//	 * @return a new instance of the given class.
-//	 * 
-//	 * @throws ExceptionInInitializerError
-//	 *             when an unexpected exception has occurred in a static
-//	 *             initializer.
-//	 * 
-//	 * @throws IllegalAccessException
-//	 *             when the class or initializer is inaccessible under Java
-//	 *             access control.
-//	 * 
-//	 * @throws InstantiationException
-//	 *             when the specified class object could not be instantiated.
-//	 *             Possible causes are the class is an interface, abstract
-//	 *             class, or array.
-//	 * 
-//	 * @throws InvocationTargetException
-//	 *             when the underlying constructor throws an exception.
-//	 */
-//	@SCJAllowed
-//	public Object newInstance(Class type)
-//	// throws ExceptionInInitializerError,
-//	// // IllegalAccessException,
-//	// InstantiationException,
-//	// InvocationTargetException;
+	/**
+	 * Create a new instance of a class in this memory area using its default
+	 * constructor.
+	 * 
+	 * @param type
+	 *            is the class of the object to be created
+	 * 
+	 * @return a new instance of the given class.
+	 * 
+	 * @throws ExceptionInInitializerError
+	 *             when an unexpected exception has occurred in a static
+	 *             initializer.
+	 * 
+	 * @throws IllegalAccessException
+	 *             when the class or initializer is inaccessible under Java
+	 *             access control.
+	 * 
+	 * @throws InstantiationException
+	 *             when the specified class object could not be instantiated.
+	 *             Possible causes are the class is an interface, abstract
+	 *             class, or array.
+	 * 
+	 * @throws InvocationTargetException
+	 *             when the underlying constructor throws an exception.
+	 */
+	@SCJAllowed
+	public Object newInstance(Class type) throws InstantiationException, IllegalAccessException, OutOfMemoryError;
+	// throws ExceptionInInitializerError,
+	// // IllegalAccessException,
+	// InstantiationException,
+	// InvocationTargetException;
 //	;
 //
 //	/**

@@ -157,7 +157,7 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 		this.name = new StringBuffer(name);
 		// this.name = name;
 
-		event = new SwEvent(priority.getPriority(), 0) {
+		event = new SwEvent(priority.getPriority(), 1) {
 
 			@Override
 			public void handle() {

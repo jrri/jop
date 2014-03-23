@@ -178,8 +178,8 @@ public class Services {
 	 * 
 	 * @param nanos
 	 */
-	@SCJAllowed(LEVEL_1)
-	// @Pure(allocation) -- MS doesn't know the syntax
+	@SCJAllowed(javax.safetycritical.annotate.Level.LEVEL_0)
+	@SCJRestricted(maySelfSuspend = false)
 	public static void nanoSpin(int nanos) {
 	}
 

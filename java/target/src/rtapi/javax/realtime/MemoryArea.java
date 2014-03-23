@@ -80,4 +80,13 @@ public abstract class MemoryArea implements AllocationContext {
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public abstract long size();
+
+	@Override
+	@SCJAllowed
+	public Object newInstance(Class type) throws InstantiationException,
+			IllegalAccessException, OutOfMemoryError {
+
+		return type.newInstance();
+	}
+
 }

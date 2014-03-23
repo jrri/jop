@@ -27,25 +27,50 @@ import static javax.safetycritical.annotate.Level.LEVEL_1;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import com.jopdesign.sys.RtThreadImpl;
+import com.jopdesign.sys.SysHelper;
+
 /**
- * What it the real usage of RealtimeThread in SCJ?
- * It is *just* the static method to get the current allocation context!!!
+ * 
+ * Real-time threads cannot be directly created by an SCJ application. However,
+ * they are needed by the infrastructure to support ManagedThreads. The
+ * getCurrentMemoryArea method can be used at Level 1, hence the class is
+ * visible at Level 1.
+ * 
+ * What is the real usage of RealtimeThread in SCJ? It is *just* the static
+ * method to get the current allocation context!!!
  * 
  * @author martin
- *
+ * 
  */
 @SCJAllowed(LEVEL_1)
 public class RealtimeThread extends Thread implements Schedulable {
-
+	
+	static SysHelper _sysHelper;
+	
+	public static void setSysHelper(SysHelper sysHelper) {
+		_sysHelper = sysHelper;
+	}
 
 	// no instances allowed in level 0/1
 	private RealtimeThread() {
 		super(null);
 	}
 
+	/**
+	 * Allocates no memory. The returned object may reside in scoped memory,
+	 * within a scope that encloses the current execution context.
+	 * 
+	 * @return a reference to the current allocation context.
+	 */
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(maySelfSuspend = false)
 	public static MemoryArea getCurrentMemoryArea() {
-		throw new Error("implement me");
+		
+		return _sysHelper.getCurrentManagedMemory();
+		
+//		throw new Error("implement me");
 	}
+
+
 }

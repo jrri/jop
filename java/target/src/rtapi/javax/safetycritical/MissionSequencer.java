@@ -36,7 +36,9 @@ import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import com.jopdesign.sys.Const;
 import com.jopdesign.sys.JVMHelp;
+import com.jopdesign.sys.Native;
 
 import joprt.RtThread;
 //import joprt.SwEvent;
@@ -318,22 +320,26 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 	@SCJAllowed(INFRASTRUCTURE)
 	public final void handleAsyncEvent() {
 
+		//FIXME Obtain the next mission BEFORE entering mission memory.
+		//TODO Possible illegal field assignment as the MEH object representing this sequencer is in Imm mem.
 		m = getNextMission();
 
 		if (m != null) {
 
 			m.currentSequencer = this;
-//			currMission = m;
 
 			// ! @todo Illegal reference when the mission object is allocated in
 			// ! Immortal memory, e.g. with the Linear and Repeating sequencers
 			Mission.setCurrentMission(m);
 			m.terminationPending = false;
 
-			Terminal.getTerminal().writeln("[SEQ]: Got new mission");
+			// debug message
+			// Terminal.getTerminal().writeln("[SEQ]: Got new mission");
+			
 			ManagedMemory.setSize((int) m.missionMemorySize());
+			
 			m.initialize();
-
+			
 			/* Fill the interrupt array */
 			registerInterrupts();
 
@@ -347,8 +353,9 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 			m.cleanUp();
 
 		} else {
-			Terminal.getTerminal()
-					.writeln("[SEQ]: No more missions to execute");
+			// debug message
+			// Terminal.getTerminal()
+			//		.writeln("[SEQ]: No more missions to execute");
 			terminationHelper.nextMission = false;
 		}
 	}
@@ -362,6 +369,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		Vector managedInterrupt = m.getInterrupts();
 
 		if (managedInterrupt != null) {
+			
 			for (int i = 0; i < managedInterrupt.size(); i++) {
 				misr = (ManagedInterruptServiceRoutine) managedInterrupt
 						.elementAt(i);
@@ -403,7 +411,8 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 
 	void executeCycle(CyclicExecutive ce) {
 
-		Terminal.getTerminal().writeln("[SEQ]: SCJ Start L0 mission on JOP");
+		// debug message 
+		// Terminal.getTerminal().writeln("[SEQ]: SCJ Start L0 mission on JOP");
 
 		/*
 		 * Upon return from initialize(), the infrastructure invokes the
@@ -442,17 +451,25 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 
 		HandlerExecutor handlerExecutor = new HandlerExecutor();
 
-		AbsoluteTime now = new AbsoluteTime();
-
-		AbsoluteTime next = new AbsoluteTime();
-		next = Clock.getRealtimeClock().getTime(next).add(1000, 0);
+		// Using SCJ's Clock API
+		// AbsoluteTime now = new AbsoluteTime();
+		// AbsoluteTime next = new AbsoluteTime();
+		// next = Clock.getRealtimeClock().getTime(next).add(1000, 0);
+		
+		// Using JOP's us counter
+		long next = Native.rd(Const.IO_US_CNT);
+		next = next + 1000;
+		
+		long now;
 
 		while (!ce.terminationPending) {
 
 			for (int i = 0; i < frames.length; i++) {
-
-				while (Clock.getRealtimeClock().getTime(now).compareTo(next) < 0) {
-					;
+				
+				now = Native.rd(Const.IO_US_CNT);
+				while(next > now ){
+				//while (Clock.getRealtimeClock().getTime(now).compareTo(next) < 0) {
+					now = Native.rd(Const.IO_US_CNT);
 				}
 
 				for (int j = 0; j < frames[i].handlers_.length; j++) {
@@ -471,11 +488,17 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 					handlerPrivMemory.enter(handlerExecutor);
 				}
 
-				next = next.add(frames[i].duration_, next);
+				next = next + frames[i].duration_.getMilliseconds()*1000 + 
+						frames[i].duration_.getNanoseconds()/1000; 
+				
+				//next = next.add(frames[i].duration_, next);
 
-				if (Clock.getRealtimeClock().getTime(now).compareTo(next) > 0) {
+				if(next < now ){
+				// if (Clock.getRealtimeClock().getTime(now).compareTo(next) > 0) {
 					/* Frame overrun */
-					Terminal.getTerminal().writeln("[SEQ]: Frame overrun");
+					// debug message
+					//Terminal.getTerminal().writeln("Frame overrun");
+					ce.frameOverrun++; 
 				}
 			}
 		}

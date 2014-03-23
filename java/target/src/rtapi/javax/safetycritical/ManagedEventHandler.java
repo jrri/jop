@@ -53,16 +53,17 @@ import static javax.safetycritical.annotate.Level.INFRASTRUCTURE;
 @SCJAllowed
 public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 		implements ManagedSchedulable {
-	
+
 	static SysHelper _sysHelper;
 	static RtsjHelper _rtsjHelper;
-	
+
 	Mission m;
 
-	public static void setSysHelper(SysHelper sysHelper){
+	public static void setSysHelper(SysHelper sysHelper) {
 		_sysHelper = sysHelper;
-		
+
 	}
+
 	public static void setRtsjHelper(RtsjHelper rtsjHelper) {
 		_rtsjHelper = rtsjHelper;
 	}
@@ -75,12 +76,17 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 
 	@SCJAllowed(INFRASTRUCTURE)
 	@SCJRestricted(phase = INITIALIZATION)
-	ManagedEventHandler(PriorityParameters priority, ReleaseParameters release, 
+	ManagedEventHandler(PriorityParameters priority, ReleaseParameters release,
 			StorageParameters scp, String name) {
+
+		// debug
+		// this.name = new StringBuffer(name);
 		
 		if ((priority == null) | (release == null) | (scp == null))
-			throw new IllegalArgumentException();
-		
+			throw new IllegalArgumentException("Null parameter in MEH: "+name.toString());
+			// debug
+			// throw new IllegalArgumentException("Null parameter in MEH: "+name.toString());
+
 		this.name = new StringBuffer(name);
 
 		/* Default affinity set, can be overridden only at initialization phase */
@@ -105,7 +111,8 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 	@SCJAllowed(SUPPORT)
 	@SCJRestricted(phase = CLEANUP)
 	public void cleanUp() {
-		Terminal.getTerminal().writeln("[SYSTEM]: Default MEH cleanup");
+		// Debug message
+		// Terminal.getTerminal().writeln("[SYSTEM]: Default MEH cleanup");
 	}
 
 	/**
@@ -117,6 +124,11 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 	@SCJAllowed
 	public String getName() {
 		return name.toString();
+	}
+
+	/* Not on Spec */
+	protected void executeMissHandler() {
+		
 	}
 
 }

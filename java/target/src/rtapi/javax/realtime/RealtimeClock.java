@@ -19,6 +19,9 @@
 */
 package javax.realtime;
 
+import com.jopdesign.sys.Const;
+import com.jopdesign.sys.Native;
+
 /**
  * @author martin
  *
@@ -65,17 +68,25 @@ public class RealtimeClock extends Clock {
 	 */
 	@Override
 	public AbsoluteTime getTime() {
+		// AbsoluteTime t = new AbsoluteTime();
+		// t.set(System.currentTimeMillis());
+		// return t;
+		
+		long time = Native.rd(Const.IO_US_CNT);
 		AbsoluteTime t = new AbsoluteTime();
-		t.set(System.currentTimeMillis());
+		t.set(time/1000, (time % 1000) * 1000);
 		return t;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see javax.realtime.Clock#getTime(javax.realtime.AbsoluteTime)
 	 */
 	@Override
 	public AbsoluteTime getTime(AbsoluteTime dest) {
-		dest.set(System.currentTimeMillis());
+		// dest.set(System.currentTimeMillis());
+		
+		long time = Native.rd(Const.IO_US_CNT); 
+		dest.set(time/1000, (time % 1000) * 1000);
 		return dest;
 	}
 

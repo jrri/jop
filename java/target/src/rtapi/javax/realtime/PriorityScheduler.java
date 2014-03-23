@@ -25,9 +25,7 @@ package javax.realtime;
 import javax.safetycritical.annotate.BlockFree;
 import javax.safetycritical.annotate.SCJAllowed;
 
-import static javax.safetycritical.annotate.Level.LEVEL_0;
 import static javax.safetycritical.annotate.Level.LEVEL_1;
-import static javax.safetycritical.annotate.Level.LEVEL_2;
 
 /**
  * This class and the singleton object exists only for get min/max priority....
@@ -47,13 +45,9 @@ public class PriorityScheduler extends Scheduler {
 //	}
 	protected PriorityScheduler(){};
 	
-	private static PriorityScheduler instance = null;
+	private static PriorityScheduler instance = new PriorityScheduler();
 	
 	public static PriorityScheduler instance() {
-		
-		if(instance == null){
-			instance = new PriorityScheduler();
-		}
 		return instance;
 	}
 

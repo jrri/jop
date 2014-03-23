@@ -33,6 +33,7 @@ public class PrivateMemory extends ManagedMemory {
 		this(size, 0);
 	}
 	
+	/* Create a non-sized Memory object. Used for enterPrivateMemory. */
 	PrivateMemory(){
 		super();
 	}

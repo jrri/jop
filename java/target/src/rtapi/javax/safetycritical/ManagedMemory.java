@@ -71,8 +71,9 @@ public abstract class ManagedMemory extends LTMemory {
 			throws IllegalStateException {
 
 		final ManagedMemory current = _sysHelper.getCurrentManagedMemory();
-
+		
 		if (current.inner == null) {
+			current.inner = new PrivateMemory();
 
 			/*
 			 * The current memory object has a longer lifetime than the current
@@ -86,14 +87,18 @@ public abstract class ManagedMemory extends LTMemory {
 			 * The runnable object is created only when the reusable nested
 			 * private memory does not exist.
 			 */
-			executeInOuterArea(new Runnable() {
+//			executeInOuterArea(new Runnable() {
 
-				@Override
-				public void run() {
-					current.inner = new PrivateMemory();
-				}
-			});
+//				@Override
+//				public void run() {
+//					current.inner = new PrivateMemory();
+//				}
+//			});
 
+			/*
+			 * set the newly created PrivateMemory as the inner memory for the
+			 * current memory
+			 */
 			_sysHelper.setInner(current.memory, current.inner.memory,
 					current.inner);
 		}
@@ -188,5 +193,15 @@ public abstract class ManagedMemory extends LTMemory {
 		Memory m = _sysHelper.getMemoryArea(o);
 		return _sysHelper.getManagedMemory(m);
 	}
+	
+	/* NOT ON SPEC, FOR TESTING ONLY */
+	public static ManagedMemory getCurrentManagedMemory(){
+		return _sysHelper.getCurrentManagedMemory();
+	}
+	
+	public static Memory getCurrentMemory(){
+		return _sysHelper.getCurrentMemory();
+	}
+	
 
 }

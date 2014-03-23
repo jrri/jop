@@ -33,6 +33,7 @@ import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import com.jopdesign.sys.Const;
 import com.jopdesign.sys.Native;
 import com.jopdesign.sys.RtThreadImpl;
 
@@ -72,9 +73,13 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	HighResolutionTime start, period;
 	PrivateMemory privMem;
 	StorageParameters storage;
+	PeriodicParameters release;
 
 	RtThread thread;
 	RtThreadImpl rtt;
+
+	// For test and debug purposes
+	public int missedDeadlines = 0;
 
 	/**
 	 * Constructs a periodic event handler.
@@ -145,11 +150,12 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		super(priority, release, storage, name);
 
 		this.storage = storage;
+		this.release = release;
 
 		// start = (RelativeTime) release.getStart();
 		// period = release.getPeriod();
-		this.start = _rtsjHelper.getStart(release);
-		this.period = _rtsjHelper.getPeriod(release);
+		this.start = _rtsjHelper.getStart(this.release);
+		this.period = _rtsjHelper.getPeriod(this.release);
 
 		// TODO scp
 
@@ -195,16 +201,28 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 			thread = new RtThread(priority.getPriority(), p, off) {
 
 				public void run() {
+					
 					// while (!MissionSequencer.terminationRequest) {
-					while (!m.terminationPending) {
+					for (;;) {
 						privMem.enter(runner);
+
+						// do not schedule this task to run again
+						if (m.terminationPending) {
+							// debug message
+							// System.out.println("done");
+							break;
+						}
+
 						if (!waitForNextPeriod()) {
-							System.out.println("Deadline missed");
-							deadlineMissHandler();
+							// debug message
+							// System.out.println("Deadline missed: " + getName());
+							
+							// For test and debug purposes
+							missedDeadlines++;
+							executeMissHandler();
 						}
 					}
 				}
-
 			};
 
 			rtt = thread.thr;
@@ -242,7 +260,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 			AffinitySet set = AffinitySet.getAffinitySet(this);
 			thread.setProcessor(_rtsjHelper.getAffinitySetProcessor(set));
 		}
-
+		
 	}
 
 	/**
@@ -332,11 +350,13 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	 * 
 	 * @return a reference to the start time parameter in the release parameters
 	 *         used when constructing this handler.
-	 * @todo Not yet implemented
 	 */
 	@SCJAllowed(LEVEL_1)
 	public HighResolutionTime getRequestedStartTime() {
-		return null;
+		
+		/* The requested start time is measured relative to the start of the mission */
+		return this.start;
+
 	}
 
 	/**
@@ -375,8 +395,5 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 	protected long getScopeSize() {
 		return this.storage.getMaxMemoryArea();
 	}
-
-	protected void deadlineMissHandler() {
-
-	}
+	
 }

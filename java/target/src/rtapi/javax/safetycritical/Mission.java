@@ -43,7 +43,7 @@ import com.jopdesign.sys.Native;
  */
 @SCJAllowed
 public abstract class Mission {
-	
+
 	/*
 	 * Workaround to avoid illegal references: Store the address itself (a
 	 * number) of the structure containing the handler's registered in this
@@ -103,7 +103,8 @@ public abstract class Mission {
 	 */
 	@SCJAllowed(SUPPORT)
 	protected void cleanUp() {
-		Terminal.getTerminal().writeln(
+		// debug message
+		 Terminal.getTerminal().writeln(
 				"[SYSTEM]: Default Mission cleanup method");
 	}
 
@@ -130,7 +131,7 @@ public abstract class Mission {
 		 * getNextMission() method (as that objt's initialize() method is
 		 * executing).
 		 * 
-		 * 2. If it is called from handleAsyncEvent() of a MEH 
+		 * 2. If it is called from handleAsyncEvent() of a MEH
 		 */
 		/* Works only on L0 or L1 where only one mission executes at a time */
 		return currentMission;
@@ -309,8 +310,12 @@ public abstract class Mission {
 			 * Unregister interrupts
 			 */
 			for (int i = 0; i < managedInterrupt.size(); i++) {
-				((ManagedInterruptServiceRoutine) managedInterrupt.elementAt(i))
-						.unregister();
+				ManagedInterruptServiceRoutine mis = (ManagedInterruptServiceRoutine) managedInterrupt
+						.elementAt(i);
+				mis.unregister();
+				// ((ManagedInterruptServiceRoutine)
+				// managedInterrupt.elementAt(i))
+				// .unregister();
 			}
 
 			managedInterrupt.removeAllElements();

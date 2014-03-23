@@ -45,7 +45,7 @@ import com.jopdesign.sys.SysHelper;
 @SCJAllowed
 public final class ImmortalMemory extends MemoryArea {
 
-	private static ImmortalMemory instance;
+	private static ImmortalMemory instance = new ImmortalMemory();
 
 	static SysHelper _sysHelper;
 
@@ -56,9 +56,6 @@ public final class ImmortalMemory extends MemoryArea {
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
 	public static ImmortalMemory instance() {
-		if (instance == null) {
-			instance = new ImmortalMemory();
-		}
 		return instance;
 	}
 

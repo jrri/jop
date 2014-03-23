@@ -15,6 +15,8 @@ import static javax.safetycritical.annotate.Level.SUPPORT;
  */
 @SCJAllowed
 public abstract class CyclicExecutive extends Mission {
+	
+	public int frameOverrun = 0;
 
 	/**
 	 * Construct a CyclicExecutive object.

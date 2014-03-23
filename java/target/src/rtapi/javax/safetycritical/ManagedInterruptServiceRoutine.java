@@ -66,7 +66,7 @@ public abstract class ManagedInterruptServiceRoutine extends
 	/**
 	 * Implementation dependent interrupt ID
 	 */
-	int interrupt;
+	int intID;
 
 	StorageParameters _storage;
 	private PrivateMemory privMem;
@@ -155,8 +155,10 @@ public abstract class ManagedInterruptServiceRoutine extends
 		
 		//TODO ceiling stuff
 		
-		this.interrupt = interrupt;
-
+		intID = interrupt;
+		
+		/* Registering of interrupt handler runnables is done in the sequencer */
+		
 		final Mission m = Mission.getCurrentMission();
 
 		if (!m.hasManagedInterrupt) {
@@ -187,7 +189,8 @@ public abstract class ManagedInterruptServiceRoutine extends
 	@SCJAllowed(LEVEL_1)
 	@SCJRestricted(phase = CLEANUP)
 	public final void unregister() {
-		factory.deregisterInterruptHandler(interrupt);
+		factory.disableInterrupt(intID);
+		factory.deregisterInterruptHandler(intID);
 	}
 
 	// ========== Implementation specific ============= //
@@ -197,7 +200,7 @@ public abstract class ManagedInterruptServiceRoutine extends
 	}
 	
 	int getInterrupt() {
-		return interrupt;
+		return intID;
 	}
 
 	public static InterruptServiceRoutine getInterruptServiceRoutine(

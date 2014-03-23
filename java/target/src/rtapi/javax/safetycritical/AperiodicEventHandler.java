@@ -141,14 +141,15 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 			}
 		};
 
-		// Aperiodic = Sporadic with minimum inter-arrival time (MIT) set to zero
+		// Aperiodic = Sporadic with minimum inter-arrival time (MIT) set to zero.
 		// There is however no enforcement for MIT violations
-		event = new SwEvent(priority.getPriority(), 0) {
+		event = new SwEvent(priority.getPriority(), 1) {
 
 			@Override
 			public void handle() {
 				if (!m.terminationPending)
 					privMem.enter(runner);
+				//TODO Check for deadline miss
 			}
 
 		};
@@ -162,9 +163,11 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 	@SCJAllowed
 	@SCJRestricted(phase = INITIALIZATION)
 	public final void register() {
-		Mission m = Mission.getCurrentMission();
+		
+		final Mission m = Mission.getCurrentMission();
+
 		if (!m.hasEventHandlers) {
-			// System.out.println("creating MEH vector...");
+//			 System.out.println("creating AEH vector...");
 			m.eventHandlersRef = Native.toInt(new Vector());
 			m.hasEventHandlers = true;
 		}
