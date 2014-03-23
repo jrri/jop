@@ -49,7 +49,7 @@ public class HostController extends PeriodicEventHandler
 		super(new PriorityParameters(2),
 			  new PeriodicParameters(null, new RelativeTime(1,0)),
 //			  new StorageParameters(35, new long[]{35},0,0), 0);
-			  new StorageParameters(35, null,0,0), 35);
+			  new StorageParameters(35, null,35, 0,0));
 	}
 	
 	synchronized private void setInputStatus(boolean status)

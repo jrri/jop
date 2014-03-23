@@ -54,7 +54,7 @@ public class Main implements Safelet
 		
 		RepRapMissionSequencer()
 		{
-			super(new PriorityParameters(0),new StorageParameters(1, null, 0,0));
+			super(new PriorityParameters(0),new StorageParameters(1, null, 1, 0,0));
 		}
 				
 		@Override
