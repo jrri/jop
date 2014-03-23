@@ -49,10 +49,10 @@ public final class Constants {
                                                                                                                      // 1;
     public static long          PERSISTENT_DETECTOR_BS_SIZE              = 1*25*1000;
     public static long          PERSISTENT_DETECTOR_SCOPE_SIZE           = PERSISTENT_DETECTOR_BS_SIZE >>> 1;
-    public static long          DETECTOR_PERIOD                          = 4000;
+    public static long          DETECTOR_PERIOD                          = 1000;
     public static long          TRANSIENT_DETECTOR_SCOPE_SIZE            = 1*25*1000;
 
-    public static int           MAX_FRAMES                               = 5;
+    public static int           MAX_FRAMES                               = 10;
 
     public static int           TIME_SCALE                               = 1;
     public static int           FPS                                      = 50;

@@ -28,15 +28,20 @@ import javax.safetycritical.Mission;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 
+import com.jopdesign.sys.Const;
+import com.jopdesign.sys.Native;
+
 import cdx.cdx.unannotated.NanoClock;
 
 /*@javax.safetycritical.annotate.Scope("cdx.Level0Safelet")*/
 /*@javax.safetycritical.annotate.RunsIn("cdx.CollisionDetectorHandler")*/
 public class CollisionDetectorHandler extends PeriodicEventHandler {
 	
+	int val = 0;
+	
     public CollisionDetectorHandler(PriorityParameters priority,
-			PeriodicParameters parameters, StorageParameters scp, long scopeSize) {
-		super(priority, parameters, scp, scopeSize);
+			PeriodicParameters parameters, StorageParameters scp) {
+		super(priority, parameters, scp, "detector");
 	}
 
 	private final TransientDetectorScopeEntry cd = new TransientDetectorScopeEntry(
@@ -57,41 +62,44 @@ public class CollisionDetectorHandler extends PeriodicEventHandler {
 
     public void runDetectorInScope(final TransientDetectorScopeEntry cd) {
     	
-        Benchmarker.set(14);
-        
+		// Benchmarker.set(14);
         final RawFrame f = cdx.cdx.ImmortalEntry.frameBuffer.getFrame();
         
         if (f == null) {
             ImmortalEntry.frameNotReadyCount++;
             System.out.println("Frame not ready");
-            Benchmarker.done(14);
+			// Benchmarker.done(14);
             return;
         }
 
         if ((cdx.cdx.ImmortalEntry.framesProcessed + cdx.cdx.ImmortalEntry.droppedFrames) == cdx.cdx.Constants.MAX_FRAMES) {
             stop = true;
-            Benchmarker.done(14);
+			// Benchmarker.done(14);
             return;
         } // should not be needed, anyway
 
-        final long heapFreeBefore = Runtime.getRuntime().freeMemory();
-        final long timeBefore = NanoClock.now();
+        /* No heap in SCJ */
+        //final long heapFreeBefore = Runtime.getRuntime().freeMemory();
+        //final long timeBefore = NanoClock.now();
 
-        noiseGenerator.generateNoiseIfEnabled();
-        Benchmarker.set(Benchmarker.RAPITA_SETFRAME);
+        /* Noise generator forces triggering of GC, not neeeded in SCJ */ 
+        // noiseGenerator.generateNoiseIfEnabled();
+		// Benchmarker.set(Benchmarker.RAPITA_SETFRAME);
+
         cd.setFrame(f);
-        Benchmarker.done(Benchmarker.RAPITA_SETFRAME);
+		// Benchmarker.done(Benchmarker.RAPITA_SETFRAME);
         // actually runs the detection logic in the given scope
         cd.run();
         
-        final long timeAfter = NanoClock.now();
-        final long heapFreeAfter = Runtime.getRuntime().freeMemory();
+        // final long timeAfter = NanoClock.now();
+        final long timeAfter = Native.rd(Const.IO_US_CNT);
+        // final long heapFreeAfter = Runtime.getRuntime().freeMemory();
 
         if (ImmortalEntry.recordedRuns < ImmortalEntry.maxDetectorRuns) {
-            ImmortalEntry.timesBefore[ImmortalEntry.recordedRuns] = timeBefore;
+            //ImmortalEntry.timesBefore[ImmortalEntry.recordedRuns] = timeBefore;
             ImmortalEntry.timesAfter[ImmortalEntry.recordedRuns] = timeAfter;
-            ImmortalEntry.heapFreeBefore[ImmortalEntry.recordedRuns] = heapFreeBefore;
-            ImmortalEntry.heapFreeAfter[ImmortalEntry.recordedRuns] = heapFreeAfter;
+            //ImmortalEntry.heapFreeBefore[ImmortalEntry.recordedRuns] = heapFreeBefore;
+            //ImmortalEntry.heapFreeAfter[ImmortalEntry.recordedRuns] = heapFreeAfter;
             ImmortalEntry.recordedRuns++;
         }
         
@@ -99,14 +107,18 @@ public class CollisionDetectorHandler extends PeriodicEventHandler {
 
         if ((cdx.cdx.ImmortalEntry.framesProcessed + cdx.cdx.ImmortalEntry.droppedFrames) == cdx.cdx.Constants.MAX_FRAMES)
             stop = true;
-        Benchmarker.done(14);
+		// Benchmarker.done(14);
     }
 
     public void handleAsyncEvent() {
     	
+    	ImmortalEntry.ls.ledSwitch = val++;
+    	
         try {
             if (!stop) {
-                long now = NanoClock.now();
+//            	System.out.print("-");
+//                long now = NanoClock.now();
+                long now = Native.rd(Const.IO_US_CNT);
                 ImmortalEntry.detectorReleaseTimes[ImmortalEntry.recordedDetectorReleaseTimes] = now;
                 ImmortalEntry.detectorReportedMiss[ImmortalEntry.recordedDetectorReleaseTimes] = false;
                 ImmortalEntry.recordedDetectorReleaseTimes++;
@@ -119,6 +131,7 @@ public class CollisionDetectorHandler extends PeriodicEventHandler {
                     + e.getMessage());
             e.printStackTrace();
         }
+        
     }
 
     //@Override

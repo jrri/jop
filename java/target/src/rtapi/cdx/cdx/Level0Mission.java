@@ -3,6 +3,7 @@ package cdx.cdx;
 import javax.realtime.AbsoluteTime;
 import javax.realtime.Clock;
 import javax.realtime.PeriodicParameters;
+import javax.realtime.PriorityParameters;
 import javax.realtime.RelativeTime;
 import javax.safetycritical.CyclicExecutive;
 import javax.safetycritical.CyclicSchedule;
@@ -32,13 +33,13 @@ public class Level0Mission extends CyclicExecutive {
 			ImmortalEntry.detectorFirstRelease = NanoClock.convert(releaseAt);
 
 
+			PriorityParameters prio = new PriorityParameters(Constants.DETECTOR_PRIORITY);
 			RelativeTime rt = new RelativeTime(10, 0);
 			PeriodicParameters pp = new PeriodicParameters(null, rt);
 			StorageParameters sp = new StorageParameters(
-					Constants.PERSISTENT_DETECTOR_BS_SIZE, null);
+					Constants.PERSISTENT_DETECTOR_BS_SIZE, null, Constants.PERSISTENT_DETECTOR_SCOPE_SIZE, 0, 0);
 			
-			CollisionDetectorHandler cdh = new CollisionDetectorHandler(null,
-					pp, sp, Constants.PERSISTENT_DETECTOR_SCOPE_SIZE);
+			CollisionDetectorHandler cdh = new CollisionDetectorHandler(prio, pp, sp);
 			cdh.register();
 
 			if (Constants.DEBUG_DETECTOR) {
@@ -56,7 +57,7 @@ public class Level0Mission extends CyclicExecutive {
 								+ ", MAX_PRIORITY is "
 								+ Thread.MAX_PRIORITY + ")");
 			}
-
+			
 		} catch (Throwable e) {
 			System.out.println("e: " + e.getMessage());
 			e.printStackTrace();

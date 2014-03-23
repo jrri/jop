@@ -79,8 +79,8 @@ public class Level0Safelet implements Safelet<CyclicExecutive>{
 	public MissionSequencer<CyclicExecutive> getSequencer() {
 
 		PriorityParameters sequencerPrio = new PriorityParameters(10);
-		StorageParameters sequencerSto = new StorageParameters(1024, null);
-		return new SingleMissionSequencer(sequencerPrio, sequencerSto);
+		StorageParameters sequencerSto = new StorageParameters(1024, null, 512, 0, 0);
+		return new SingleMissionSequencer(sequencerPrio, sequencerSto, "seq");
 	}
 
 
@@ -210,33 +210,34 @@ public class Level0Safelet implements Safelet<CyclicExecutive>{
 class SingleMissionSequencer extends MissionSequencer<CyclicExecutive> {
 
 	boolean served = false;
-	private CyclicExecutive mission = null;
+//	private CyclicExecutive mission = null;
 
 	public SingleMissionSequencer(PriorityParameters priority,
-			StorageParameters storage) {
-		super(priority, storage);
+			StorageParameters storage, String name) {
+		super(priority, storage, name);
 	}
 	
-	CyclicExecutive newMission() {
+//	CyclicExecutive newMission() {
 		
-		CyclicExecutive single = new Level0Mission();
-		return single;
-	}
+//		CyclicExecutive single = new Level0Mission();
+//		return single;
+//	}
 
 	@SCJAllowed(SUPPORT)
 	@SCJRestricted(phase = INITIALIZATION, maySelfSuspend = false)
 	@Override
-	protected CyclicExecutive getNextMission() {
+	protected CyclicExecutive getNextMission() { // executes in mission memory
 		if (!served) {
-			mission = newMission();
+//			mission = newMission();
 
 			// Comment the following line to have an infinite
 			// stream of missions
 			served = true;
 
-			return mission;
+//			return mission;
+			return new Level0Mission();
 		} else {
-			mission = null;
+//			mission = null;
 			return null;
 		}
 	}

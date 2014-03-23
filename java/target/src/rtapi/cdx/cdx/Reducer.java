@@ -38,7 +38,7 @@ class Reducer {
 
     /** Creates a Vector2d that represents a voxel. */
     protected void voxelHash(Vector3d position, Vector2d voxel) {
-        Benchmarker.set(7);
+		// Benchmarker.set(7);
         int x_div = (int) (position.x / voxel_size);
         voxel.x = voxel_size * (x_div);
         if (position.x < 0.0f) voxel.x -= voxel_size;
@@ -46,27 +46,27 @@ class Reducer {
         int y_div = (int) (position.y / voxel_size);
         voxel.y = voxel_size * (y_div);
         if (position.y < 0.0f) voxel.y -= voxel_size;
-        Benchmarker.done(7);
+		// Benchmarker.done(7);
     }
 
     /** * Puts a Motion object into the voxel map at a voxel. */
     protected void putIntoMap(HashMap voxel_map, Vector2d voxel, Motion motion) {
-        Benchmarker.set(8);
+        // Benchmarker.set(8);
         if (!voxel_map.containsKey(voxel)) {
             voxel_map.put(new Vector2d(voxel), new ArrayList());
         }
         ((ArrayList) voxel_map.get(voxel)).add(motion);
-        Benchmarker.done(8);
+        // Benchmarker.done(8);
     }
 
     /**
      * Given a voxel and a Motion, determines if they overlap.
      */
     protected boolean isInVoxel(Vector2d voxel, Motion motion) {
-        Benchmarker.set(9);
+        // Benchmarker.set(9);
         if (voxel.x > Constants.MAX_X || voxel.x + voxel_size < Constants.MIN_X || voxel.y > Constants.MAX_Y
                 || voxel.y + voxel_size < Constants.MIN_Y) {
-            Benchmarker.done(9);
+            // Benchmarker.done(9);
             return false;
         }
         // this code detects intersection between a line segment and a square
@@ -121,12 +121,12 @@ class Reducer {
                         || (low_y <= 0.0f && 0.0f <= high_y) || (0.0f <= low_y && high_y <= 1.0f))) && (xv == 0.0f
                 || yv == 0.0f || /* no motion in x or y or both */
                 (low_y <= high_x && high_x <= high_y) || (low_y <= low_x && low_x <= high_y) || (low_x <= low_y && high_y <= high_x)));
-        Benchmarker.done(9);
+        // Benchmarker.done(9);
         return result;
     }
 
     protected void dfsVoxelHashRecurse(Motion motion, Vector2d next_voxel, HashMap voxel_map, HashMap graph_colors) {
-        Benchmarker.set(10);
+        // Benchmarker.set(10);
         Vector2d tmp = new Vector2d();
 
         if (!graph_colors.containsKey(next_voxel) && isInVoxel(next_voxel, motion)) {
@@ -169,19 +169,19 @@ class Reducer {
             VectorMath.subtract(tmp, vertical, tmp);
             dfsVoxelHashRecurse(motion, tmp, voxel_map, graph_colors);
         }
-        Benchmarker.done(10);
+        // Benchmarker.done(10);
     }
 
     /**
      * Colors all of the voxels that overla the Motion.
      */
     protected void performVoxelHashing(Motion motion, HashMap voxel_map, HashMap graph_colors) {
-        Benchmarker.set(11);
+        // Benchmarker.set(11);
         graph_colors.clear();
         Vector2d voxel = new Vector2d();
         voxelHash(motion.getFirstPosition(), voxel);
         dfsVoxelHashRecurse(motion, voxel, voxel_map, graph_colors);
-        Benchmarker.done(11);
+        // Benchmarker.done(11);
     }
 
     /**
@@ -189,7 +189,7 @@ class Reducer {
      * Each Vector of Motions that is returned represents a set of Motions that might have collisions.
      */
     public LinkedList reduceCollisionSet(LinkedList motions) {
-        Benchmarker.set(12);
+        // Benchmarker.set(12);
         HashMap voxel_map = new HashMap();
         HashMap graph_colors = new HashMap();
 
@@ -201,7 +201,7 @@ class Reducer {
             LinkedList cur_set = (LinkedList) iter.next();
             if (cur_set.size() > 1) ret.add(cur_set);
         }
-        Benchmarker.done(12);
+        // Benchmarker.done(12);
         return ret;
     }
     /** The voxel size. Each voxel is a square, so the is the length of a side. */

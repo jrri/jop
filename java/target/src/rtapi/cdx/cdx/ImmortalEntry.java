@@ -29,6 +29,10 @@ import javax.safetycritical.ManagedMemory;
 import javax.safetycritical.MissionMemory;
 import javax.safetycritical.PrivateMemory;
 
+import com.jopdesign.io.IOFactory;
+import com.jopdesign.io.LedSwitch;
+import com.jopdesign.io.LedSwitchFactory;
+import com.jopdesign.io.SysDevice;
 import com.jopdesign.sys.Memory;
 
 /**
@@ -74,6 +78,8 @@ public class ImmortalEntry implements Runnable {
     static public FrameBuffer      frameBuffer                  = null;
 
     static public DataOutputStream binaryDumpStream             = null;
+    
+    static public LedSwitch ls = null;
 
     public ImmortalEntry() {
         // super(new PriorityParameters(Constants.DETECTOR_STARTUP_PRIORITY));
@@ -89,6 +95,8 @@ public class ImmortalEntry implements Runnable {
 
         detectorReleaseTimes = new long[maxDetectorRuns + 10]; // the 10 is for missed deadlines
         detectorReportedMiss = new boolean[maxDetectorRuns + 10];
+        
+        ls = LedSwitchFactory.getLedSwitchFactory().getLedSwitch();
     }
 
     /** Called only once during initialization. Runs in immortal memory */
@@ -133,11 +141,12 @@ public class ImmortalEntry implements Runnable {
 		public void run() {
 			System.out.print(ImmortalEntry.detectorReleaseTimes[index]);
 			System.out.print(" ");
-			System.out.print(index * Constants.DETECTOR_PERIOD * 1000000L
+			System.out.print(index * Constants.DETECTOR_PERIOD * 1000L
 					+ ImmortalEntry.detectorReleaseTimes[0]);
 			System.out.print(" ");
-			System.out.print(ImmortalEntry.detectorReportedMiss[index] ? 1 : 0);
+			System.out.print(ImmortalEntry.timesAfter[index]);
 			System.out.print(" ");
+			System.out.print(ImmortalEntry.detectorReportedMiss[index] ? 1 : 0);
 			System.out.println(index);
 		}
 	}
