@@ -1,5 +1,6 @@
 package test.cyclic;
 
+
 import javax.realtime.PeriodicParameters;
 import javax.realtime.PriorityParameters;
 import javax.realtime.RelativeTime;
@@ -11,22 +12,26 @@ import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.Terminal;
 
-
 public class CyclicMission extends CyclicExecutive {
 
 	long missionMemory = 2048;
 	int totalPeriodicHandlers = 3;
-	
+
 	@Override
 	protected void initialize() {
-		
+
 		// Create the handlers for the frames
-//		peHandlerCount = totalPeriodicHandlers;
+		// peHandlerCount = totalPeriodicHandlers;
 		for (int i = 0; i < totalPeriodicHandlers; i++) {
 			(new EventHandler(new PriorityParameters(i + 10),
 					new PeriodicParameters(null, new RelativeTime(10, 0)),
-					new StorageParameters(1024, null), 256, "PEH"+i)).register();
+					new StorageParameters(1024, null, 256L, 0, 0), "PEH" + i)).register();
 		}
+
+		// Trying to add an AEH to a CyclicExecutive throws an exception
+		// (new TestAEH(new PriorityParameters(15), new AperiodicParameters(),
+		// new StorageParameters(1024, null, 256L, 0, 0), "AEH")).register();
+
 	}
 
 	public CyclicSchedule getSchedule(PeriodicEventHandler[] handlers) {
@@ -55,26 +60,26 @@ public class CyclicMission extends CyclicExecutive {
 	public long missionMemorySize() {
 		return missionMemory;
 	}
-	
+
 	@Override
-	public void cleanUp(){
-		
-		Terminal.getTerminal().writeln("CyclicMission cleanup" );
-		
+	public void cleanUp() {
+
+		Terminal.getTerminal().writeln("CyclicMission cleanup");
+
 		ImmortalEntry.dumpLog.selector = 0;
-		for(int i =0; i < ImmortalEntry.eventsLogged; i++){
+		for (int i = 0; i < ImmortalEntry.eventsLogged; i++) {
 			ImmortalEntry.dumpLog.logEntry = i;
 			ManagedMemory.enterPrivateMemory(1500, ImmortalEntry.dumpLog);
 		}
-		
+
 		ImmortalEntry.dumpLog.selector = 1;
-		for(int i =0; i < ImmortalEntry.eventsLogged-1; i++){
+		for (int i = 0; i < ImmortalEntry.eventsLogged - 1; i++) {
 			ImmortalEntry.dumpLog.logEntry = i;
 			ManagedMemory.enterPrivateMemory(1500, ImmortalEntry.dumpLog);
 		}
-		
+
 		ImmortalEntry.dumpLog.selector = 2;
-		for(int i =0; i < ImmortalEntry.eventsLogged-1; i++){
+		for (int i = 0; i < ImmortalEntry.eventsLogged - 1; i++) {
 			ImmortalEntry.dumpLog.logEntry = i;
 			ManagedMemory.enterPrivateMemory(1500, ImmortalEntry.dumpLog);
 		}

@@ -20,9 +20,8 @@ public class Level1Safelet implements Safelet{
 	public MissionSequencer<Mission> getSequencer() {
 		
 		PriorityParameters seq_prio = new PriorityParameters(13);
-		long[] sizes = {1024};
 		
-		StorageParameters seq_storage = new StorageParameters(16384, sizes, 0, 0);
+		StorageParameters seq_storage = new StorageParameters(16384, null, 0, 0, 0);
 
 		MyMission m0 = new MyMission(0);
 		MyMission m1 = new MyMission(1);

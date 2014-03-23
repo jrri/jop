@@ -45,7 +45,7 @@ public class Level0Mission extends CyclicExecutive {
 		for (int i = 0; i < totalPeriodicHandlers; i++) {
 			(new EventHandler(new PriorityParameters(i + 10),
 					new PeriodicParameters(null, new RelativeTime(10, 0)),
-					new StorageParameters(1024, null), 256, "PEH"+i)).register();
+					new StorageParameters(1024, null,256,0,0), "PEH"+i)).register();
 		}
 	}
 

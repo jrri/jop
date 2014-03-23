@@ -26,18 +26,26 @@ import javax.safetycritical.AperiodicEventHandler;
 import javax.safetycritical.StorageParameters;
 import javax.safetycritical.Terminal;
 
+import test.cyclic.ImmortalEntry;
+
 public class TestAEH extends AperiodicEventHandler{
+	
+	private int missionNr;
+	private int fireCount = 0;
 
 	public TestAEH(PriorityParameters priority,
-			AperiodicParameters release, StorageParameters storage, long scopeSize, String name) {
-		super(priority, release, storage, scopeSize, name);
+			AperiodicParameters release, StorageParameters storage, String name, int missionNr) {
+		super(priority, release, storage, name);
 		// TODO Auto-generated constructor stub
+		this.missionNr = missionNr;
 	}
 
 	@Override
 	public void handleAsyncEvent() {
 		// TODO Auto-generated method stub
-		Terminal.getTerminal().writeln(getName()+"Hello");
+//		Terminal.getTerminal().writeln(getName()+"Hello");
+		fireCount++;
+		ImmortalEntry.shared[ImmortalEntry.sys.cpuId][missionNr] = fireCount; 
 	}
 
 }

@@ -17,20 +17,30 @@ import javax.safetycritical.StorageParameters;
 import javax.safetycritical.Terminal;
 import javax.safetycritical.Services;
 
+import test.cyclic.ImmortalEntry;
+
+import com.jopdesign.io.IOFactory;
+import com.jopdesign.io.LedSwitch;
+import com.jopdesign.io.LedSwitchFactory;
+import com.jopdesign.io.SysDevice;
+
 public class TestPEH extends PeriodicEventHandler {
 
 	int fireCount = 0;
+	int number;
 	AperiodicEventHandler aeh;
 	AperiodicLongEventHandler aleh;
+	
 
 	Random rnd = new Random();
 
 	public TestPEH(PriorityParameters priority, PeriodicParameters release,
-			StorageParameters storage, long scopeSize, String name, AperiodicEventHandler aeh,
-			AperiodicLongEventHandler aleh) {
-		super(priority, release, storage, scopeSize, name);
+			StorageParameters storage, String name, AperiodicEventHandler aeh,
+			AperiodicLongEventHandler aleh, int number) {
+		super(priority, release, storage, name);
 		this.aeh = aeh;
 		this.aleh = aleh;
+		this.number = number;
 	}
 
 	@Override
@@ -52,14 +62,28 @@ public class TestPEH extends PeriodicEventHandler {
 			}
 		});
 
-		if (rnd.nextInt(3) == 1) {
+//		if (rnd.nextInt(3) == 1) {
+		System.out.println(getName()+ "fire aeh's");
 			aeh.release();
-			aleh.release(666);
+			aleh.release(number);
 			fireCount++;
-		}
+//		}
+			
+			if (number == 1) {
+				int foo = 0;
+				Terminal.getTerminal().writeln("** Long computation **");
+				for(int i = 0; i < 10000000; i++)
+					foo++;
+			}
 
-		if (fireCount > 2) {
+		// Only PEH 0 can finish the mission
+		if (fireCount > 2 & number == 0) {
+			int dummy = 0;
+			Terminal.getTerminal().writeln("------> Requesting mission termination");
 			Mission.getCurrentMission().requestTermination();
+			Terminal.getTerminal().writeln("** Doing a long final computation **");
+			for(int i = 0; i < 10000000; i++)
+				dummy++;
 		}
 
 	}

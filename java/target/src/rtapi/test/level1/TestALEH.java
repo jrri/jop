@@ -10,8 +10,8 @@ import javax.safetycritical.Terminal;
 public class TestALEH extends AperiodicLongEventHandler{
 
 	public TestALEH(PriorityParameters priority, AperiodicParameters release,
-			StorageParameters storage, long scopeSize, String name) {
-		super(priority, release, storage, scopeSize, name);
+			StorageParameters storage, String name) {
+		super(priority, release, storage, name);
 		// TODO Auto-generated constructor stub
 	}
 

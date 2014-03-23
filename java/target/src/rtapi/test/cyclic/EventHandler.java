@@ -16,16 +16,15 @@ public class EventHandler extends PeriodicEventHandler {
 	int count = 0;
 
 	public EventHandler(PriorityParameters priority,
-			PeriodicParameters release, StorageParameters scp, long scopeSize,
-			String name) {
-		super(priority, release, scp, scopeSize, name);
+			PeriodicParameters release, StorageParameters scp, String name) {
+		super(priority, release, scp, name);
 	}
 
 	@Override
 	public void handleAsyncEvent() {
 
 		ImmortalEntry.term.writeln(getName());
-		
+
 		count++;
 		if (count == 2) {
 			System.out.println("Termination requested...");
@@ -34,7 +33,7 @@ public class EventHandler extends PeriodicEventHandler {
 		Terminal.getTerminal().writeln("exec term");
 
 	}
-	
+
 	@Override
 	@SCJAllowed(Level.SUPPORT)
 	@SCJRestricted(phase = Phase.CLEANUP)

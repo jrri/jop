@@ -25,18 +25,15 @@ public class MixedLevelSafelet implements Safelet{
 	public MissionSequencer<Mission> getSequencer() {
 		
 		PriorityParameters seq_prio = new PriorityParameters(13);
-		long[] sizes = {1024};
 		
-		StorageParameters seq_storage = new StorageParameters(16384, sizes, 0, 0);
+		StorageParameters seq_storage = new StorageParameters(16384, null, 0L, 0L, 0L);
 
-		Mission m0 = new CyclicMission();
-		Mission m1 = new MyMission(1);
-		Mission m2 = new MyMission(2);
+		Mission[] missions = new Mission[ImmortalEntry.missions+1];
+		missions[0] = new CyclicMission();
 		
-		Mission[] missions = new Mission[3];
-		missions[0] = m0;
-		missions[1] = m1;
-		missions[2] = m2;
+		for(int i = 0; i < ImmortalEntry.missions; i++){
+			missions[i+1] = new MyMission(i+1);
+		}
 		
 		MissionSequencer[] ms = new MissionSequencer[3];
 

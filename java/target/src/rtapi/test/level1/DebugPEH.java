@@ -15,8 +15,8 @@ import javax.safetycritical.annotate.SCJRestricted;
 public class DebugPEH extends PeriodicEventHandler{
 
 	public DebugPEH(PriorityParameters priority, PeriodicParameters release,
-			StorageParameters storage, long scopeSize, String name) {
-		super(priority, release, storage, scopeSize, name);
+			StorageParameters storage, String name) {
+		super(priority, release, storage, name);
 	}
 	
 	@Override
@@ -43,6 +43,12 @@ public class DebugPEH extends PeriodicEventHandler{
 				
 			}
 		});
+		
+	}
+
+	@Override
+	public void executeMissHandler() {
+		// TODO Auto-generated method stub
 		
 	}
 

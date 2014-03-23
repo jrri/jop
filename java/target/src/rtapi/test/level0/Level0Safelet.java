@@ -40,9 +40,8 @@ public class Level0Safelet implements Safelet<CyclicExecutive> {
 	public MissionSequencer<CyclicExecutive> getSequencer() {
 
 		PriorityParameters seq_prio = new PriorityParameters(13);
-		long[] sizes = { 1024 };
 
-		StorageParameters seq_storage = new StorageParameters(2048, sizes, 0, 0);
+		StorageParameters seq_storage = new StorageParameters(2048, null, 0, 0, 0);
 
 		Level0Mission missions[] = new Level0Mission[2];
 		for (int i = 0; i < missions.length; i++) {

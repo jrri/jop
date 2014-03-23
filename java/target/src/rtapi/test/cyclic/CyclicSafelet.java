@@ -14,23 +14,24 @@ import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-public class CyclicSafelet implements Safelet<CyclicExecutive>{
+public class CyclicSafelet implements Safelet<CyclicExecutive> {
 
 	@Override
 	public MissionSequencer<CyclicExecutive> getSequencer() {
-		
+
 		PriorityParameters sequencerPrio = new PriorityParameters(10);
-		StorageParameters sequencerSto = new StorageParameters(1024, new long[] {512});
-		
+		StorageParameters sequencerSto = new StorageParameters(1024, null, 0L,
+				0L, 0L);
+
 		return new SingleMissionSequencer(sequencerPrio, sequencerSto);
-		
+
 	}
-	
+
 	@Override
 	public long immortalMemorySize() {
 		return 0;
 	}
-	
+
 	class SingleMissionSequencer extends MissionSequencer<CyclicExecutive> {
 
 		boolean served = false;
@@ -40,9 +41,9 @@ public class CyclicSafelet implements Safelet<CyclicExecutive>{
 				StorageParameters storage) {
 			super(priority, storage);
 		}
-		
+
 		CyclicExecutive newMission() {
-			
+
 			CyclicExecutive single = new CyclicMission();
 			return single;
 		}
@@ -51,16 +52,16 @@ public class CyclicSafelet implements Safelet<CyclicExecutive>{
 		@SCJRestricted(phase = INITIALIZATION, maySelfSuspend = false)
 		@Override
 		protected CyclicExecutive getNextMission() {
-			if(!served){
+			if (!served) {
 				mission = newMission();
-				
+
 				// Comment the following line to have an infinite
 				// stream of missions
 				served = true;
-				
+
 				return (CyclicExecutive) mission;
 			}
-			
+
 			mission = null;
 			return null;
 		}
@@ -72,8 +73,7 @@ public class CyclicSafelet implements Safelet<CyclicExecutive>{
 	@SCJRestricted(phase = Phase.INITIALIZATION)
 	public void initializeApplication() {
 		ImmortalEntry.setup();
-		
-	}
 
+	}
 
 }

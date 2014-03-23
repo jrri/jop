@@ -6,6 +6,10 @@ import javax.safetycritical.Terminal;
 
 import com.jopdesign.io.I2CFactory;
 import com.jopdesign.io.I2Cport;
+import com.jopdesign.io.IOFactory;
+import com.jopdesign.io.LedSwitch;
+import com.jopdesign.io.LedSwitchFactory;
+import com.jopdesign.io.SysDevice;
 
 public class ImmortalEntry {
 	
@@ -15,8 +19,17 @@ public class ImmortalEntry {
 	public static DumpLog dumpLog = null;
 
 	public static Terminal term = null;
+	public static int[][] shared = null;
+	public static SysDevice sys;
+	public static int missions = 2;
+	public static int cmpStarted = 0;
+	public static LedSwitch ls;
 
 	public static void setup() {
+		
+		sys = IOFactory.getFactory().getSysDevice();
+		ls = LedSwitchFactory.getLedSwitchFactory().getLedSwitch();
+		shared = new int[sys.nrCpu][missions+1];
 		
 		clk = Clock.getRealtimeClock().getTime();
 		log = new Logger();
