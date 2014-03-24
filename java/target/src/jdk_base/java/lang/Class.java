@@ -465,7 +465,6 @@ public final class Class<T> {
 		 */
     	int p = Native.rdMem(1) + 6;
     	int classCntAdd = Native.rdMem(p);
-    	
     	p = classCntAdd + Native.rdMem(classCntAdd) * Const.CLASS_INST_SIZE + 1;
     	
     	int offset = 0;
@@ -502,7 +501,7 @@ public final class Class<T> {
 			break;
 		}
     	
-    	int i = p + 5*offset;
+    	int i = p + Const.CLASS_INST_SIZE * offset;
     	return (Class<?>) Native.toObject(i);
     }
 

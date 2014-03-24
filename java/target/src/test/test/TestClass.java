@@ -1,7 +1,9 @@
 package test;
 
 import com.jopdesign.sys.Config;
+import com.jopdesign.sys.GC;
 import com.jopdesign.sys.JVMHelp;
+import com.jopdesign.sys.Native;
 
 public class TestClass {
 
@@ -82,7 +84,7 @@ public class TestClass {
 
 		// Use Objet.getClass()
 		ok = ok & testGetClass();
-
+		
 		// Misc tests
 		ok = ok & miscTests();
 
@@ -300,6 +302,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Boolean newBoolean;
 
@@ -325,6 +328,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Character newCharacter;
 
@@ -350,6 +354,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Byte newByte;
 
@@ -375,6 +380,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Short newShort;
 
@@ -400,6 +406,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Integer newInteger;
 
@@ -425,6 +432,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Long newLong;
 
@@ -450,6 +458,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Float newFloat;
 
@@ -475,6 +484,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Double newDouble;
 
@@ -500,6 +510,7 @@ public class TestClass {
 			ok = ok & (klazz.isInstance(testObj) == false);
 			ok = ok & (klazz.isInterface() == false);
 			ok = ok & (klazz.isPrimitive());
+			ok = ok & (Native.rd(Native.toInt(klazz)+GC.OFF_SCOPE_LEVEL) == 0);
 
 			Void newVoid;
 

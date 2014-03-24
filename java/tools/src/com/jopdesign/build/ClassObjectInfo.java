@@ -10,11 +10,14 @@ import org.apache.bcel.classfile.JavaClass;
 
 public class ClassObjectInfo {
 
+	private static final int HEADER_SIZE = 3;
+	private static final int INST_VARS = 3;
+	
 	/**
-	 * The size of a Class class instance. Equal to 2 + (3 instance variables).
+	 * The size of a Class class instance. Equal to 3 header words + 3 instance variable fields.
 	 * See JOP's java.lang.Class
 	 */
-	static final int SIZE = 5;
+	static final int SIZE = HEADER_SIZE + INST_VARS;
 
 	/**
 	 * Address of the Class class cli
@@ -157,17 +160,18 @@ public class ClassObjectInfo {
 
 	}
 
-	public void dump(PrintWriter out, JopClassInfo classCli, int address) {
-
-		out.println("//\t " + address + ": " + name);
-		out.println("\t" + (address + 2) + ",\t//\tpointer to first instance variable");
-		out.println("\t" + classCli.methodsAddress + ",\t//\tpointer to java.lang.Class mtab ");
-		out.println("\t" + clinfo + ",\t//\tpointer to class info structure");
-		out.println("\t" + initMethod + ",\t//\tpointer to empty <init> method");
-		out.println("\t" + attributes + ",\t//\ttype attributes");
-
-		objAddressOffset = address;
-	}
+//	public void dump(PrintWriter out, JopClassInfo classCli, int address) {
+//
+//		out.println("//\t " + address + ": " + name);
+//		out.println("\t" + (address + HEADER_SIZE) + ",\t//\tpointer to first instance variable");
+//		out.println("\t" + classCli.methodsAddress + ",\t//\tpointer to java.lang.Class mtab ");
+//		out.println("\t" + "0" + ",\t//\tScope level (Immortal memory) ");
+//		out.println("\t" + clinfo + ",\t//\tpointer to class info structure");
+//		out.println("\t" + initMethod + ",\t//\tpointer to empty <init> method");
+//		out.println("\t" + attributes + ",\t//\ttype attributes");
+//
+//		objAddressOffset = address;
+//	}
 
 	private static String getPrimName(int i) {
 
@@ -199,8 +203,9 @@ public class ClassObjectInfo {
 			int address, int index) {
 
 		out.println("//\t " + address + ": " + getPrimName(index) + " primitive type");
-		out.println("\t" + (address + 2) + ",\t//\tpointer to first instance variable");
+		out.println("\t" + (address + HEADER_SIZE) + ",\t//\tpointer to first instance variable");
 		out.println("\t" + classCli.methodsAddress + ",\t//\tpointer to java.lang.Class mtab ");
+		out.println("\t" + "0" + ",\t//\tScope level (Immortal memory) ");
 		out.println("\t" + 0 + ",\t//\tpointer to class info structure");
 		out.println("\t" + 0 + ",\t//\tpointer to empty <init> method");
 		out.println("\t" + (index << 5) + ",\t//\ttype attributes");
@@ -221,8 +226,9 @@ public class ClassObjectInfo {
 		lastAddress = address + SIZE;
 		
 		out.println("//\t " + address + ": " + name);
-		out.println("\t" + (address + 2) + ",\t//\tpointer to first instance variable");
+		out.println("\t" + (address + HEADER_SIZE) + ",\t//\tpointer to first instance variable");
 		out.println("\t" + classCli.methodsAddress + ",\t//\tpointer to java.lang.Class mtab ");
+		out.println("\t" + "0" + ",\t//\tScope level (Immortal memory) ");
 		out.println("\t" + clinfo + ",\t//\tpointer to class info structure");
 		out.println("\t" + initMethod + ",\t//\tpointer to empty <init> method");
 		out.println("\t" + attributes + ",\t//\ttype attributes");

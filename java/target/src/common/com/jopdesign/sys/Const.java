@@ -63,7 +63,7 @@ public class Const {
 	 */
 	public static final int MTAB2CLASS_OBJ = -1;
 	
-	public static final int CLASS_INST_SIZE = 5;
+	public static final int CLASS_INST_SIZE = 6;
 
 	/**
 	 * Class info start relative to start of MTAB.
