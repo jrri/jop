@@ -40,7 +40,7 @@ public abstract class ManagedLongEventHandler extends
 		BoundAsyncLongEventHandler implements ManagedSchedulable {
 
 	protected Mission m;
-	boolean finished = false;
+	boolean finished;
 	
 	/*
 	 * Workaround to avoid illegal assignments when referring to constant
@@ -117,7 +117,7 @@ public abstract class ManagedLongEventHandler extends
 	 * whenever the event(s) to which this event handler is bound is fired.
 	 */
 	@SCJAllowed
-	public abstract void handleAsyncEvent(long data);
+	public abstract void handleAsyncLongEvent(long data);
 
 	/**
 	 * @return the name of this event handler.

@@ -136,6 +136,7 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 			throw new IllegalArgumentException();
 
 		m = Mission.getCurrentMission();
+		finished = true;
 
 		if (m instanceof CyclicExecutive) {
 			throw new IllegalStateException();
@@ -144,13 +145,13 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 		// Create private memory
 		// privMem = new Memory((int) scopeSize, (int)
 		// storage.getTotalBackingStoreSize());
-		privMem = new PrivateMemory((int) storage.getMaxMemoryArea(),
-				(int) storage.getTotalBackingStoreSize());
+		privMem = new PrivateMemory((int) storage.maxMemoryArea,
+				(int) storage.totalBackingStore);
 
 		final Runnable runner = new Runnable() {
 			@Override
 			public void run() {
-				handleAsyncEvent(_data);
+				handleAsyncLongEvent(_data);
 			}
 		};
 
@@ -161,8 +162,13 @@ public abstract class AperiodicLongEventHandler extends ManagedLongEventHandler 
 
 			@Override
 			public void handle() {
-				if (!m.terminationPending)
+				if (!m.terminationPending){
+					finished = false;
 					privMem.enter(runner);
+					finished = true;
+				} else {
+					finished = true;
+				}
 			}
 		};
 

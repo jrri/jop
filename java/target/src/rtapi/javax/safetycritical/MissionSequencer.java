@@ -320,8 +320,9 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 	@SCJAllowed(INFRASTRUCTURE)
 	public final void handleAsyncEvent() {
 
-		//FIXME Obtain the next mission BEFORE entering mission memory.
-		//TODO Possible illegal field assignment as the MEH object representing this sequencer is in Imm mem.
+		//TODO Possible illegal field assignment as the MEH object representing 
+		// the sequencer might be in a memory area that is outer-nested to the 
+		// memory area where the mission returned by getNextMission() is allocated
 		m = getNextMission();
 
 		if (m != null) {
@@ -332,6 +333,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 			// ! Immortal memory, e.g. with the Linear and Repeating sequencers
 			Mission.setCurrentMission(m);
 			m.terminationPending = false;
+			m.execFinished = false;
 
 			// debug message
 			// Terminal.getTerminal().writeln("[SEQ]: Got new mission");
@@ -402,10 +404,39 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 
 		/*
 		 * Used to avoid leaving the MissionMemory. This is part of the main
-		 * thread and it should block to avoid it being executed.
+		 * thread and it should block until all handlers finished execution.
 		 */
 		while (!m.terminationPending) {
 		}
+		
+		Vector managedSO;
+		
+		/* Wait for PEHs and AEHs to terminate */
+		if (m.hasEventHandlers) {
+			managedSO = m.getHandlers();
+			for (int i = 0; i < managedSO.size(); i++) {
+				ManagedEventHandler meh = (ManagedEventHandler) managedSO
+						.elementAt(i);
+				while (!meh.finished) {
+
+				}
+			}
+		}
+		
+		/* Wait for ALEHs to terminate */
+		if(m.hasLongEventHandlers){
+			managedSO = m.getLongHandlers();
+			for (int i = 0; i < managedSO.size(); i++) {
+				ManagedLongEventHandler mleh = (ManagedLongEventHandler) managedSO
+						.elementAt(i);
+				while (!mleh.finished) {
+
+				}
+			}
+		}
+		
+		m.execFinished = true;
+		
 
 	}
 
@@ -438,9 +469,8 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		long maxBsSize = 0;
 		for (int i = 0; i < frames.length; i++) {
 			for (int j = 0; j < frames[i].handlers_.length; j++) {
-				long k = frames[i].handlers_[j].getScopeSize();
-				long l = frames[i].handlers_[j].storage
-						.getTotalBackingStoreSize();
+				long k = frames[i].handlers_[j].storage.maxMemoryArea;
+				long l = frames[i].handlers_[j].storage	.totalBackingStore;
 				maxScopeSize = (k > maxScopeSize) ? k : maxScopeSize;
 				maxBsSize = (l > maxBsSize) ? l : maxBsSize;
 			}

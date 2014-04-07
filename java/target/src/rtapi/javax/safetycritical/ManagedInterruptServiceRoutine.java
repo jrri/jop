@@ -90,8 +90,8 @@ public abstract class ManagedInterruptServiceRoutine extends
 		_storage = storage;
 		_name = new StringBuffer(name);
 
-		privMem = new PrivateMemory((int) _storage.getMaxMemoryArea(),
-				(int) _storage.getTotalBackingStoreSize());
+		privMem = new PrivateMemory((int) _storage.maxMemoryArea,
+				(int) _storage.totalBackingStore);
 		
 		/* Default affinity set, can be overridden only at initialization phase */
 		affinitySet = Services.getSchedulingAllocationDoamins()[0];

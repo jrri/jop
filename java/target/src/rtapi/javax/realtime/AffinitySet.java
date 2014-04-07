@@ -200,6 +200,10 @@ public final class AffinitySet {
 	@SCJAllowed(LEVEL_1)
 	public static final void setProcessorAffinity(AffinitySet set,
 			AbstractAsyncEventHandler handler) {
+		
+		if(handler == null)
+			throw new NullPointerException();
+		
 		handler.setProcessorAffinity(set);
 	}
 

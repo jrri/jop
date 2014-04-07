@@ -188,8 +188,8 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		 */
 		if (!(m instanceof CyclicExecutive)) {
 
-			privMem = new PrivateMemory((int) storage.getMaxMemoryArea(),
-					(int) storage.getTotalBackingStoreSize());
+			privMem = new PrivateMemory((int) storage.maxMemoryArea,
+					(int) storage.totalBackingStore);
 
 			final Runnable runner = new Runnable() {
 				@Override
@@ -210,6 +210,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 						if (m.terminationPending) {
 							// debug message
 							// System.out.println("done");
+							finished = true;
 							break;
 						}
 
@@ -389,11 +390,11 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		return null;
 	}
 
-	/**
-	 * Not on spec, implementation specific
-	 */
-	protected long getScopeSize() {
-		return this.storage.getMaxMemoryArea();
-	}
+//	/**
+//	 * Not on spec, implementation specific
+//	 */
+//	protected long getScopeSize() {
+//		return this.storage.getMaxMemoryArea();
+//	}
 	
 }

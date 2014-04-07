@@ -37,9 +37,9 @@ import javax.safetycritical.annotate.SCJAllowed;
 @SCJAllowed
 public final class StorageParameters {
 
-	private long totalBackingStore;
-	private long maxMemoryArea;
-	private long maxImmortal;
+	long totalBackingStore;
+	long maxMemoryArea;
+	long maxImmortal;
 
 	/**
 	 * This is the primary constructor for a StorageParameters object,
@@ -95,13 +95,13 @@ public final class StorageParameters {
 
 	}
 
-	/* Implementation specific */
-	long getTotalBackingStoreSize() {
-		return totalBackingStore;
-	}
-	
-	long getMaxMemoryArea(){
-		return maxMemoryArea;
-	}
+//	/* Implementation specific */
+//	long getTotalBackingStoreSize() {
+//		return totalBackingStore;
+//	}
+//	
+//	long getMaxMemoryArea(){
+//		return maxMemoryArea;
+//	}
 
 }

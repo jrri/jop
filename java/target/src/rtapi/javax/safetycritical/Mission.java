@@ -24,10 +24,12 @@ import static javax.safetycritical.annotate.Level.SUPPORT;
 
 import java.util.Vector;
 
+import javax.realtime.AffinitySet;
 import javax.safetycritical.annotate.Allocate;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.Allocate.Area;
 
+import com.jopdesign.io.IOFactory;
 import com.jopdesign.sys.Native;
 
 /**
@@ -73,6 +75,7 @@ public abstract class Mission {
 	static Mission currentMission;
 
 	volatile boolean terminationPending = false;
+	public volatile boolean execFinished = false;
 
 	/**
 	 * Allocate and initialize data structures associated with a Mission
@@ -234,8 +237,8 @@ public abstract class Mission {
 	public final void requestTermination() {
 
 		/*
-		 * This variable is polled in the PEH and checked before every firing of
-		 * AEH/ALEH
+		 * This variable is checked after returning from the handleAsync event in
+		 * a PEH and checked before firing an AEH/ALEH
 		 */
 		terminationPending = true;
 		terminationHook();
@@ -245,6 +248,8 @@ public abstract class Mission {
 	/**
 	 * Used to call the cleanUp() method of every managed handler associated
 	 * with the mission
+	 * 
+	 * TODO Probably should be part of sequencer and not of mission
 	 */
 	void terminate() {
 
@@ -255,8 +260,14 @@ public abstract class Mission {
 			 * Run all cleanUp() methods of every MEH associated with the
 			 * mission
 			 */
+			ManagedEventHandler meh;
 			for (int i = 0; i < eventHandlers.size(); i++) {
-				((ManagedEventHandler) eventHandlers.elementAt(i)).cleanUp();
+				meh = ((ManagedEventHandler) eventHandlers.elementAt(i));
+				if (AffinitySet.getAffinitySet(meh).isProcessorInSet(
+						IOFactory.getFactory().getSysDevice().cpuId)) {
+					meh.cleanUp();
+				}
+//				((ManagedEventHandler) eventHandlers.elementAt(i)).cleanUp();
 			}
 
 			/*
@@ -264,8 +275,9 @@ public abstract class Mission {
 			 * method sets all references to handlers to null. The handler
 			 * objects are collected when the mission finishes (i.e. when
 			 * mission memory is exited).
+			 * 
 			 */
-			eventHandlers.removeAllElements();
+//			eventHandlers.removeAllElements();
 
 			/*
 			 * The following is needed only if mission objects live in immortal
@@ -282,9 +294,14 @@ public abstract class Mission {
 			 * Run all cleanUp() methods of every MLEH associated with the
 			 * mission
 			 */
+			ManagedLongEventHandler mleh;
 			for (int i = 0; i < longEventHandlers.size(); i++) {
-				((ManagedLongEventHandler) longEventHandlers.elementAt(i))
-						.cleanUp();
+				mleh = ((ManagedLongEventHandler) longEventHandlers.elementAt(i));
+				if (AffinitySet.getAffinitySet(mleh).isProcessorInSet(
+						IOFactory.getFactory().getSysDevice().cpuId)) {
+					mleh.cleanUp();
+				}
+				
 			}
 
 			/*
@@ -293,7 +310,7 @@ public abstract class Mission {
 			 * objects are collected when the mission finishes (i.e. when
 			 * mission memory is exited).
 			 */
-			longEventHandlers.removeAllElements();
+//			longEventHandlers.removeAllElements();
 
 			/*
 			 * The following is needed only if mission objects live in immortal

@@ -184,7 +184,7 @@ public abstract class ManagedMemory extends LTMemory {
 		return _sysHelper.size(m);
 	}
 
-	static void setSize(int size) {
+	static void setSize (int size) {
 		Memory m = _sysHelper.getCurrentMemory();
 		_sysHelper.setSize(m, size);
 	}

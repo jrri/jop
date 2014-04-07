@@ -95,7 +95,7 @@ public class JopSystem {
 		 * its backing store requirements.
 		 */
 
-		int size = (int) missionSequencer.storage.getTotalBackingStoreSize();
+		int size = (int) missionSequencer.storage.totalBackingStore;
 		MissionMemory missionMem = new MissionMemory(size);
 
 		while (terminationHelper.nextMission

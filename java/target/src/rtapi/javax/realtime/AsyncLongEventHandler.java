@@ -13,7 +13,7 @@ import static javax.safetycritical.annotate.Level.LEVEL_0;
  * fired, a long integer is provided for use by the released event handler(s).
  * 
  * @author Juan Rios
- * @version SCJ 0.93
+ * @version SCJ 0.94
  * 
  */
 @SCJAllowed(LEVEL_0)
@@ -36,6 +36,6 @@ public class AsyncLongEventHandler extends AbstractAsyncEventHandler {
 	 *            fired.
 	 */
 	@SCJAllowed
-	public void handleAsyncEvent(long data) {
+	public void handleAsyncLongEvent(long data) {
 	}
 }

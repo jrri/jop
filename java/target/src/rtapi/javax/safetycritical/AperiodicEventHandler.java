@@ -35,7 +35,6 @@ import com.jopdesign.sys.Native;
 import com.jopdesign.sys.RtThreadImpl;
 
 import joprt.SwEvent;
-
 import static javax.safetycritical.annotate.Phase.INITIALIZATION;
 
 /**
@@ -124,15 +123,16 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 		super(priority, release, storage, name);
 
 		m = Mission.getCurrentMission();
+		finished = true;
 		
 		if(m instanceof CyclicExecutive){
-			throw new IllegalStateException();
+			throw new IllegalArgumentException();
 		}
 
 		// privMem = new Memory((int) scopeSize, (int)
 		// storage.getTotalBackingStoreSize());
-		privMem = new PrivateMemory((int) storage.getMaxMemoryArea(),
-				(int) storage.getTotalBackingStoreSize());
+		privMem = new PrivateMemory((int) storage.maxMemoryArea,
+				(int) storage.totalBackingStore);
 
 		final Runnable runner = new Runnable() {
 			@Override
@@ -147,8 +147,13 @@ public abstract class AperiodicEventHandler extends ManagedEventHandler {
 
 			@Override
 			public void handle() {
-				if (!m.terminationPending)
+				if (!m.terminationPending){
+					finished = false;
 					privMem.enter(runner);
+					finished = true;
+				} else {
+					finished = true;
+				}
 				//TODO Check for deadline miss
 			}
 
