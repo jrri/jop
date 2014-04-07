@@ -39,8 +39,8 @@ import static javax.safetycritical.annotate.Level.SUPPORT;
 public abstract class ManagedLongEventHandler extends
 		BoundAsyncLongEventHandler implements ManagedSchedulable {
 
-	protected Mission m;
-	boolean finished;
+	Mission m;
+	volatile boolean finished;
 	
 	/*
 	 * Workaround to avoid illegal assignments when referring to constant

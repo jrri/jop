@@ -260,14 +260,8 @@ public abstract class Mission {
 			 * Run all cleanUp() methods of every MEH associated with the
 			 * mission
 			 */
-			ManagedEventHandler meh;
 			for (int i = 0; i < eventHandlers.size(); i++) {
-				meh = ((ManagedEventHandler) eventHandlers.elementAt(i));
-				if (AffinitySet.getAffinitySet(meh).isProcessorInSet(
-						IOFactory.getFactory().getSysDevice().cpuId)) {
-					meh.cleanUp();
-				}
-//				((ManagedEventHandler) eventHandlers.elementAt(i)).cleanUp();
+				((ManagedEventHandler) eventHandlers.elementAt(i)).cleanUp();
 			}
 
 			/*
@@ -277,7 +271,7 @@ public abstract class Mission {
 			 * mission memory is exited).
 			 * 
 			 */
-//			eventHandlers.removeAllElements();
+			eventHandlers.removeAllElements();
 
 			/*
 			 * The following is needed only if mission objects live in immortal
@@ -294,14 +288,8 @@ public abstract class Mission {
 			 * Run all cleanUp() methods of every MLEH associated with the
 			 * mission
 			 */
-			ManagedLongEventHandler mleh;
 			for (int i = 0; i < longEventHandlers.size(); i++) {
-				mleh = ((ManagedLongEventHandler) longEventHandlers.elementAt(i));
-				if (AffinitySet.getAffinitySet(mleh).isProcessorInSet(
-						IOFactory.getFactory().getSysDevice().cpuId)) {
-					mleh.cleanUp();
-				}
-				
+				((ManagedLongEventHandler) longEventHandlers.elementAt(i)).cleanUp();
 			}
 
 			/*

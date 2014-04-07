@@ -72,8 +72,8 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 	 * Workaround to avoid illegal assignments when referring to constant
 	 * strings. Constant strings in JOP have no associated memory area
 	 */
-	protected StringBuffer name;
-	protected boolean finished = false;
+	StringBuffer name;
+	volatile boolean finished = false;
 
 	@SCJAllowed(INFRASTRUCTURE)
 	@SCJRestricted(phase = INITIALIZATION)
