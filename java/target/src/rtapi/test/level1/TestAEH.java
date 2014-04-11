@@ -47,5 +47,12 @@ public class TestAEH extends AperiodicEventHandler{
 		fireCount++;
 		ImmortalEntry.shared[ImmortalEntry.sys.cpuId][missionNr] = fireCount; 
 	}
+	
+	@Override
+	public void cleanUp() {
+		// Just a debug message
+		System.out.println("Cleanup "+ getName());
+		
+	}
 
 }

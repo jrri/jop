@@ -128,7 +128,7 @@ public class MyMission extends Mission {
 
 		synchronized (this) {
 
-			System.out.println("Custom clean");
+			System.out.println("Clean [MISSION " + number + "]");
 			for (int i = 0; i < ImmortalEntry.sys.nrCpu; i++) {
 				h.coreNr = i;
 				ManagedMemory.enterPrivateMemory(1500, h);

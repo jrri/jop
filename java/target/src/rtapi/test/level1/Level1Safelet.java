@@ -12,6 +12,8 @@ import javax.safetycritical.annotate.Phase;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import test.cyclic.ImmortalEntry;
+
 public class Level1Safelet implements Safelet{
 	
 	static final int sequencerSelector = 0;
@@ -59,6 +61,7 @@ public class Level1Safelet implements Safelet{
 	@SCJRestricted(phase = Phase.INITIALIZATION)
 	public void initializeApplication() {
 		// TODO Auto-generated method stub
+		ImmortalEntry.setup();
 		
 	}
 	

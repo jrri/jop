@@ -72,7 +72,8 @@ public class TestPEH extends PeriodicEventHandler {
 			if (number == 1) {
 				int foo = 0;
 				Terminal.getTerminal().writeln("** Long computation **");
-				for(int i = 0; i < 10000000; i++)
+//				for(int i = 0; i < 10000000; i++)
+				for(int i = 0; i < 10000; i++)
 					foo++;
 			}
 
@@ -82,10 +83,17 @@ public class TestPEH extends PeriodicEventHandler {
 			Terminal.getTerminal().writeln("------> Requesting mission termination");
 			Mission.getCurrentMission().requestTermination();
 			Terminal.getTerminal().writeln("** Doing a long final computation **");
-			for(int i = 0; i < 10000000; i++)
+			for(int i = 0; i < 10000; i++)
 				dummy++;
 		}
 
+	}
+	
+	@Override
+	public void cleanUp() {
+		// Just a debug message
+		System.out.println("Cleanup "+ getName());
+		
 	}
 
 }
