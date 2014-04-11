@@ -14,12 +14,12 @@ public class CyclicApp {
 		public static void main(String args[]) {
 
 			term = Terminal.getTerminal();
-			JopSystem js = new JopSystem();
+//			JopSystem js = new JopSystem();
 
 			Safelet s = new CyclicSafelet();
 			term.writeln("Safelet created");
 
-			js.startMission(s);
+			JopSystem.startMission(s);
 
 		}
 

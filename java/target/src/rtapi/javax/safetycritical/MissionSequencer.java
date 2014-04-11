@@ -31,7 +31,7 @@ import javax.realtime.AffinitySet;
 import javax.realtime.AperiodicParameters;
 import javax.realtime.Clock;
 import javax.realtime.PriorityParameters;
-import javax.safetycritical.JopSystem.TerminationHelper;
+//import javax.safetycritical.JopSystem.TerminationHelper;
 import javax.safetycritical.annotate.MemoryAreaEncloses;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
@@ -83,8 +83,8 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 	// private boolean cleanupDidRun;
 	// public static boolean cleanupDidRun;
 	StorageParameters storage;
+	boolean nextMission = true;
 
-	TerminationHelper terminationHelper;
 //	Mission currMission;
 
 	// why is this static?
@@ -358,7 +358,7 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 			// debug message
 			// Terminal.getTerminal()
 			//		.writeln("[SEQ]: No more missions to execute");
-			terminationHelper.nextMission = false;
+			nextMission = false;
 		}
 	}
 

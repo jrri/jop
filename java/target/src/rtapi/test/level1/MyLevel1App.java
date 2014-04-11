@@ -7,8 +7,8 @@ public class MyLevel1App {
 
 	public static void main(String args[]) {
 
-		Safelet s = new Level1Safelet();
-		JopSystem js = new JopSystem();
-		js.startMission(s);
+		Safelet<?> s = new Level1Safelet();
+		JopSystem.startMission(s);
+		
 	}
 }

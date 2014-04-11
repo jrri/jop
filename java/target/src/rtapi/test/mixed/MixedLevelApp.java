@@ -7,8 +7,8 @@ public class MixedLevelApp {
 
 	public static void main(String args[]) {
 
-		Safelet s = new MixedLevelSafelet();
-		JopSystem js = new JopSystem();
-		js.startMission(s);
+		Safelet<?> s = new MixedLevelSafelet();
+		JopSystem.startMission(s);
+		
 	}
 }

@@ -37,10 +37,9 @@ import com.jopdesign.sys.RtThreadImpl;
  * 
  */
 public class JopSystem {
+	
+	public static void startMission(Safelet scj) {
 
-	public void startMission(Safelet scj) {
-
-		TerminationHelper terminationHelper = new TerminationHelper();
 		SequencerHelper sequencerHelper = new SequencerHelper();
 
 		/*
@@ -72,7 +71,6 @@ public class JopSystem {
 			return;
 		}
 
-		missionSequencer.terminationHelper = terminationHelper;
 		sequencerHelper.sequencer = missionSequencer;
 
 		/*
@@ -98,9 +96,8 @@ public class JopSystem {
 		int size = (int) missionSequencer.storage.totalBackingStore;
 		MissionMemory missionMem = new MissionMemory(size);
 
-		while (terminationHelper.nextMission
+		while (missionSequencer.nextMission
 				&& !MissionSequencer.terminationRequest) {
-			// ManagedMemory.enterPrivateMemory(size, sequencerHelper);
 			missionMem.enter(sequencerHelper);
 			RtThreadImpl.reInitialize();
 		}
@@ -109,11 +106,7 @@ public class JopSystem {
 
 	}
 
-	class TerminationHelper {
-		boolean nextMission = true;
-	}
-
-	class SequencerHelper implements Runnable {
+	static class SequencerHelper implements Runnable {
 
 		MissionSequencer<Mission> sequencer;
 
