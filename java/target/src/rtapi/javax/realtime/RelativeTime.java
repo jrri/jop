@@ -191,9 +191,18 @@ public class RelativeTime extends HighResolutionTime {
 	 */
 	@SCJAllowed
 	@SCJRestricted(maySelfSuspend = false)
+//	public RelativeTime add(long millis, int nanos, RelativeTime dest) {
+//		return (RelativeTime) super.add(millis, nanos,
+//				dest == null ? new RelativeTime(0, 0, clock) : dest);
+//	}
 	public RelativeTime add(long millis, int nanos, RelativeTime dest) {
-		return (RelativeTime) super.add(millis, nanos,
-				dest == null ? new RelativeTime(0, 0, clock) : dest);
+		
+		if(dest == null)
+			dest = new RelativeTime(0,0, clock);
+		
+		dest.set(addSafe(this.millis, millis), ((long) this.nanos) + nanos);
+		
+		return dest;
 	}
 	
 	/**
