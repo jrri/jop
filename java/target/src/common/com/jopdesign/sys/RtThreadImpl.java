@@ -24,16 +24,10 @@
 
 package com.jopdesign.sys;
 
-import java.util.Vector;
-
 import javax.realtime.AbsoluteTime;
-import javax.realtime.AffinitySet;
 import javax.realtime.RealtimeClock;
 import javax.realtime.Schedulable;
-import javax.safetycritical.ManagedEventHandler;
-import javax.safetycritical.ManagedLongEventHandler;
 import javax.safetycritical.Mission;
-import javax.safetycritical.ScjHelper;
 
 import com.jopdesign.io.IOFactory;
 import com.jopdesign.io.SysDevice;
@@ -47,12 +41,6 @@ import joprt.RtThread;
  *
  */
 public class RtThreadImpl {
-	
-	static ScjHelper _scjHelper;
-	public static void setScjHelper(ScjHelper scjHelper) {
-		_scjHelper = scjHelper;
-
-	}
 	
 	static volatile boolean reStartCmpMission;
 	
@@ -82,10 +70,6 @@ public class RtThreadImpl {
 				while(!Mission.getCurrentMission().execFinished){
 					;
 				}
-				
-				/* Execute the cleanup methods of the handlers that belong 
-				 * to this core */
-				cleanupHandlers();	
 				
 				// Nothing to do in the main thread for the CMP cores 1 .. n-1
 				// Wait until the mission is re-started
@@ -128,36 +112,6 @@ public class RtThreadImpl {
 			Native.wr(-1, Const.IO_INTMASK);		
 			Native.wr(1, Const.IO_INT_ENA);
 
-		}
-		
-		void cleanupHandlers() {
-
-			Mission m = Mission.getCurrentMission();
-
-			Vector mso = _scjHelper.getMissionEventHandlers(m);
-
-			/* Execute cleanUp() method of PEHs and AEHs */
-			if (mso != null) {
-				ManagedEventHandler meh;
-				for (int i = 0; i < mso.size(); i++) {
-					meh = (ManagedEventHandler) mso.elementAt(i);
-					if (AffinitySet.getAffinitySet(meh).isProcessorInSet(
-							sys.cpuId))
-						meh.cleanUp();
-				}
-			}
-
-			/* Execute cleanUp() method of ALEHs */
-			mso = _scjHelper.getMissionLongEventHandlers(m);
-			if (mso != null) {
-				ManagedLongEventHandler mleh;
-				for (int i = 0; i < mso.size(); i++) {
-					mleh = (ManagedLongEventHandler) mso.elementAt(i);
-					if (AffinitySet.getAffinitySet(mleh).isProcessorInSet(
-							sys.cpuId))
-						mleh.cleanUp();
-				}
-			}
 		}
 	}
 
