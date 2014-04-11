@@ -28,7 +28,7 @@ public class AperiodicWorker extends GenericALEH{
 
 	@Override
 	@SCJAllowed
-	public void handleAsyncEvent(long data) {
+	public void handleAsyncLongEvent(long data) {
 
 		for (int j = 0; j < 200; j++)
 			for (int i = 0; i < 3749; i++)

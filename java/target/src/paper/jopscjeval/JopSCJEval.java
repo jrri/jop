@@ -30,7 +30,7 @@ public class JopSCJEval implements Safelet {
 //	Mission[] tests = {new Test001()};
 //	Mission[] tests = {new Test002()};
 //	Mission[] tests = {new Test004(), new Test004()};
-	Mission[] tests = {new Test001()};
+	Mission[] tests = {new Test000()};
 //	Mission[] tests = {new Test007()};
 	
 	
@@ -41,8 +41,7 @@ public class JopSCJEval implements Safelet {
 		
 		app = new JopSCJEval();
 		
-		JopSystem js = new JopSystem();
-		js.startMission(app);
+		JopSystem.startMission(app);
 
 	}
 
@@ -64,39 +63,7 @@ public class JopSCJEval implements Safelet {
 
 		return new LinearMissionSequencer<Mission>(new PriorityParameters(10),
 				new StorageParameters(1024, null, 512, 0, 0), tests, false, "Sequencer");
-		
-//		return new MissionSequencer<Mission>(new PriorityParameters(10),
-//				new StorageParameters(512, null, 256, 0, 0), "Sequencer") {
-//
-//			private int testNumber = 1;
-//
-//			@Override
-//			@SCJAllowed(Level.SUPPORT)
-//			protected Mission getNextMission() {
-//				
-//				switch (testNumber) {
-//				case 1:
-//					testNumber++;
-//					return new Test001();
-//				case 2:
-//					testNumber++;
-//					return new Test002();
-//				case 3:
-//					testNumber++;
-//					return new Test003();
-//
-//				default:
-//					return null;
-//				}
 
-				// Mission lives in ImmortalMemory
-//				if (!serviced) {
-//					serviced = true;
-//					return new Test003();
-//				} else
-//					return null;
-//			}
-//		};
 	}
 
 	@Override
