@@ -59,34 +59,34 @@ public class I2Cport extends HardwareObject implements RawInt{
 	public static final int T_SUSTO = 4 * CNT_BASE - 1;
 	public static final int T_WAIT = 8 * CNT_BASE;
 	
-	// Control register
+	// Control register, offset 0
 	public volatile int control;
 
-	// Status register
+	// Status register, offset 1
 	public volatile int status;
 	
-	// Host slave address
+	// Host slave address, offset 2
 	public volatile int devadd;
 	
-	// Size of the message (in bytes) to be transmitted
+	// Size of the message (in bytes) to be transmitted, offset 3
 	public volatile int msg_size;
 	
-	// Data to send
+	// Data to send, offset 4
 	public volatile int tx_fifo_data;
 	
-	// Data received
+	// Data received, offset 5
 	public volatile int rx_fifo_data;
 	
-	// Timing high
+	// Timing high, offset 6
 	public volatile int th;
 
-	// Timing low
+	// Timing low, offset 7
 	public volatile int tl;
 	
-	// Tx buffer occupancy
+	// Tx buffer occupancy, offset 8
 	public volatile int tx_occu;
 
-	// Rx buffer occupancy
+	// Rx buffer occupancy, offset 9
 	public volatile int rx_occu;
 	
 	public void disable(){

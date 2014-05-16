@@ -23,6 +23,8 @@ import test.IODeviceHwArray;
 import test.IODeviceHwObject;
 import test.IODeviceNative;
 
+import com.jopdesign.io.GenericHwArrayIOFactory;
+import com.jopdesign.io.GenericHwObjectIOFactory;
 import com.jopdesign.sys.Native;
 
 public class IOMemMappedFactory implements RawIntegralAccessFactory {
@@ -92,10 +94,13 @@ public class IOMemMappedFactory implements RawIntegralAccessFactory {
 		 * This object should be created somewhere else (immortal memory) since
 		 * the method has mayAllocate = false
 		 */
-		// Three options:
+		// Four options:
 //		return new IODeviceNative(address);
-		return new IODeviceHwObject(address);
+//		return new IODeviceHwObject(address);
 //		return new IODeviceHwArray(address);
+		GenericHwObjectIOFactory factory = GenericHwObjectIOFactory.getFactory();
+		return factory.getDevice(address);
+		
 
 //		/**
 //		 * This object should be created somewhere else (immortal memory) since
@@ -169,8 +174,10 @@ public class IOMemMappedFactory implements RawIntegralAccessFactory {
 	@SCJAllowed(Level.LEVEL_0)
 	@SCJRestricted(mayAllocate = false, maySelfSuspend = false)
 	public RawIntArray newRawIntArray(long base, int entries) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		GenericHwArrayIOFactory factory = GenericHwArrayIOFactory.getFactory();
+		return factory.getDevice((int) base);
+		
 	}
 
 	@Override
