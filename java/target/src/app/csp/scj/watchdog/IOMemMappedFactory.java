@@ -19,10 +19,14 @@ import javax.safetycritical.annotate.Level;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
+import test.IODeviceHwArray;
+import test.IODeviceHwObject;
+import test.IODeviceNative;
+
 import com.jopdesign.sys.Native;
 
-public class GeneralIOFactory implements RawIntegralAccessFactory{
-	
+public class IOMemMappedFactory implements RawIntegralAccessFactory {
+
 	@Override
 	@SCJAllowed(Level.LEVEL_0)
 	public RawMemoryName getName() {
@@ -84,23 +88,36 @@ public class GeneralIOFactory implements RawIntegralAccessFactory{
 
 		final int address = (int) offset;
 		
-		return new RawInt() {
-			
-			@Override
-			@SCJAllowed(Level.LEVEL_0)
-			@SCJRestricted(mayAllocate = false, maySelfSuspend = false)
-			public void put(int value) {
-				Native.wrMem(value, address);
-				
-			}
-			
-			@Override
-			@SCJAllowed(Level.LEVEL_0)
-			@SCJRestricted(mayAllocate = false, maySelfSuspend = false)
-			public int get() {
-				return Native.rdMem(address);
-			}
-		};
+		/**
+		 * This object should be created somewhere else (immortal memory) since
+		 * the method has mayAllocate = false
+		 */
+		// Three options:
+//		return new IODeviceNative(address);
+		return new IODeviceHwObject(address);
+//		return new IODeviceHwArray(address);
+
+//		/**
+//		 * This object should be created somewhere else (immortal memory) since
+//		 * the method has mayAllocate = false
+//		 */
+//		return new RawInt() {
+//			
+//			@Override
+//			@SCJAllowed(Level.LEVEL_0)
+//			@SCJRestricted(mayAllocate = false, maySelfSuspend = false)
+//			public void put(int value) {
+//				Native.wrMem(value, address);
+//				
+//			}
+//			
+//			@Override
+//			@SCJAllowed(Level.LEVEL_0)
+//			@SCJRestricted(mayAllocate = false, maySelfSuspend = false)
+//			public int get() {
+//				return Native.rdMem(address);
+//			}
+//		};
 		
 	}
 	
@@ -110,7 +127,11 @@ public class GeneralIOFactory implements RawIntegralAccessFactory{
 	public RawIntRead newRawIntRead(long offset) {
 		
 		final int address = (int) offset;
-		
+
+		/**
+		 * This object should be created somewhere else (immortal memory) since
+		 * the method has mayAllocate = false
+		 */
 		return new RawIntRead() {
 			
 			@Override

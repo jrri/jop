@@ -70,6 +70,8 @@ public class I2CBusController implements IODevice{
 	public static final int T_SUSTO = 4 * CNT_BASE - 1;
 	public static final int T_WAIT = 8 * CNT_BASE;
 
+	// The following are the accessor objects
+	
 	/**
 	 * Control register
 	 */
