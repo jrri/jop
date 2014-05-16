@@ -5,7 +5,7 @@ import javax.safetycritical.annotate.Level;
 import javax.safetycritical.annotate.SCJAllowed;
 import javax.safetycritical.annotate.SCJRestricted;
 
-public class GenericAccessorHwObject extends HardwareObject implements RawInt {
+public class GenericRawMemAccessorHwObject extends HardwareObject implements RawInt {
 
 	private int data;
 

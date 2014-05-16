@@ -13,8 +13,8 @@ public class GenericHwArrayIOFactory {
 	private static int A1_PTR;
 	private static int A1_LEN;
 
-	GenericAccessorHwArray IODevice_0 = new GenericAccessorHwArray();
-	GenericAccessorHwArray IODevice_1 = new GenericAccessorHwArray();
+	GenericRawMemAccessorHwArray IODevice_0 = new GenericRawMemAccessorHwArray();
+	GenericRawMemAccessorHwArray IODevice_1 = new GenericRawMemAccessorHwArray();
 			
 	GenericHwArrayIOFactory() {
 			IODevice_0.data = makeHWArray(16, Const.I2C_A_BASE, 0);
@@ -34,7 +34,7 @@ public class GenericHwArrayIOFactory {
 		return single;
 	}
 
-	public GenericAccessorHwArray getDevice(int address) {
+	public GenericRawMemAccessorHwArray getDevice(int address) {
 		
 		int index = address & 0xFFFFFFF0;
 		

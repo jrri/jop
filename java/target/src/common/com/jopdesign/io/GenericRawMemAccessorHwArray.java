@@ -2,7 +2,7 @@ package com.jopdesign.io;
 
 import javax.realtime.RawIntArray;
 
-public class GenericAccessorHwArray extends HardwareObject implements RawIntArray{
+public class GenericRawMemAccessorHwArray extends HardwareObject implements RawIntArray{
 	
 	int[] data;
 

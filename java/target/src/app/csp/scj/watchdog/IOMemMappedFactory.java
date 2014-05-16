@@ -21,7 +21,7 @@ import javax.safetycritical.annotate.SCJRestricted;
 
 import test.IODeviceHwArray;
 import test.IODeviceHwObject;
-import test.IODeviceNative;
+import test.GenericRawMemAccessorNative;
 
 import com.jopdesign.io.GenericHwArrayIOFactory;
 import com.jopdesign.io.GenericHwObjectIOFactory;

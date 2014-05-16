@@ -7,11 +7,11 @@ import javax.safetycritical.annotate.SCJRestricted;
 
 import com.jopdesign.sys.Native;
 
-public class IODeviceNative implements RawInt {
+public class GenericRawMemAccessorNative implements RawInt {
 
 	int address;
 
-	public IODeviceNative(int address) {
+	public GenericRawMemAccessorNative(int address) {
 		this.address = address;
 	}
 

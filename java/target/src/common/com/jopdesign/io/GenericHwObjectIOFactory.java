@@ -36,12 +36,12 @@ public class GenericHwObjectIOFactory {
 
 	// We need one object per register
 	int registers = 9;
-	GenericAccessorHwObject[] IODevice = new GenericAccessorHwObject[registers]; 
+	GenericRawMemAccessorHwObject[] IODevice = new GenericRawMemAccessorHwObject[registers]; 
 			
 	GenericHwObjectIOFactory() {
 		
 		for(int i = 0; i < registers; i ++){
-			IODevice[i] = (GenericAccessorHwObject) makeHWObject(new GenericAccessorHwObject(),
+			IODevice[i] = (GenericRawMemAccessorHwObject) makeHWObject(new GenericRawMemAccessorHwObject(),
 					Const.I2C_A_BASE + i, i);
 		}
 		
@@ -60,7 +60,7 @@ public class GenericHwObjectIOFactory {
 		return single;
 	}
 
-	public GenericAccessorHwObject getDevice(int address) {
+	public GenericRawMemAccessorHwObject getDevice(int address) {
 		int index = address & 0x0000000F;
 		return IODevice[index];
 	}
