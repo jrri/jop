@@ -127,7 +127,7 @@ public abstract class ManagedEventHandler extends BoundAsyncEventHandler
 		return name.toString();
 	}
 
-	/* Not on Spec */
+	/* Not on Spec, can be overriden by the application */
 	protected void executeMissHandler() {
 		
 	}

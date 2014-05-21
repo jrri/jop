@@ -77,9 +77,11 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 
 	RtThread thread;
 	RtThreadImpl rtt;
+	
+	//ThrowBoundaryError tbe = new ThrowBoundaryError();
 
 	// For test and debug purposes
-	public int missedDeadlines = 0;
+	public int missCount = 0;
 
 	/**
 	 * Constructs a periodic event handler.
@@ -149,13 +151,16 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		// the handler belongs and performs the checks for null arguments.
 		super(priority, release, storage, name);
 
+		// preallocate a ThrowBoundaryError
+		
+		
 		this.storage = storage;
 		this.release = release;
 
 		// start = (RelativeTime) release.getStart();
 		// period = release.getPeriod();
-		this.start = _rtsjHelper.getStart(this.release);
-		this.period = _rtsjHelper.getPeriod(this.release);
+		this.start = this.release.getStart();
+		this.period = this.release.getPeriod();
 
 		// TODO scp
 
@@ -187,7 +192,6 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 		 * handlers.
 		 */
 		if (!(m instanceof CyclicExecutive)) {
-
 			privMem = new PrivateMemory((int) storage.maxMemoryArea,
 					(int) storage.totalBackingStore);
 
@@ -219,7 +223,7 @@ public abstract class PeriodicEventHandler extends ManagedEventHandler {
 							// System.out.println("Deadline missed: " + getName());
 							
 							// For test and debug purposes
-							missedDeadlines++;
+							missCount++;
 							executeMissHandler();
 						}
 					}
