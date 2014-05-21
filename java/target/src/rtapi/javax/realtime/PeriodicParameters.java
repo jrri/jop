@@ -122,7 +122,7 @@ public class PeriodicParameters extends ReleaseParameters {
 	 */
 	@BlockFree
 	@SCJAllowed
-	HighResolutionTime getStart() {
+	public HighResolutionTime getStart() {
 		return start;
 	}
 
@@ -132,7 +132,7 @@ public class PeriodicParameters extends ReleaseParameters {
 	 */
 	@BlockFree
 	@SCJAllowed
-	RelativeTime getPeriod() {
+	public RelativeTime getPeriod() {
 		return period;
 	}
 	
