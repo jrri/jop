@@ -95,6 +95,13 @@ public class JopSystem {
 
 		int size = (int) missionSequencer.storage.totalBackingStore;
 		MissionMemory missionMem = new MissionMemory(size);
+		
+		// debug messages:
+		// System.out.println("Initial Mission Memory:");
+		// System.out.println("Size: "+ missionMem.size());
+		// System.out.println("Consumed: " +missionMem.memoryConsumed());
+		// System.out.println("Remaining: "+ missionMem.memoryRemaining());
+		// System.out.println("Bs. remaining: "+ missionMem.getRemainingBackingStore());
 
 		while (missionSequencer.nextMission
 				&& !MissionSequencer.terminationRequest) {

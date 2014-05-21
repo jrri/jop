@@ -493,8 +493,16 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 		long now;
 
 		while (!ce.terminationPending) {
-
+			
+			// debug messages:
+			// System.out.println("Frames: " +frames.length);
+			// System.out.println("Termination: " + ce.terminationPending);
+			
 			for (int i = 0; i < frames.length; i++) {
+				
+				// debug messages:
+				// System.out.println("Curr. Frame: " + i + " --> "
+				//		+ frames[i].handlers_.length + " handlers");
 				
 				now = Native.rd(Const.IO_US_CNT);
 				while(next > now ){
@@ -505,6 +513,9 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 				for (int j = 0; j < frames[i].handlers_.length; j++) {
 
 					handlerExecutor.handler = frames[i].handlers_[j];
+					
+					// debug messages:
+					// System.out.println("\tCurr. handler: "+ j);
 
 					/*
 					 * Since no two PeriodicEventHandlers in a Level 0
@@ -527,10 +538,14 @@ public abstract class MissionSequencer<SpecificMission extends Mission> extends
 				// if (Clock.getRealtimeClock().getTime(now).compareTo(next) > 0) {
 					/* Frame overrun */
 					// debug message
-					//Terminal.getTerminal().writeln("Frame overrun");
+					// Terminal.getTerminal().writeln("Frame overrun");
 					ce.frameOverrun++; 
 				}
+				
 			}
+			
+			// debug messages:
+			// System.out.println("Termination: "+ce.terminationPending);
 		}
 
 	}
