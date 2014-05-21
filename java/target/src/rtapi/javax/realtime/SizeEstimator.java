@@ -73,8 +73,8 @@ public final class SizeEstimator {
 	public void reserve(Class clazz, int num) {
 
 		int ptr = Native.toInt(clazz);
-		int clinfo_ptr = Native.rd(ptr + 2);
-
+		int clinfo_ptr = Native.rd(ptr + 3);
+		
 		estimate += num * (_sysHelper.getHandlerSize() + Native.rd(clinfo_ptr));
 
 	}
