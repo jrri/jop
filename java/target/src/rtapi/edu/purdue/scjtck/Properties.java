@@ -6,7 +6,7 @@ import javax.safetycritical.annotate.Level;
 
 public class Properties {
 
-//    public Level _level = Level.LEVEL_1;
+//    public Level _level = Level.LEVEL_0;
     public long _duration = 300;
     public long _period = 50;
     public long _iDelay = 0;

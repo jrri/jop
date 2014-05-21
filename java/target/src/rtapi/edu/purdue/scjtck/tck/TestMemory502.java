@@ -1,4 +1,4 @@
-package s3scj.tck;
+package edu.purdue.scjtck.tck;
 
 import javax.realtime.MemoryInUseException;
 import javax.realtime.PeriodicParameters;
@@ -8,6 +8,7 @@ import javax.realtime.ScopedCycleException;
 import javax.safetycritical.MissionSequencer;
 import javax.safetycritical.PeriodicEventHandler;
 import javax.safetycritical.PrivateMemory;
+import javax.safetycritical.StorageParameters;
 
 /**
  * @author leizhao
@@ -16,7 +17,7 @@ import javax.safetycritical.PrivateMemory;
  * 
  *         - A given scoped memory can only be entered by a single thread at any
  *         given time;
- *         
+ * 
  */
 // NOTE: This test cannot be executed, it requires the creation of a
 // PrivateMemory object which does not have a public constructor
@@ -31,38 +32,35 @@ public class TestMemory502 extends TestCase {
 
 			@Override
 			public void initialize() {
-				final PrivateMemory scope = new PrivateMemory(5000);
+				final PrivateMemory scope = new PrivateMemory(256);
 
 				class ScopeInvader extends PeriodicEventHandler {
 
 					public ScopeInvader() {
 						super(new PriorityParameters(_prop._priority),
 								new PeriodicParameters(null, new RelativeTime(
-										500000, 0)), _prop._schedObjMemSize);
+										500000, 0)), new StorageParameters(256,
+										null, 128, 0, 0));
 					}
 
 					@Override
-					public void handleEvent() {
+					public void handleAsyncEvent() {
 						try {
 							scope.enter(new Runnable() {
 								public void run() {
 									try {
 										_myLock.doWait();
-									}
-									catch (InterruptedException e) {
+									} catch (InterruptedException e) {
 										fail(e.getMessage());
 									}
 								};
 							});
-						}
-						catch (MemoryInUseException miue) {
+						} catch (MemoryInUseException miue) {
 							// These are expected, since they should be thrown
 							// when a thread is already in a scope
-						}
-						catch (ScopedCycleException sce) {
+						} catch (ScopedCycleException sce) {
 							fail("Multiple handlers entered a private memory simultaneously (scope cycle)");
-						}
-						catch (Throwable t) {
+						} catch (Throwable t) {
 							fail(t.getMessage());
 						}
 					}
@@ -74,7 +72,7 @@ public class TestMemory502 extends TestCase {
 				 * to do that.
 				 */
 				for (int i = 0; i < _nScopeInvaders; i++)
-					new ScopeInvader();
+					new ScopeInvader().register();
 
 				/*
 				 * Wait for reasonable long a time so that all invaders should
@@ -85,25 +83,25 @@ public class TestMemory502 extends TestCase {
 						new PriorityParameters(_prop._priority),
 						new PeriodicParameters(null,
 								new RelativeTime(500000, 0)),
-						_prop._schedObjMemSize) {
+						new StorageParameters(256,
+								null, 128, 0, 0)) {
 
 					@Override
-					public void handleEvent() {
+					public void handleAsyncEvent() {
 						try {
 							Thread.sleep(2000);
-						}
-						catch (InterruptedException e) {
+						} catch (InterruptedException e) {
 							fail(e.getMessage());
 						}
 						_myLock.doNotifyAll();
-						requestSequenceTermination();
+						requestTermination();
 					}
-				};
+				}.register();
 			}
 
 			@Override
 			public long missionMemorySize() {
-				return 5000 * _nScopeInvaders;
+				return 512 * _nScopeInvaders;
 			}
 
 			class MyLock {
@@ -116,5 +114,15 @@ public class TestMemory502 extends TestCase {
 				}
 			}
 		});
+	}
+
+	@Override
+	public long immortalMemorySize() {
+		return 10000;
+	}
+
+	@Override
+	protected String getArgs() {
+		return "-L 1";
 	}
 }

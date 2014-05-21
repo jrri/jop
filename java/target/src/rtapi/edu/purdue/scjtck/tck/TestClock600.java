@@ -26,7 +26,7 @@ public class TestClock600 extends TestCase {
 		return new GeneralSingleMissionSequencer(new GeneralMission() {
 			@Override
 			public void initialize() {
-				new MyPeriodicEventHandler();
+				new MyPeriodicEventHandler().register();
 //				new LockNotifier();
 			}
 
@@ -52,6 +52,7 @@ public class TestClock600 extends TestCase {
 					
 					for (int i = 0; i < _prop._iterations; i++) {
 						curTime = Clock.getRealtimeClock().getTime();
+						
 						if (curTime.getMilliseconds() * 1000000
 								+ curTime.getNanoseconds() < preTime
 								.getMilliseconds()
@@ -79,6 +80,12 @@ public class TestClock600 extends TestCase {
 //					_myLock.doNotifyAll();
 //				}
 //			}
+			
+			@Override
+			protected void cleanUp() {
+				teardown();
+				super.cleanUp();
+			}
 		});
 	}
 
