@@ -23,7 +23,7 @@ public class OutputCollisionsHandler extends AperiodicEventHandler {
 	public OutputCollisionsHandler(CDxMission mission) {
 		super(new PriorityParameters(PriorityScheduler.instance()
 				.getMaxPriority()), new AperiodicParameters(),
-				new StorageParameters(2048, null, 0, 0), 1024, "OutputHandler");
+				new StorageParameters(2048, null, 1024,0, 0) , "OutputHandler");
 		this.mission = mission;
 	}
 

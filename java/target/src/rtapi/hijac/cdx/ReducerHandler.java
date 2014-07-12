@@ -55,7 +55,7 @@ public class ReducerHandler extends AperiodicEventHandler {
 		super(new PriorityParameters(PriorityScheduler.instance()
 				.getNormPriority()), new AperiodicParameters(),
 				new StorageParameters(Constants.REDUCER_HANDLER_BS_SIZE, null,
-						0, 0), Constants.REDUCER_HANDLER_SCOPE_SIZE,
+						Constants.REDUCER_HANDLER_SCOPE_SIZE, 0, 0),
 				"ReducerHandler");
 
 		this.mission = mission;

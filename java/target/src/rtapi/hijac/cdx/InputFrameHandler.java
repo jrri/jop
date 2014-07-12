@@ -47,7 +47,7 @@ public class InputFrameHandler extends PeriodicEventHandler {
 				.getMaxPriority()), new PeriodicParameters(null,
 				new RelativeTime(Constants.DETECTOR_PERIOD, 0)),
 				new StorageParameters(Constants.INPUT_FRAME_HANDLER_BS_SIZE,
-						null, 0, 0), Constants.INPUT_FRAME_HANDLER_SCOPE_SIZE,
+						null, Constants.INPUT_FRAME_HANDLER_SCOPE_SIZE, 0, 0),
 				"InputHandler");
 		this.mission = mission;
 		// reduce = event;

@@ -24,7 +24,7 @@ public class CDxMissionSequencer extends MissionSequencer<CDxMission> {
 
 	public CDxMissionSequencer() {
 		super(new PriorityParameters(PriorityScheduler.instance()
-				.getNormPriority()), new StorageParameters(16000, null, 0, 0));
+				.getNormPriority()), new StorageParameters(16000, null, 16000, 0, 0));
 
 		mission_done = false;
 	}

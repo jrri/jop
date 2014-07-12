@@ -30,8 +30,8 @@ public class DetectorHandler extends AperiodicEventHandler {
 	public DetectorHandler(CDxMission mission, DetectorControl control, int id) {
 		super(new PriorityParameters(PriorityScheduler.instance()
 				.getNormPriority()), new AperiodicParameters(),
-				new StorageParameters(2048, null, 0, 0),
-				Constants.TRANSIENT_DETECTOR_SCOPE_SIZE, "DetectorHandler");
+				new StorageParameters(2048, null, Constants.TRANSIENT_DETECTOR_SCOPE_SIZE, 0, 0),
+				 "DetectorHandler");
 		this.mission = mission;
 		this.control = control;
 		this.id = id;
